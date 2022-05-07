@@ -3,5 +3,18 @@ name = "actix1"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/main.rs"
+name = "actix1"
+
+
 [dependencies]
-actix-web = "4.0.1"
+actix-web = "4"
+serde = { version = "1.0.137", features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+[dev-dependencies]
+reqwest = "0.11"
