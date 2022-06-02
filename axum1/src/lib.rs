@@ -1,4 +1,2 @@
-pub mod db;
-pub mod http;
-pub mod types;
-pub mod utils;
+pub mod extractors;
+pub const AXUM_SESSION_COOKIE_NAME: &str = "axum_session";

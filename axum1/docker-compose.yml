@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=hummus
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: "redis:alpine"
+    command: "redis-server"
+    hostname: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - "./redis-data:/var/lib/redis"
+
+  server:
+    restart: always
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@localhost:5432/hummus
+      - RUST_LOG=info
+      - RUST_BACKTRACE=1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "3000:3000"
+    network_mode: host
