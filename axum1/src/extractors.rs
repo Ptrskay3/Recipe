@@ -1,15 +1,16 @@
+use crate::AXUM_SESSION_COOKIE_NAME;
+use async_redis_session::RedisSessionStore;
+use async_session::{Session, SessionStore as _};
 use axum::{
     async_trait,
-    TypedHeader,
     extract::{FromRequest, RequestParts},
     headers::Cookie,
-    http::{StatusCode, HeaderValue},
-    Extension,
+    http::{HeaderValue, StatusCode},
+    Extension, TypedHeader, response::{IntoResponse, Redirect, Response},
 };
-use async_session::{MemoryStore, Session, SessionStore as _};
-use sqlx::PgPool;
-use crate::AXUM_SESSION_COOKIE_NAME;
-pub struct DatabaseConnection(pub sqlx::pool::PoolConnection<sqlx::Postgres>);
+use sqlx::{pool, PgPool, Postgres};
+
+pub struct DatabaseConnection(pub pool::PoolConnection<Postgres>);
 
 #[async_trait]
 impl<B> FromRequest<B> for DatabaseConnection
@@ -35,7 +36,6 @@ where
     (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
 }
 
-
 #[derive(Debug)]
 pub struct FreshUserId {
     pub user_id: UserId,
@@ -56,9 +56,9 @@ where
     type Rejection = (StatusCode, &'static str);
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let Extension(store) = Extension::<MemoryStore>::from_request(req)
+        let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
             .await
-            .expect("`MemoryStore` extension missing");
+            .expect("`RedisSessionStore` extension missing");
 
         let cookie = Option::<TypedHeader<Cookie>>::from_request(req)
             .await
@@ -125,5 +125,14 @@ pub struct UserId(uuid::Uuid);
 impl UserId {
     fn new() -> Self {
         Self(uuid::Uuid::new_v4())
+    }
+}
+
+
+pub struct AuthRedirect;
+
+impl IntoResponse for AuthRedirect {
+    fn into_response(self) -> Response {
+        Redirect::temporary("/auth").into_response()
     }
 }
