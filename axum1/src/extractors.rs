@@ -88,7 +88,7 @@ where
             .and_then(|cookie| cookie.get(AXUM_SESSION_COOKIE_NAME));
 
         tracing::debug!(
-            "[Session]: got session cookie from user agent, {}={:?}",
+            "got session cookie from user agent, {}={:?}",
             AXUM_SESSION_COOKIE_NAME,
             session_cookie
         );
@@ -104,16 +104,16 @@ where
         {
             if let Some(user_id) = session.get::<AuthUser>("user_id") {
                 tracing::debug!(
-                    "UserIdFromSession: session decoded success, user_id={:?}",
+                    "session decoded success, user_id={:?}",
                     user_id
                 );
                 user_id
             } else {
-                tracing::debug!("No `user_id` found in session");
+                tracing::debug!("no `user_id` found in session");
                 return Err(AuthRedirect);
             }
         } else {
-            tracing::debug!("Invalid `session_cookie`");
+            tracing::debug!("invalid `session_cookie`");
             return Err(AuthRedirect);
         };
 

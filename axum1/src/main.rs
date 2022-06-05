@@ -3,16 +3,16 @@ use async_redis_session::RedisSessionStore;
 use async_session::{Session, SessionStore};
 use axum::{
     extract::Query,
-    http::{HeaderMap, StatusCode, header::SET_COOKIE},
+    headers::Cookie,
+    http::{header::SET_COOKIE, HeaderMap, StatusCode},
     response::{IntoResponse, Redirect},
     routing::{delete, get},
-    Extension, Json, Router, TypedHeader, headers::Cookie,
+    Extension, Json, Router, TypedHeader,
 };
 use axum1::{
     extractors::{internal_error, AuthUser, DatabaseConnection, RedisConnection},
     AXUM_SESSION_COOKIE_NAME,
 };
-use rand::{distributions::Alphanumeric, Rng};
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -48,11 +48,10 @@ async fn main() -> anyhow::Result<()> {
     let store = RedisSessionStore::new(&*redis_conn_str).context("failed to connect redis")?;
 
     let app = Router::new()
-    .route("/", get(index))
+        .route("/", get(index))
         .route("/health_check", get(|| async { StatusCode::OK }))
         .route("/pg", get(pg_health))
         .route("/users", get(get_users))
-        .route("/insert", get(insert_garbage))
         .route("/auth", get(authorize))
         .route("/logout", get(logout))
         .route("/clean", delete(clean))
@@ -78,7 +77,7 @@ pub(crate) struct User {
 async fn index(user: Option<AuthUser>) -> impl IntoResponse {
     match user {
         Some(_) => "Hello User, you are logged in!",
-        _ => "Hi stranger!"
+        _ => "Hi stranger!",
     }
 }
 
@@ -95,8 +94,9 @@ async fn authorize(
     RedisConnection(store): RedisConnection,
     // DatabaseConnection(mut conn): DatabaseConnection
 ) -> impl IntoResponse {
+    // TODO: Remove the absurd amount of `unwrap` calls.
     let mut headers = HeaderMap::new();
-
+    // TODO: currently this always succeeds, we need to validate credentials from DB..
     let user_id = AuthUser::new();
     let mut session = Session::new();
     session.insert("user_id", user_id).unwrap();
@@ -120,18 +120,19 @@ async fn logout(
     let mut headers = HeaderMap::new();
     // TODO: Remove the absurd amount of `unwrap` calls.
     let session_cookie = cookie.get(AXUM_SESSION_COOKIE_NAME).unwrap();
-    let loaded_session = store.load_session(session_cookie.to_owned()).await.unwrap().unwrap();
+    let loaded_session = store
+        .load_session(session_cookie.to_owned())
+        .await
+        .unwrap()
+        .unwrap();
     store.destroy_session(loaded_session).await.unwrap();
 
     // Unset cookies at client side
-    let cookie = format!(
-        "{}={}; Max-Age=0",
-        AXUM_SESSION_COOKIE_NAME, ""
-    );
+    let cookie = format!("{}={}; Max-Age=0", AXUM_SESSION_COOKIE_NAME, "");
 
     headers.insert(SET_COOKIE, cookie.parse().unwrap());
 
-    (headers, Redirect::to("/pg"))
+    (headers, Redirect::to("/"))
 }
 
 async fn clean(DatabaseConnection(conn): DatabaseConnection) -> Result<(), (StatusCode, String)> {
@@ -162,29 +163,4 @@ async fn get_users(
         .await
         .map_err(internal_error)?;
     Ok(Json(users))
-}
-
-async fn insert_garbage(
-    DatabaseConnection(conn): DatabaseConnection,
-) -> Result<impl IntoResponse, (StatusCode, String)> {
-    let mut conn = conn;
-    let name: String = rand::thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(9)
-        .map(char::from)
-        .collect();
-    let email: String = rand::thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(9)
-        .map(char::from)
-        .collect();
-    sqlx::query!(
-        r#"INSERT INTO users (name, email) VALUES ($1, $2)"#,
-        name,
-        email
-    )
-    .execute(&mut conn)
-    .await
-    .map_err(internal_error)?;
-    Ok(())
 }

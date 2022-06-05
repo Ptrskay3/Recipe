@@ -18,5 +18,4 @@ log = "0.4.14"
 time = { version = "0.3.9", features = ["formatting", "serde", "serde-well-known"] }
 async-session = "3.0.0"
 uuid = { version = "1", features = ["v4", "serde"] }
-rand = "0.8.5"
 async-redis-session = "0.2.2"

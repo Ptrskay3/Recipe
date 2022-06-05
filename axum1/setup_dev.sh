@@ -11,3 +11,4 @@ directories=(
 
 mkdir -p "${directories[@]}"
 sudo chown -R $(id -u):$(id -g) volumes/
+docker-compose -f docker-compose.dev.yml build

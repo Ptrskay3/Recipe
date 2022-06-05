@@ -261,7 +261,6 @@ dependencies = [
  "chrono",
  "dotenv",
  "log",
- "rand",
  "serde",
  "sqlx",
  "thiserror",
