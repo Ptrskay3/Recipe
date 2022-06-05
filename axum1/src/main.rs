@@ -3,7 +3,7 @@ use async_redis_session::RedisSessionStore;
 use async_session::{Session, SessionStore};
 use axum::{
     extract::Query,
-    http::{HeaderMap, StatusCode},
+    http::{HeaderMap, StatusCode, header::SET_COOKIE},
     response::{IntoResponse, Redirect},
     routing::{delete, get},
     Extension, Json, Router, TypedHeader, headers::Cookie,
@@ -107,7 +107,7 @@ async fn authorize(
         AXUM_SESSION_COOKIE_NAME, cookie
     );
 
-    headers.insert(axum::http::header::SET_COOKIE, cookie.parse().unwrap());
+    headers.insert(SET_COOKIE, cookie.parse().unwrap());
 
     (headers, Redirect::to("/"))
 }
@@ -117,10 +117,21 @@ async fn logout(
     RedisConnection(store): RedisConnection,
     TypedHeader(cookie): TypedHeader<Cookie>,
 ) -> impl IntoResponse {
+    let mut headers = HeaderMap::new();
+    // TODO: Remove the absurd amount of `unwrap` calls.
     let session_cookie = cookie.get(AXUM_SESSION_COOKIE_NAME).unwrap();
     let loaded_session = store.load_session(session_cookie.to_owned()).await.unwrap().unwrap();
     store.destroy_session(loaded_session).await.unwrap();
-    Redirect::to("/pg")
+
+    // Unset cookies at client side
+    let cookie = format!(
+        "{}={}; Max-Age=0",
+        AXUM_SESSION_COOKIE_NAME, ""
+    );
+
+    headers.insert(SET_COOKIE, cookie.parse().unwrap());
+
+    (headers, Redirect::to("/pg"))
 }
 
 async fn clean(DatabaseConnection(conn): DatabaseConnection) -> Result<(), (StatusCode, String)> {

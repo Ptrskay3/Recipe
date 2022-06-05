@@ -1,15 +1,17 @@
 
-create table "users"
+CREATE TABLE "users"
 (
-    id SERIAL,
+    user_id  UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
 
-    name      text collate "case_insensitive" unique not null,
+    name          TEXT COLLATE "case_insensitive" UNIQUE NOT NULL,
   
-    email         text collate "case_insensitive" unique not null,
-  
-    created_at    timestamptz                            not null default now(),
+    email         TEXT COLLATE "case_insensitive" UNIQUE NOT NULL,
 
-    updated_at    timestamptz
+    password_hash TEXT                                   NOT NULL,
+  
+    created_at    TIMESTAMPTZ                            NOT NULL DEFAULT NOW(),
+
+    updated_at    TIMESTAMPTZ
 );
 
 SELECT trigger_updated_at('"users"');
