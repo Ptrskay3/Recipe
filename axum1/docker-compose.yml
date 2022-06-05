@@ -8,9 +8,22 @@ services:
       - POSTGRES_DB=hummus
       - PGDATA=/var/lib/pg_data
     volumes:
-      - ./postgres/data:/var/lib/postgresql/data
+      - ./volumes/postgres/data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@dev.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    # volumes:
+    #    - ./volumes/pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
 
   redis:
     image: "redis:alpine"
@@ -19,12 +32,12 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - "./redis-data:/var/lib/redis"
+      - "./volumes/redis-data:/var/lib/redis"
 
   server:
     restart: always
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@localhost:5432/hummus
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/hummus
       - RUST_LOG=info
       - RUST_BACKTRACE=1
     build:
@@ -35,4 +48,3 @@ services:
       - redis
     ports:
       - "3000:3000"
-    network_mode: host

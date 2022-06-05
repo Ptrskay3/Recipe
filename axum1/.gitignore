@@ -1,2 +1,5 @@
 /target
 /data
+redis-data/
+postgres/
+data/
