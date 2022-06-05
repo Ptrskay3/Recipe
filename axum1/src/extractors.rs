@@ -1,12 +1,13 @@
 use crate::AXUM_SESSION_COOKIE_NAME;
 use async_redis_session::RedisSessionStore;
-use async_session::{Session, SessionStore as _};
+use async_session::SessionStore as _;
 use axum::{
     async_trait,
     extract::{FromRequest, RequestParts},
     headers::Cookie,
     http::{HeaderValue, StatusCode},
-    Extension, TypedHeader, response::{IntoResponse, Redirect, Response},
+    response::{IntoResponse, Redirect, Response},
+    Extension, TypedHeader,
 };
 use sqlx::{pool, PgPool, Postgres};
 
@@ -38,22 +39,40 @@ where
 
 #[derive(Debug)]
 pub struct FreshUserId {
-    pub user_id: UserId,
+    pub user_id: AuthUser,
     pub cookie: HeaderValue,
 }
 
 #[derive(Debug)]
 pub enum UserIdFromSession {
-    FoundUserId(UserId),
+    FoundUserId(AuthUser),
     CreatedFreshUserId(FreshUserId),
 }
 
+pub struct RedisConnection(pub RedisSessionStore);
+
 #[async_trait]
-impl<B> FromRequest<B> for UserIdFromSession
+impl<B> FromRequest<B> for RedisConnection
 where
     B: Send,
 {
     type Rejection = (StatusCode, &'static str);
+
+    async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
+        let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
+            .await
+            .expect("`RedisSessionStore` extension missing");
+
+        Ok(Self(store))
+    }
+}
+
+#[async_trait]
+impl<B> FromRequest<B> for AuthUser
+where
+    B: Send,
+{
+    type Rejection = AuthRedirect;
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
@@ -68,66 +87,48 @@ where
             .as_ref()
             .and_then(|cookie| cookie.get(AXUM_SESSION_COOKIE_NAME));
 
-        // return the new created session cookie for client
+        tracing::debug!(
+            "[Session]: got session cookie from user agent, {}={:?}",
+            AXUM_SESSION_COOKIE_NAME,
+            session_cookie
+        );
+
         if session_cookie.is_none() {
-            let user_id = UserId::new();
-            let mut session = Session::new();
-            session.insert("user_id", user_id).unwrap();
-            let cookie = store.store_session(session).await.unwrap().unwrap();
-            return Ok(Self::CreatedFreshUserId(FreshUserId {
-                user_id,
-                cookie: HeaderValue::from_str(
-                    format!("{}={}", AXUM_SESSION_COOKIE_NAME, cookie).as_str(),
-                )
-                .unwrap(),
-            }));
+            return Err(AuthRedirect);
         }
 
-        tracing::debug!(
-            "UserIdFromSession: got session cookie from user agent, {}={}",
-            AXUM_SESSION_COOKIE_NAME,
-            session_cookie.unwrap()
-        );
-        // continue to decode the session cookie
         let user_id = if let Some(session) = store
-            .load_session(session_cookie.unwrap().to_owned())
+            .load_session(session_cookie.unwrap().into())
             .await
-            .unwrap()
+            .map_err(|_| AuthRedirect)?
         {
-            if let Some(user_id) = session.get::<UserId>("user_id") {
+            if let Some(user_id) = session.get::<AuthUser>("user_id") {
                 tracing::debug!(
                     "UserIdFromSession: session decoded success, user_id={:?}",
                     user_id
                 );
                 user_id
             } else {
-                return Err((
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "No `user_id` found in session",
-                ));
+                tracing::debug!("No `user_id` found in session");
+                return Err(AuthRedirect);
             }
         } else {
-            tracing::debug!(
-                "UserIdFromSession: err session not exists in store, {}={}",
-                AXUM_SESSION_COOKIE_NAME,
-                session_cookie.unwrap()
-            );
-            return Err((StatusCode::BAD_REQUEST, "No session found for cookie"));
+            tracing::debug!("Invalid `session_cookie`");
+            return Err(AuthRedirect);
         };
 
-        Ok(Self::FoundUserId(user_id))
+        Ok(user_id)
     }
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, Copy)]
-pub struct UserId(uuid::Uuid);
+pub struct AuthUser(uuid::Uuid);
 
-impl UserId {
-    fn new() -> Self {
+impl AuthUser {
+    pub fn new() -> Self {
         Self(uuid::Uuid::new_v4())
     }
 }
-
 
 pub struct AuthRedirect;
 

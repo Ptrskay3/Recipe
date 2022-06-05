@@ -1,13 +1,17 @@
 use anyhow::Context;
 use async_redis_session::RedisSessionStore;
+use async_session::{Session, SessionStore};
 use axum::{
     extract::Query,
-    http::StatusCode,
-    response::IntoResponse,
+    http::{HeaderMap, StatusCode},
+    response::{IntoResponse, Redirect},
     routing::{delete, get},
-    Extension, Json, Router,
+    Extension, Json, Router, TypedHeader, headers::Cookie,
 };
-use axum1::extractors::{internal_error, DatabaseConnection, UserIdFromSession};
+use axum1::{
+    extractors::{internal_error, AuthUser, DatabaseConnection, RedisConnection},
+    AXUM_SESSION_COOKIE_NAME,
+};
 use rand::{distributions::Alphanumeric, Rng};
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
@@ -44,10 +48,13 @@ async fn main() -> anyhow::Result<()> {
     let store = RedisSessionStore::new(&*redis_conn_str).context("failed to connect redis")?;
 
     let app = Router::new()
+    .route("/", get(index))
         .route("/health_check", get(|| async { StatusCode::OK }))
         .route("/pg", get(pg_health))
         .route("/users", get(get_users))
         .route("/insert", get(insert_garbage))
+        .route("/auth", get(authorize))
+        .route("/logout", get(logout))
         .route("/clean", delete(clean))
         .layer(Extension(store))
         .layer(Extension(db_pool));
@@ -68,14 +75,52 @@ pub(crate) struct User {
     created_at: chrono::DateTime<chrono::Utc>,
 }
 
+async fn index(user: Option<AuthUser>) -> impl IntoResponse {
+    match user {
+        Some(_) => "Hello User, you are logged in!",
+        _ => "Hi stranger!"
+    }
+}
+
 async fn pg_health(
-    DatabaseConnection(conn): DatabaseConnection,
+    DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<String, (StatusCode, String)> {
-    let mut conn = conn;
     sqlx::query_scalar("SELECT 'hello world from pg'")
         .fetch_one(&mut conn)
         .await
         .map_err(internal_error)
+}
+
+async fn authorize(
+    RedisConnection(store): RedisConnection,
+    // DatabaseConnection(mut conn): DatabaseConnection
+) -> impl IntoResponse {
+    let mut headers = HeaderMap::new();
+
+    let user_id = AuthUser::new();
+    let mut session = Session::new();
+    session.insert("user_id", user_id).unwrap();
+    let cookie = store.store_session(session).await.unwrap().unwrap();
+
+    let cookie = format!(
+        "{}={}; SameSite=Lax; Path=/",
+        AXUM_SESSION_COOKIE_NAME, cookie
+    );
+
+    headers.insert(axum::http::header::SET_COOKIE, cookie.parse().unwrap());
+
+    (headers, Redirect::to("/"))
+}
+
+async fn logout(
+    _user: AuthUser,
+    RedisConnection(store): RedisConnection,
+    TypedHeader(cookie): TypedHeader<Cookie>,
+) -> impl IntoResponse {
+    let session_cookie = cookie.get(AXUM_SESSION_COOKIE_NAME).unwrap();
+    let loaded_session = store.load_session(session_cookie.to_owned()).await.unwrap().unwrap();
+    store.destroy_session(loaded_session).await.unwrap();
+    Redirect::to("/pg")
 }
 
 async fn clean(DatabaseConnection(conn): DatabaseConnection) -> Result<(), (StatusCode, String)> {
@@ -88,13 +133,11 @@ async fn clean(DatabaseConnection(conn): DatabaseConnection) -> Result<(), (Stat
 }
 
 async fn get_users(
-    _user_id: UserIdFromSession,
+    user_id: AuthUser,
     DatabaseConnection(mut conn): DatabaseConnection,
     Query(params): Query<std::collections::HashMap<String, String>>,
 ) -> Result<Json<Vec<User>>, (StatusCode, String)> {
-    println!("got user id {:?}", _user_id);
-    // let mut conn = conn;
-
+    println!("decoded user_id is {:?}", user_id);
     let ordering = match params.get_key_value("order_by") {
         Some((_, order)) => match order.to_lowercase().as_ref() {
             "desc" => "desc",
