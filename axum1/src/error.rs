@@ -14,7 +14,7 @@ use std::collections::HashMap;
 /// and maps them to appropriate status codes along with at least a minimally useful error
 /// message in a plain text body, or a JSON body in the case of `UnprocessableEntity`.
 #[derive(thiserror::Error, Debug)]
-pub enum Error {
+pub enum ApiError {
     /// Return `401 Unauthorized`
     #[error("authentication required")]
     Unauthorized,
@@ -70,7 +70,7 @@ pub enum Error {
     Anyhow(#[from] anyhow::Error),
 }
 
-impl Error {
+impl ApiError {
     /// Convenient constructor for `Error::UnprocessableEntity`.
     ///
     /// Multiple for the same key are collected into a list for that key.
@@ -107,7 +107,7 @@ impl Error {
 ///
 /// By default, the generated `Display` impl is used to return a plaintext error message
 /// to the client.
-impl IntoResponse for Error {
+impl IntoResponse for ApiError {
     fn into_response(self) -> axum::response::Response {
         match self {
             Self::UnprocessableEntity { errors } => {
@@ -178,21 +178,21 @@ pub trait ResultExt<T> {
     fn on_constraint(
         self,
         name: &str,
-        f: impl FnOnce(Box<dyn DatabaseError>) -> Error,
-    ) -> Result<T, Error>;
+        f: impl FnOnce(Box<dyn DatabaseError>) -> ApiError,
+    ) -> Result<T, ApiError>;
 }
 
 impl<T, E> ResultExt<T> for Result<T, E>
 where
-    E: Into<Error>,
+    E: Into<ApiError>,
 {
     fn on_constraint(
         self,
         name: &str,
-        map_err: impl FnOnce(Box<dyn DatabaseError>) -> Error,
-    ) -> Result<T, Error> {
+        map_err: impl FnOnce(Box<dyn DatabaseError>) -> ApiError,
+    ) -> Result<T, ApiError> {
         self.map_err(|e| match e.into() {
-            Error::Sqlx(sqlx::Error::Database(dbe)) if dbe.constraint() == Some(name) => {
+            ApiError::Sqlx(sqlx::Error::Database(dbe)) if dbe.constraint() == Some(name) => {
                 map_err(dbe)
             }
             e => e,

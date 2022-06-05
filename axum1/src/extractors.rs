@@ -1,11 +1,11 @@
 use crate::AXUM_SESSION_COOKIE_NAME;
 use async_redis_session::RedisSessionStore;
-use async_session::SessionStore as _;
+use async_session::SessionStore;
 use axum::{
     async_trait,
     extract::{FromRequest, RequestParts},
     headers::Cookie,
-    http::{HeaderValue, StatusCode},
+    http::StatusCode,
     response::{IntoResponse, Redirect, Response},
     Extension, TypedHeader,
 };
@@ -35,18 +35,6 @@ where
     E: std::error::Error,
 {
     (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
-}
-
-#[derive(Debug)]
-pub struct FreshUserId {
-    pub user_id: AuthUser,
-    pub cookie: HeaderValue,
-}
-
-#[derive(Debug)]
-pub enum UserIdFromSession {
-    FoundUserId(AuthUser),
-    CreatedFreshUserId(FreshUserId),
 }
 
 pub struct RedisConnection(pub RedisSessionStore);
@@ -103,10 +91,7 @@ where
             .map_err(|_| AuthRedirect)?
         {
             if let Some(user_id) = session.get::<AuthUser>("user_id") {
-                tracing::debug!(
-                    "session decoded success, user_id={:?}",
-                    user_id
-                );
+                tracing::debug!("session decoded success, user_id={:?}", user_id);
                 user_id
             } else {
                 tracing::debug!("no `user_id` found in session");

@@ -2,7 +2,6 @@ use anyhow::Context;
 use async_redis_session::RedisSessionStore;
 use async_session::{Session, SessionStore};
 use axum::{
-    extract::Query,
     headers::Cookie,
     http::{header::SET_COOKIE, HeaderMap, StatusCode},
     response::{IntoResponse, Redirect},
@@ -10,11 +9,13 @@ use axum::{
     Extension, Json, Router, TypedHeader,
 };
 use axum1::{
+    error::ApiError,
     extractors::{internal_error, AuthUser, DatabaseConnection, RedisConnection},
-    AXUM_SESSION_COOKIE_NAME,
+    AXUM_SESSION_COOKIE_NAME, SESSION_EXPIRES_IN,
 };
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
+use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
@@ -45,7 +46,8 @@ async fn main() -> anyhow::Result<()> {
     let redis_conn_str =
         std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
 
-    let store = RedisSessionStore::new(&*redis_conn_str).context("failed to connect redis")?;
+    let store =
+        RedisSessionStore::new(redis_conn_str.as_ref()).context("failed to connect redis")?;
 
     let app = Router::new()
         .route("/", get(index))
@@ -54,7 +56,9 @@ async fn main() -> anyhow::Result<()> {
         .route("/users", get(get_users))
         .route("/auth", get(authorize))
         .route("/logout", get(logout))
+        .route("/protected", get(protected))
         .route("/clean", delete(clean))
+        .layer(TraceLayer::new_for_http())
         .layer(Extension(store))
         .layer(Extension(db_pool));
 
@@ -81,6 +85,16 @@ async fn index(user: Option<AuthUser>) -> impl IntoResponse {
     }
 }
 
+async fn protected(user: Option<AuthUser>) -> Result<String, ApiError> {
+    match user {
+        Some(user) => Ok(format!(
+            "This is the protected area, here is your data: {:?}",
+            user
+        )),
+        _ => Err(ApiError::Unauthorized),
+    }
+}
+
 async fn pg_health(
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<String, (StatusCode, String)> {
@@ -96,9 +110,10 @@ async fn authorize(
 ) -> impl IntoResponse {
     // TODO: Remove the absurd amount of `unwrap` calls.
     let mut headers = HeaderMap::new();
-    // TODO: currently this always succeeds, we need to validate credentials from DB..
+    // TODO: currently this always succeeds, but we'll need to build authentication.
     let user_id = AuthUser::new();
     let mut session = Session::new();
+    session.expire_in(std::time::Duration::from_secs(SESSION_EXPIRES_IN));
     session.insert("user_id", user_id).unwrap();
     let cookie = store.store_session(session).await.unwrap().unwrap();
 
@@ -145,19 +160,10 @@ async fn clean(DatabaseConnection(conn): DatabaseConnection) -> Result<(), (Stat
 }
 
 async fn get_users(
-    user_id: AuthUser,
+    _user_id: AuthUser,
     DatabaseConnection(mut conn): DatabaseConnection,
-    Query(params): Query<std::collections::HashMap<String, String>>,
 ) -> Result<Json<Vec<User>>, (StatusCode, String)> {
-    println!("decoded user_id is {:?}", user_id);
-    let ordering = match params.get_key_value("order_by") {
-        Some((_, order)) => match order.to_lowercase().as_ref() {
-            "desc" => "desc",
-            _ => "asc",
-        },
-        _ => "asc",
-    };
-    let query = format!("SELECT * FROM users u order by u.created_at {ordering}");
+    let query = format!("SELECT * FROM users u order by u.created_at");
     let users = sqlx::query_as::<_, User>(&query)
         .fetch_all(&mut conn)
         .await
