@@ -61,7 +61,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/pg", get(pg_health))
         .route("/users", get(get_users))
         .route("/register", post(register))
-        .route("/auth", get(authorize))
+        .route("/auth", post(authorize))
         .route("/logout", get(logout))
         .route("/protected", get(protected))
         .route("/clean", delete(clean))
@@ -79,7 +79,6 @@ async fn main() -> anyhow::Result<()> {
 
 #[derive(sqlx::FromRow, serde::Deserialize, Debug, serde::Serialize, Clone)]
 pub(crate) struct User {
-    id: i32,
     name: String,
     email: String,
     created_at: chrono::DateTime<chrono::Utc>,
@@ -112,13 +111,12 @@ async fn pg_health(
 }
 
 async fn authorize(
+    Form(credentials): Form<Credentials>,
     RedisConnection(store): RedisConnection,
-    // DatabaseConnection(mut conn): DatabaseConnection
-) -> impl IntoResponse {
-    // TODO: Remove the absurd amount of `unwrap` calls.
+    conn: DatabaseConnection,
+) -> Result<(HeaderMap, Redirect), ApiError> {
     let mut headers = HeaderMap::new();
-    // TODO: currently this always succeeds, but we'll need to build authentication.
-    let user_id = AuthUser::new();
+    let user_id = validate_credentials(credentials, conn).await?;
     let mut session = Session::new();
     session.insert("user_id", user_id).unwrap();
     let cookie = store.store_session(session).await.unwrap().unwrap();
@@ -130,7 +128,7 @@ async fn authorize(
 
     headers.insert(SET_COOKIE, cookie.parse().unwrap());
 
-    (headers, Redirect::to("/"))
+    Ok((headers, Redirect::to("/")))
 }
 
 async fn logout(
@@ -177,6 +175,7 @@ async fn get_users(
     Ok(Json(users))
 }
 
+#[derive(Debug, serde::Deserialize)]
 pub struct Credentials {
     name: String,
     password: Secret<String>,
@@ -185,7 +184,7 @@ pub struct Credentials {
 async fn validate_credentials(
     credentials: Credentials,
     DatabaseConnection(mut conn): DatabaseConnection,
-) -> Result<sqlx::types::uuid::Uuid, ApiError> {
+) -> Result<uuid::Uuid, ApiError> {
     let row: Option<_> = sqlx::query!(
         r#"
         SELECT user_id, password_hash
@@ -200,20 +199,29 @@ async fn validate_credentials(
 
     let (expected_password_hash, user_id) = match row {
         Some(row) => (row.password_hash, row.user_id),
-        None => return Err(ApiError::Unauthorized),
+        None => {
+            return Err(ApiError::unprocessable_entity([(
+                "username",
+                "no such user",
+            )]))
+        }
     };
 
-    let expected_password_hash = PasswordHash::new(&expected_password_hash)
-        .context("Failed to parse hash in PHC string format.")
-        .map_err(|_| ApiError::Unauthorized)?;
-
-    Argon2::default()
-        .verify_password(
+    axum1::utils::spawn_blocking_with_tracing(move || {
+        let expected_password_hash = PasswordHash::new(&expected_password_hash)?;
+        Argon2::default().verify_password(
             credentials.password.expose_secret().as_bytes(),
             &expected_password_hash,
         )
-        .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to validate credentials")))?;
-    Ok(user_id)
+    })
+    .await
+    .map_err(|_| {
+        ApiError::Anyhow(anyhow::anyhow!(
+            "unexpected error happened during password hashing"
+        ))
+    })?
+    .map_err(|_| ApiError::unprocessable_entity([("password", "password is wrong")]))?;
+    Ok(uuid::Uuid::from_bytes(*user_id.as_bytes()))
 }
 
 #[derive(serde::Deserialize, Debug)]
@@ -239,7 +247,7 @@ async fn register(
         password,
     } = form;
     let password_hash =
-        axum1::utils::spawn_blocking_with_tracing(move || compute_password_hash(password.clone()))
+        axum1::utils::spawn_blocking_with_tracing(move || compute_password_hash(password))
             .await
             .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to hash password")))?
             .context("Failed to hash password")?;
@@ -265,7 +273,7 @@ async fn update_password(
 ) -> Result<(), ApiError> {
     let UpdatePassword { name, password } = form;
     let password_hash =
-        axum1::utils::spawn_blocking_with_tracing(move || compute_password_hash(password.clone()))
+        axum1::utils::spawn_blocking_with_tracing(move || compute_password_hash(password))
             .await
             .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to hash password")))?
             .context("Failed to hash password")?;
