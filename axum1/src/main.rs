@@ -1,18 +1,24 @@
 use anyhow::Context;
+use argon2::{
+    password_hash::SaltString, Algorithm, Argon2, Params, PasswordHash, PasswordHasher,
+    PasswordVerifier, Version,
+};
 use async_redis_session::RedisSessionStore;
 use async_session::{Session, SessionStore};
 use axum::{
+    extract::Form,
     headers::Cookie,
     http::{header::SET_COOKIE, HeaderMap, StatusCode},
     response::{IntoResponse, Redirect},
-    routing::{delete, get},
+    routing::{delete, get, post},
     Extension, Json, Router, TypedHeader,
 };
 use axum1::{
     error::ApiError,
     extractors::{internal_error, AuthUser, DatabaseConnection, RedisConnection},
-    AXUM_SESSION_COOKIE_NAME, SESSION_EXPIRES_IN,
+    AXUM_SESSION_COOKIE_NAME,
 };
+use secrecy::{ExposeSecret, Secret};
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use tower_http::trace::TraceLayer;
@@ -54,6 +60,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/health_check", get(|| async { StatusCode::OK }))
         .route("/pg", get(pg_health))
         .route("/users", get(get_users))
+        .route("/register", post(register))
         .route("/auth", get(authorize))
         .route("/logout", get(logout))
         .route("/protected", get(protected))
@@ -113,7 +120,6 @@ async fn authorize(
     // TODO: currently this always succeeds, but we'll need to build authentication.
     let user_id = AuthUser::new();
     let mut session = Session::new();
-    session.expire_in(std::time::Duration::from_secs(SESSION_EXPIRES_IN));
     session.insert("user_id", user_id).unwrap();
     let cookie = store.store_session(session).await.unwrap().unwrap();
 
@@ -169,4 +175,124 @@ async fn get_users(
         .await
         .map_err(internal_error)?;
     Ok(Json(users))
+}
+
+pub struct Credentials {
+    name: String,
+    password: Secret<String>,
+}
+
+async fn validate_credentials(
+    credentials: Credentials,
+    DatabaseConnection(mut conn): DatabaseConnection,
+) -> Result<sqlx::types::uuid::Uuid, ApiError> {
+    let row: Option<_> = sqlx::query!(
+        r#"
+        SELECT user_id, password_hash
+        FROM users
+        WHERE name = $1
+        "#,
+        credentials.name,
+    )
+    .fetch_optional(&mut conn)
+    .await
+    .context("Failed to perform a query to retrieve stored credentials.")?;
+
+    let (expected_password_hash, user_id) = match row {
+        Some(row) => (row.password_hash, row.user_id),
+        None => return Err(ApiError::Unauthorized),
+    };
+
+    let expected_password_hash = PasswordHash::new(&expected_password_hash)
+        .context("Failed to parse hash in PHC string format.")
+        .map_err(|_| ApiError::Unauthorized)?;
+
+    Argon2::default()
+        .verify_password(
+            credentials.password.expose_secret().as_bytes(),
+            &expected_password_hash,
+        )
+        .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to validate credentials")))?;
+    Ok(user_id)
+}
+
+#[derive(serde::Deserialize, Debug)]
+pub struct UpdatePassword {
+    name: String,
+    password: Secret<String>,
+}
+
+#[derive(serde::Deserialize, Debug)]
+pub struct Register {
+    name: String,
+    email: String,
+    password: Secret<String>,
+}
+
+async fn register(
+    Form(form): Form<Register>,
+    DatabaseConnection(mut conn): DatabaseConnection,
+) -> Result<(), ApiError> {
+    let Register {
+        name,
+        email,
+        password,
+    } = form;
+    let password_hash =
+        axum1::utils::spawn_blocking_with_tracing(move || compute_password_hash(password.clone()))
+            .await
+            .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to hash password")))?
+            .context("Failed to hash password")?;
+
+    sqlx::query!(
+        r#"
+        INSERT INTO users (name, email, password_hash)
+        VALUES ($1, $2, $3)
+        "#,
+        name,
+        email,
+        password_hash.expose_secret(),
+    )
+    .execute(&mut conn)
+    .await
+    .context("Failed to insert new user.")?;
+    Ok(())
+}
+
+async fn update_password(
+    Form(form): Form<UpdatePassword>,
+    DatabaseConnection(mut conn): DatabaseConnection,
+) -> Result<(), ApiError> {
+    let UpdatePassword { name, password } = form;
+    let password_hash =
+        axum1::utils::spawn_blocking_with_tracing(move || compute_password_hash(password.clone()))
+            .await
+            .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to hash password")))?
+            .context("Failed to hash password")?;
+
+    sqlx::query!(
+        r#"
+        UPDATE users
+        SET password_hash = $1
+        WHERE name = $2
+        "#,
+        password_hash.expose_secret(),
+        name
+    )
+    .execute(&mut conn)
+    .await
+    .context("Failed to change user's password in the database.")?;
+    Ok(())
+}
+
+fn compute_password_hash(password: Secret<String>) -> Result<Secret<String>, anyhow::Error> {
+    let salt = SaltString::generate(&mut rand::thread_rng());
+    let password_hash = Argon2::new(
+        Algorithm::Argon2id,
+        Version::V0x13,
+        Params::new(15000, 2, 1, None).unwrap(),
+    )
+    .hash_password(password.expose_secret().as_bytes(), &salt)?
+    .to_string();
+    Ok(Secret::new(password_hash))
 }

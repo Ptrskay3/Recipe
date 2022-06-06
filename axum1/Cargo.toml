@@ -9,7 +9,7 @@ axum = { version= "0.5.4", features = ["json", "headers"] }
 chrono = { version = "0.4.19", features = ["serde"] }
 dotenv = "0.15.0"
 serde = { version = "1.0.137", features = ["derive"] }
-sqlx = { version = "0.5.13", features = ["runtime-tokio-rustls", "any", "postgres", "json", "macros", "chrono", "migrate", "offline"], default-features = false }
+sqlx = { version = "0.5.13", features = ["runtime-tokio-rustls", "any", "postgres", "json", "macros", "chrono", "uuid", "migrate", "offline"], default-features = false }
 thiserror = "1.0.31"
 tokio = { version = "1.18.0", features = ["full"] }
 tracing = "0.1.34"
@@ -20,3 +20,6 @@ async-session = "3.0.0"
 uuid = { version = "1", features = ["v4", "serde"] }
 async-redis-session = "0.2.2"
 tower-http = { version = "0.3.0", features = ["add-extension", "trace"] }
+argon2 = { version = "0.4", features = ["std"] }
+secrecy = { version = "0.8.0", features = ["serde"] } 
+rand = "0.8.5"
