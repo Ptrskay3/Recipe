@@ -10,7 +10,7 @@ use axum::{
     headers::Cookie,
     http::{header::SET_COOKIE, HeaderMap, StatusCode},
     response::{IntoResponse, Redirect},
-    routing::{delete, get, post},
+    routing::{delete, get, post, put},
     Extension, Json, Router, TypedHeader,
 };
 use axum1::{
@@ -64,6 +64,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/auth", post(authorize))
         .route("/logout", get(logout))
         .route("/protected", get(protected))
+        .route("/update_password", put(update_password))
         .route("/clean", delete(clean))
         .layer(TraceLayer::new_for_http())
         .layer(Extension(store))
@@ -224,13 +225,13 @@ async fn validate_credentials(
     Ok(uuid::Uuid::from_bytes(*user_id.as_bytes()))
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize)]
 pub struct UpdatePassword {
     name: String,
     password: Secret<String>,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize)]
 pub struct Register {
     name: String,
     email: String,
@@ -268,6 +269,7 @@ async fn register(
 }
 
 async fn update_password(
+    user_id: AuthUser,
     Form(form): Form<UpdatePassword>,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<(), ApiError> {
@@ -282,10 +284,11 @@ async fn update_password(
         r#"
         UPDATE users
         SET password_hash = $1
-        WHERE name = $2
+        WHERE name = $2 and user_id = $3
         "#,
         password_hash.expose_secret(),
-        name
+        name,
+        sqlx::types::uuid::Uuid::from_bytes(*user_id.as_bytes()),
     )
     .execute(&mut conn)
     .await

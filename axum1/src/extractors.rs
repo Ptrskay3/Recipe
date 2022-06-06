@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use crate::AXUM_SESSION_COOKIE_NAME;
 use async_redis_session::RedisSessionStore;
 use async_session::SessionStore;
@@ -92,6 +94,10 @@ where
         {
             if let Some(user_id) = session.get::<AuthUser>("user_id") {
                 tracing::debug!("session decoded success, user_id={:?}", user_id);
+                // TODO: Rotate cookie value to prevent session fixation attacks
+                // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#renew-the-session-id-after-any-privilege-level-change
+                //
+                // session.regenerate();
                 user_id
             } else {
                 tracing::debug!("no `user_id` found in session");
@@ -108,6 +114,14 @@ where
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, Copy)]
 pub struct AuthUser(uuid::Uuid);
+
+impl Deref for AuthUser {
+    type Target = uuid::Uuid;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 impl AuthUser {
     pub fn new() -> Self {
