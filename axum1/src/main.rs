@@ -167,8 +167,7 @@ async fn get_users(
     _user_id: AuthUser,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<Json<Vec<User>>, ApiError> {
-    let query = format!("SELECT * FROM users u order by u.created_at");
-    let users = sqlx::query_as::<_, User>(&query)
+    let users = sqlx::query_as::<_, User>("SELECT * FROM users order by created_at")
         .fetch_all(&mut conn)
         .await?;
     Ok(Json(users))
@@ -220,7 +219,7 @@ async fn validate_credentials(
         ))
     })?
     .map_err(|_| ApiError::unprocessable_entity([("password", "password is wrong")]))?;
-    // after the 0.6 release of sqlx, this nonsense can go away
+    // FIXME: after the 0.6 release of sqlx, this nonsense can go away
     Ok(uuid::Uuid::from_bytes(*user_id.as_bytes()))
 }
 
@@ -261,8 +260,7 @@ async fn register(
         password_hash.expose_secret(),
     )
     .execute(&mut conn)
-    .await
-    .context("Failed to insert new user.")?;
+    .await?;
     Ok(())
 }
 
@@ -285,8 +283,8 @@ async fn update_password(
         "#,
         password_hash.expose_secret(),
         name,
-        // after the 0.6 release of sqlx, this nonsense can go away
-        sqlx::types::uuid::Uuid::from_bytes(*user_id.as_bytes()),
+        // FIXME: after the 0.6 release of sqlx, this nonsense can go away
+        <sqlx::types::uuid::Uuid as From<_>>::from(user_id),
     )
     .execute(&mut conn)
     .await

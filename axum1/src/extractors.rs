@@ -56,6 +56,7 @@ where
 {
     type Rejection = AuthRedirect;
 
+    // TODO: move cookie and session creation into here
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
             .await
@@ -112,6 +113,13 @@ impl Deref for AuthUser {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+// FIXME: after the 0.6 release of sqlx, this nonsense can go away
+impl From<AuthUser> for sqlx::types::uuid::Uuid {
+    fn from(auth_user: AuthUser) -> Self {
+        sqlx::types::uuid::Uuid::from_bytes(*auth_user.as_bytes())
     }
 }
 
