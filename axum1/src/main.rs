@@ -15,7 +15,7 @@ use axum::{
 };
 use axum1::{
     error::ApiError,
-    extractors::{internal_error, AuthUser, DatabaseConnection, RedisConnection},
+    extractors::{AuthUser, DatabaseConnection, RedisConnection},
     AXUM_SESSION_COOKIE_NAME,
 };
 use secrecy::{ExposeSecret, Secret};
@@ -104,11 +104,11 @@ async fn protected(user: Option<AuthUser>) -> Result<String, ApiError> {
 
 async fn pg_health(
     DatabaseConnection(mut conn): DatabaseConnection,
-) -> Result<String, (StatusCode, String)> {
+) -> Result<(), ApiError> {
     sqlx::query_scalar("SELECT 'hello world from pg'")
         .fetch_one(&mut conn)
-        .await
-        .map_err(internal_error)
+        .await?;
+    Ok(())
 }
 
 async fn authorize(
@@ -155,24 +155,22 @@ async fn logout(
     (headers, Redirect::to("/"))
 }
 
-async fn clean(DatabaseConnection(conn): DatabaseConnection) -> Result<(), (StatusCode, String)> {
+async fn clean(DatabaseConnection(conn): DatabaseConnection) -> Result<(), ApiError> {
     let mut conn = conn;
     sqlx::query("TRUNCATE TABLE users")
         .execute(&mut conn)
-        .await
-        .map_err(internal_error)?;
+        .await?;
     Ok(())
 }
 
 async fn get_users(
     _user_id: AuthUser,
     DatabaseConnection(mut conn): DatabaseConnection,
-) -> Result<Json<Vec<User>>, (StatusCode, String)> {
+) -> Result<Json<Vec<User>>, ApiError> {
     let query = format!("SELECT * FROM users u order by u.created_at");
     let users = sqlx::query_as::<_, User>(&query)
         .fetch_all(&mut conn)
-        .await
-        .map_err(internal_error)?;
+        .await?;
     Ok(Json(users))
 }
 
@@ -222,6 +220,7 @@ async fn validate_credentials(
         ))
     })?
     .map_err(|_| ApiError::unprocessable_entity([("password", "password is wrong")]))?;
+    // after the 0.6 release of sqlx, this nonsense can go away
     Ok(uuid::Uuid::from_bytes(*user_id.as_bytes()))
 }
 
@@ -250,8 +249,7 @@ async fn register(
     let password_hash =
         axum1::utils::spawn_blocking_with_tracing(move || compute_password_hash(password))
             .await
-            .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to hash password")))?
-            .context("Failed to hash password")?;
+            .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to hash password")))??;
 
     sqlx::query!(
         r#"
@@ -277,17 +275,17 @@ async fn update_password(
     let password_hash =
         axum1::utils::spawn_blocking_with_tracing(move || compute_password_hash(password))
             .await
-            .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to hash password")))?
-            .context("Failed to hash password")?;
+            .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to hash password")))??;
 
     sqlx::query!(
         r#"
         UPDATE users
         SET password_hash = $1
-        WHERE name = $2 and user_id = $3
+        WHERE name = $2 AND user_id = $3
         "#,
         password_hash.expose_secret(),
         name,
+        // after the 0.6 release of sqlx, this nonsense can go away
         sqlx::types::uuid::Uuid::from_bytes(*user_id.as_bytes()),
     )
     .execute(&mut conn)

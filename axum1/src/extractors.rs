@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use crate::AXUM_SESSION_COOKIE_NAME;
+use crate::{AXUM_SESSION_COOKIE_NAME, error::ApiError};
 use async_redis_session::RedisSessionStore;
 use async_session::SessionStore;
 use axum::{
@@ -20,23 +20,15 @@ impl<B> FromRequest<B> for DatabaseConnection
 where
     B: Send,
 {
-    type Rejection = (StatusCode, String);
+    type Rejection = ApiError;
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let Extension(pool) = Extension::<PgPool>::from_request(req)
-            .await
-            .map_err(internal_error)?;
+            .await.expect("`Database` extension is missing");
 
-        let conn = pool.acquire().await.map_err(internal_error)?;
+        let conn = pool.acquire().await?;
         Ok(Self(conn))
     }
-}
-
-pub fn internal_error<E>(err: E) -> (StatusCode, String)
-where
-    E: std::error::Error,
-{
-    (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
 }
 
 pub struct RedisConnection(pub RedisSessionStore);
