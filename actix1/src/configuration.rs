@@ -29,5 +29,5 @@ pub fn get_config() -> Result<Settings, config::ConfigError> {
         .add_source(config::File::with_name("configuration"))
         .build()
         .unwrap();
-    Ok(settings.try_deserialize::<Settings>()?)
+    Ok(settings.try_deserialize()?)
 }

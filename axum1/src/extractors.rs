@@ -81,17 +81,20 @@ where
             return Err(AuthRedirect);
         }
 
-        let user_id = if let Some(session) = store
+        let user_id = if let Some(mut session) = store
             .load_session(session_cookie.unwrap().into())
             .await
             .map_err(|_| AuthRedirect)?
         {
             if let Some(user_id) = session.get::<AuthUser>("user_id") {
                 tracing::debug!("session decoded success, user_id={:?}", user_id);
+                // TODO: make this a global const
+                session.set_expiry(chrono::Utc::now() + chrono::Duration::minutes(20));
+                store.store_session(session).await.unwrap();
+
                 // TODO: Rotate cookie value to prevent session fixation attacks
+                // This feature will become essential, as long as we initialize sessions for guest users.
                 // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#renew-the-session-id-after-any-privilege-level-change
-                //
-                // session.regenerate();
                 user_id
             } else {
                 tracing::debug!("no `user_id` found in session");
@@ -121,12 +124,6 @@ impl Deref for AuthUser {
 impl From<AuthUser> for sqlx::types::uuid::Uuid {
     fn from(auth_user: AuthUser) -> Self {
         sqlx::types::uuid::Uuid::from_bytes(*auth_user.as_bytes())
-    }
-}
-
-impl AuthUser {
-    pub fn new() -> Self {
-        Self(uuid::Uuid::new_v4())
     }
 }
 

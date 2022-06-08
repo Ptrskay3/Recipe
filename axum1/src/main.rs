@@ -66,6 +66,13 @@ async fn main() -> anyhow::Result<()> {
         .route("/protected", get(protected))
         .route("/update_password", put(update_password))
         .route("/clean", delete(clean))
+        // We should do nested routing in the future, like so:
+        //
+        // `router.nest("/users", user_routes)`
+        //
+        // and we call an appropriate middleware extractor on `user_routes`
+        //
+        // .route_layer(axum::middleware::from_extractor::<AuthUser>())
         .layer(TraceLayer::new_for_http())
         .layer(Extension(store))
         .layer(Extension(db_pool));
@@ -109,34 +116,28 @@ async fn pg_health(DatabaseConnection(mut conn): DatabaseConnection) -> Result<(
     Ok(())
 }
 
-async fn authorize(
-    Form(credentials): Form<Credentials>,
-    RedisConnection(store): RedisConnection,
-    conn: DatabaseConnection,
-) -> Result<(HeaderMap, Redirect), ApiError> {
+async fn set_authorization_headers(
+    store: RedisSessionStore,
+    user_id: uuid::Uuid,
+) -> Result<HeaderMap, ApiError> {
     let mut headers = HeaderMap::new();
-    let user_id = validate_credentials(credentials, conn).await?;
     let mut session = Session::new();
+    session.expire_in(std::time::Duration::from_secs(1200));
     session.insert("user_id", user_id).unwrap();
     let cookie = store.store_session(session).await?.unwrap();
-
     let cookie = format!(
         "{}={}; SameSite=Lax; Path=/",
         AXUM_SESSION_COOKIE_NAME, cookie
     );
-
     headers.insert(SET_COOKIE, cookie.parse().unwrap());
-
-    Ok((headers, Redirect::to("/")))
+    Ok(headers)
 }
 
-async fn logout(
-    _user: AuthUser,
-    RedisConnection(store): RedisConnection,
-    TypedHeader(cookie): TypedHeader<Cookie>,
-) -> Result<(HeaderMap, Redirect), ApiError> {
+async fn unset_authorization_headers(
+    cookie: Cookie,
+    store: RedisSessionStore,
+) -> Result<HeaderMap, ApiError> {
     let mut headers = HeaderMap::new();
-    // TODO: Remove the absurd amount of `unwrap` calls.
     let session_cookie = cookie.get(AXUM_SESSION_COOKIE_NAME).unwrap();
     let loaded_session = store
         .load_session(session_cookie.to_owned())
@@ -148,7 +149,25 @@ async fn logout(
     let cookie = format!("{}={}; Max-Age=0", AXUM_SESSION_COOKIE_NAME, "");
 
     headers.insert(SET_COOKIE, cookie.parse().unwrap());
+    Ok(headers)
+}
 
+async fn authorize(
+    Form(credentials): Form<Credentials>,
+    RedisConnection(store): RedisConnection,
+    conn: DatabaseConnection,
+) -> Result<(HeaderMap, Redirect), ApiError> {
+    let user_id = validate_credentials(credentials, conn).await?;
+    let headers = set_authorization_headers(store, user_id).await?;
+    Ok((headers, Redirect::to("/")))
+}
+
+async fn logout(
+    _user: AuthUser,
+    RedisConnection(store): RedisConnection,
+    TypedHeader(cookie): TypedHeader<Cookie>,
+) -> Result<(HeaderMap, Redirect), ApiError> {
+    let headers = unset_authorization_headers(cookie, store).await?;
     Ok((headers, Redirect::to("/")))
 }
 
