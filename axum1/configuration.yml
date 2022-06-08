@@ -1,0 +1,10 @@
+application_port: 3000
+database:
+  host: '127.0.0.1'
+  port: 5432
+  username: 'postgres'
+  password: 'postgres'
+  database_name: 'hummus'
+redis:
+  host: '127.0.0.1'
+  port: 6379

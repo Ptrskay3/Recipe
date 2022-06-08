@@ -16,6 +16,7 @@ use axum::{
 use axum1::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, RedisConnection},
+    routes::auth_router,
     AXUM_SESSION_COOKIE_NAME,
 };
 use secrecy::{ExposeSecret, Secret};
@@ -28,6 +29,8 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
 
+    let config = axum1::config::get_config().expect("Configuration file is missing");
+
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
             std::env::var("RUST_LOG").unwrap_or_else(|_| "axum1=debug".into()),
@@ -35,10 +38,9 @@ async fn main() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr = SocketAddr::from(([127, 0, 0, 1], config.application_port));
 
-    let db_conn_str = std::env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgres://postgres:postgres@localhost:5432".to_string());
+    let db_conn_str = config.database.connection_string();
 
     let db_pool = PgPoolOptions::new()
         .max_connections(5)
@@ -49,8 +51,7 @@ async fn main() -> anyhow::Result<()> {
 
     sqlx::migrate!().run(&db_pool).await?;
 
-    let redis_conn_str =
-        std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
+    let redis_conn_str = config.redis.connection_string();
 
     let store =
         RedisSessionStore::new(redis_conn_str.as_ref()).context("failed to connect redis")?;
@@ -66,13 +67,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/protected", get(protected))
         .route("/update_password", put(update_password))
         .route("/clean", delete(clean))
-        // We should do nested routing in the future, like so:
-        //
-        // `router.nest("/users", user_routes)`
-        //
-        // and we call an appropriate middleware extractor on `user_routes`
-        //
-        // .route_layer(axum::middleware::from_extractor::<AuthUser>())
+        .nest("/api", auth_router())
         .layer(TraceLayer::new_for_http())
         .layer(Extension(store))
         .layer(Extension(db_pool));
@@ -122,6 +117,7 @@ async fn set_authorization_headers(
 ) -> Result<HeaderMap, ApiError> {
     let mut headers = HeaderMap::new();
     let mut session = Session::new();
+    // TODO: do not hardcode this here..
     session.expire_in(std::time::Duration::from_secs(1200));
     session.insert("user_id", user_id).unwrap();
     let cookie = store.store_session(session).await?.unwrap();

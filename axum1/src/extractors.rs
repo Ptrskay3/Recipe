@@ -57,7 +57,6 @@ where
 {
     type Rejection = AuthRedirect;
 
-    // TODO: move cookie and session creation into here
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
             .await
@@ -71,15 +70,16 @@ where
             .as_ref()
             .and_then(|cookie| cookie.get(AXUM_SESSION_COOKIE_NAME));
 
+        if session_cookie.is_none() {
+            tracing::debug!("No session cookie found, redirecting to auth.");
+            return Err(AuthRedirect);
+        }
+
         tracing::debug!(
             "got session cookie from user agent, {}={:?}",
             AXUM_SESSION_COOKIE_NAME,
             session_cookie
         );
-
-        if session_cookie.is_none() {
-            return Err(AuthRedirect);
-        }
 
         let user_id = if let Some(mut session) = store
             .load_session(session_cookie.unwrap().into())
