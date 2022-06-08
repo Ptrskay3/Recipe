@@ -14,7 +14,7 @@ use axum::{
     Extension, Json, Router, TypedHeader,
 };
 use axum1::{
-    error::ApiError,
+    error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, RedisConnection},
     AXUM_SESSION_COOKIE_NAME,
 };
@@ -102,9 +102,7 @@ async fn protected(user: Option<AuthUser>) -> Result<String, ApiError> {
     }
 }
 
-async fn pg_health(
-    DatabaseConnection(mut conn): DatabaseConnection,
-) -> Result<(), ApiError> {
+async fn pg_health(DatabaseConnection(mut conn): DatabaseConnection) -> Result<(), ApiError> {
     sqlx::query_scalar("SELECT 'hello world from pg'")
         .fetch_one(&mut conn)
         .await?;
@@ -120,7 +118,7 @@ async fn authorize(
     let user_id = validate_credentials(credentials, conn).await?;
     let mut session = Session::new();
     session.insert("user_id", user_id).unwrap();
-    let cookie = store.store_session(session).await.unwrap().unwrap();
+    let cookie = store.store_session(session).await?.unwrap();
 
     let cookie = format!(
         "{}={}; SameSite=Lax; Path=/",
@@ -136,14 +134,13 @@ async fn logout(
     _user: AuthUser,
     RedisConnection(store): RedisConnection,
     TypedHeader(cookie): TypedHeader<Cookie>,
-) -> impl IntoResponse {
+) -> Result<(HeaderMap, Redirect), ApiError> {
     let mut headers = HeaderMap::new();
     // TODO: Remove the absurd amount of `unwrap` calls.
     let session_cookie = cookie.get(AXUM_SESSION_COOKIE_NAME).unwrap();
     let loaded_session = store
         .load_session(session_cookie.to_owned())
-        .await
-        .unwrap()
+        .await?
         .unwrap();
     store.destroy_session(loaded_session).await.unwrap();
 
@@ -152,11 +149,10 @@ async fn logout(
 
     headers.insert(SET_COOKIE, cookie.parse().unwrap());
 
-    (headers, Redirect::to("/"))
+    Ok((headers, Redirect::to("/")))
 }
 
-async fn clean(DatabaseConnection(conn): DatabaseConnection) -> Result<(), ApiError> {
-    let mut conn = conn;
+async fn clean(DatabaseConnection(mut conn): DatabaseConnection) -> Result<(), ApiError> {
     sqlx::query("TRUNCATE TABLE users")
         .execute(&mut conn)
         .await?;
@@ -167,7 +163,7 @@ async fn get_users(
     _user_id: AuthUser,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<Json<Vec<User>>, ApiError> {
-    let users = sqlx::query_as::<_, User>("SELECT * FROM users order by created_at")
+    let users = sqlx::query_as::<_, User>("SELECT * FROM users ORDER BY created_at")
         .fetch_all(&mut conn)
         .await?;
     Ok(Json(users))
@@ -260,7 +256,13 @@ async fn register(
         password_hash.expose_secret(),
     )
     .execute(&mut conn)
-    .await?;
+    .await
+    .on_constraint("users_name_key", |_| {
+        ApiError::unprocessable_entity([("name", "name already taken")])
+    })
+    .on_constraint("users_email_key", |_| {
+        ApiError::unprocessable_entity([("email", "email already taken")])
+    })?;
     Ok(())
 }
 

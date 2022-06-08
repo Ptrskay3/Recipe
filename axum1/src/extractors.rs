@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use crate::{AXUM_SESSION_COOKIE_NAME, error::ApiError};
+use crate::{error::ApiError, AXUM_SESSION_COOKIE_NAME};
 use async_redis_session::RedisSessionStore;
 use async_session::SessionStore;
 use axum::{
@@ -24,7 +24,8 @@ where
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let Extension(pool) = Extension::<PgPool>::from_request(req)
-            .await.expect("`Database` extension is missing");
+            .await
+            .expect("`Database` extension is missing");
 
         let conn = pool.acquire().await?;
         Ok(Self(conn))
@@ -43,7 +44,7 @@ where
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
             .await
-            .expect("`RedisSessionStore` extension missing");
+            .expect("`RedisSessionStore` extension is missing");
 
         Ok(Self(store))
     }
@@ -60,11 +61,11 @@ where
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
             .await
-            .expect("`RedisSessionStore` extension missing");
+            .expect("`RedisSessionStore` extension is missing");
 
         let cookie = Option::<TypedHeader<Cookie>>::from_request(req)
             .await
-            .unwrap();
+            .expect("`TypedHeader` should not be missing");
 
         let session_cookie = cookie
             .as_ref()
