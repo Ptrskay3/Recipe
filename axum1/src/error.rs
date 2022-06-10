@@ -15,6 +15,10 @@ use std::collections::HashMap;
 /// message in a plain text body, or a JSON body in the case of `UnprocessableEntity`.
 #[derive(thiserror::Error, Debug)]
 pub enum ApiError {
+    // Return `400 Bad Request`
+    #[error("bad request")]
+    BadRequest,
+
     /// Return `401 Unauthorized`
     #[error("authentication required")]
     Unauthorized,
@@ -93,6 +97,7 @@ impl ApiError {
 
     fn status_code(&self) -> StatusCode {
         match self {
+            Self::BadRequest => StatusCode::BAD_REQUEST,
             Self::Unauthorized => StatusCode::UNAUTHORIZED,
             Self::Forbidden => StatusCode::FORBIDDEN,
             Self::NotFound => StatusCode::NOT_FOUND,

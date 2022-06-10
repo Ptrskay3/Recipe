@@ -6,11 +6,11 @@ use async_session::SessionStore;
 use axum::{
     async_trait,
     extract::{FromRequest, RequestParts},
-    headers::Cookie,
     http::StatusCode,
     response::{IntoResponse, Redirect, Response},
-    Extension, TypedHeader,
+    Extension,
 };
+use axum_extra::extract::SignedCookieJar;
 use sqlx::{pool, PgPool, Postgres};
 
 pub struct DatabaseConnection(pub pool::PoolConnection<Postgres>);
@@ -62,11 +62,11 @@ where
             .await
             .expect("`RedisSessionStore` extension is missing");
 
-        let cookie = Option::<TypedHeader<Cookie>>::from_request(req)
+        let cookie_jar = Option::<SignedCookieJar>::from_request(req)
             .await
-            .expect("`TypedHeader` should not be missing");
+            .expect("To be added");
 
-        let session_cookie = cookie
+        let session_cookie = cookie_jar
             .as_ref()
             .and_then(|cookie| cookie.get(AXUM_SESSION_COOKIE_NAME));
 
@@ -82,7 +82,7 @@ where
         );
 
         let user_id = if let Some(mut session) = store
-            .load_session(session_cookie.unwrap().into())
+            .load_session(session_cookie.unwrap().value().into())
             .await
             .map_err(|_| AuthRedirect)?
         {

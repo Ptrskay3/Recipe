@@ -7,11 +7,10 @@ use async_redis_session::RedisSessionStore;
 use async_session::{Session, SessionStore};
 use axum::{
     extract::Form,
-    headers::Cookie,
-    http::{header::SET_COOKIE, HeaderMap, StatusCode},
+    http::StatusCode,
     response::{IntoResponse, Redirect},
     routing::{delete, get, post, put},
-    Extension, Json, Router, TypedHeader,
+    Extension, Json, Router,
 };
 use axum1::{
     error::{ApiError, ResultExt},
@@ -19,6 +18,7 @@ use axum1::{
     routes::auth_router,
     AXUM_SESSION_COOKIE_NAME,
 };
+use axum_extra::extract::cookie::{Cookie as AxumCookie, Key, SameSite, SignedCookieJar};
 use secrecy::{ExposeSecret, Secret};
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
@@ -56,6 +56,8 @@ async fn main() -> anyhow::Result<()> {
     let store =
         RedisSessionStore::new(redis_conn_str.as_ref()).context("failed to connect redis")?;
 
+    let key = Key::generate();
+
     let app = Router::new()
         .route("/", get(index))
         .route("/health_check", get(|| async { StatusCode::OK }))
@@ -70,7 +72,8 @@ async fn main() -> anyhow::Result<()> {
         .nest("/api", auth_router())
         .layer(TraceLayer::new_for_http())
         .layer(Extension(store))
-        .layer(Extension(db_pool));
+        .layer(Extension(db_pool))
+        .layer(Extension(key));
 
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
@@ -105,7 +108,7 @@ async fn protected(user: Option<AuthUser>) -> Result<String, ApiError> {
 }
 
 async fn pg_health(DatabaseConnection(mut conn): DatabaseConnection) -> Result<(), ApiError> {
-    sqlx::query_scalar("SELECT 'hello world from pg'")
+    let _ = sqlx::query_scalar!("SELECT 1 + 1")
         .fetch_one(&mut conn)
         .await?;
     Ok(())
@@ -114,57 +117,52 @@ async fn pg_health(DatabaseConnection(mut conn): DatabaseConnection) -> Result<(
 async fn set_authorization_headers(
     store: RedisSessionStore,
     user_id: uuid::Uuid,
-) -> Result<HeaderMap, ApiError> {
-    let mut headers = HeaderMap::new();
+    jar: SignedCookieJar,
+) -> Result<SignedCookieJar, ApiError> {
     let mut session = Session::new();
     // TODO: do not hardcode this here..
     session.expire_in(std::time::Duration::from_secs(1200));
     session.insert("user_id", user_id).unwrap();
     let cookie = store.store_session(session).await?.unwrap();
-    let cookie = format!(
-        "{}={}; SameSite=Lax; Path=/",
-        AXUM_SESSION_COOKIE_NAME, cookie
-    );
-    headers.insert(SET_COOKIE, cookie.parse().unwrap());
-    Ok(headers)
+    let cookie = AxumCookie::build(AXUM_SESSION_COOKIE_NAME, cookie)
+        .path("/")
+        .same_site(SameSite::Lax)
+        .finish();
+    Ok(jar.add(cookie))
 }
 
 async fn unset_authorization_headers(
-    cookie: Cookie,
+    cookie_jar: SignedCookieJar,
     store: RedisSessionStore,
-) -> Result<HeaderMap, ApiError> {
-    let mut headers = HeaderMap::new();
-    let session_cookie = cookie.get(AXUM_SESSION_COOKIE_NAME).unwrap();
+) -> Result<SignedCookieJar, ApiError> {
+    let session_cookie = cookie_jar.get(AXUM_SESSION_COOKIE_NAME).unwrap();
     let loaded_session = store
-        .load_session(session_cookie.to_owned())
+        .load_session(session_cookie.value().to_owned())
         .await?
         .unwrap();
     store.destroy_session(loaded_session).await.unwrap();
 
-    // Unset cookies at client side
-    let cookie = format!("{}={}; Max-Age=0", AXUM_SESSION_COOKIE_NAME, "");
-
-    headers.insert(SET_COOKIE, cookie.parse().unwrap());
-    Ok(headers)
+    Ok(cookie_jar.remove(AxumCookie::named(AXUM_SESSION_COOKIE_NAME)))
 }
 
 async fn authorize(
     Form(credentials): Form<Credentials>,
     RedisConnection(store): RedisConnection,
     conn: DatabaseConnection,
-) -> Result<(HeaderMap, Redirect), ApiError> {
+    jar: SignedCookieJar,
+) -> Result<(SignedCookieJar, Redirect), ApiError> {
     let user_id = validate_credentials(credentials, conn).await?;
-    let headers = set_authorization_headers(store, user_id).await?;
-    Ok((headers, Redirect::to("/")))
+    let cookie_jar = set_authorization_headers(store, user_id, jar).await?;
+    Ok((cookie_jar, Redirect::to("/")))
 }
 
 async fn logout(
     _user: AuthUser,
     RedisConnection(store): RedisConnection,
-    TypedHeader(cookie): TypedHeader<Cookie>,
-) -> Result<(HeaderMap, Redirect), ApiError> {
-    let headers = unset_authorization_headers(cookie, store).await?;
-    Ok((headers, Redirect::to("/")))
+    cookie_jar: SignedCookieJar,
+) -> Result<(SignedCookieJar, Redirect), ApiError> {
+    let cookie_jar = unset_authorization_headers(cookie_jar, store).await?;
+    Ok((cookie_jar, Redirect::to("/")))
 }
 
 async fn clean(DatabaseConnection(mut conn): DatabaseConnection) -> Result<(), ApiError> {
