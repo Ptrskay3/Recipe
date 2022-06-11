@@ -69,6 +69,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/protected", get(protected))
         .route("/update_password", put(update_password))
         .route("/clean", delete(clean))
+        .route("/try", get(try_ingredient))
         .nest("/api", auth_router())
         .layer(TraceLayer::new_for_http())
         .layer(Extension(store))
@@ -317,4 +318,43 @@ fn compute_password_hash(password: Secret<String>) -> Result<Secret<String>, any
     .hash_password(password.expose_secret().as_bytes(), &salt)?
     .to_string();
     Ok(Secret::new(password_hash))
+}
+
+#[derive(sqlx::Type, Debug)]
+#[sqlx(rename_all = "snake_case")]
+pub enum FoodCategory {
+    Vegetable,
+    Fruit,
+    Meat,
+    Dairy,
+    Grains,
+    Legumes,
+    Baked,
+    Eggs,
+    Seafood,
+    NutsAndSeeds,
+    HerbsAndSpices,
+    Garnishes,
+    DesertsAndSweets,
+    Supplements,
+    Beverage,
+}
+
+#[derive(Debug, sqlx::FromRow)]
+struct Ingredient {
+    name: String,
+    category: Vec<FoodCategory>,
+}
+
+async fn try_ingredient(DatabaseConnection(mut conn): DatabaseConnection) -> Result<(), ApiError> {
+    let rows = sqlx::query_as!(
+        Ingredient,
+        r#"
+        SELECT name, category as "category: Vec<FoodCategory>" FROM ingredients;
+        "#
+    )
+    .fetch_all(&mut conn)
+    .await?;
+    println!("got row:\n{:?}", rows);
+    Ok(())
 }
