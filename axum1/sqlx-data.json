@@ -1,16 +1,246 @@
 {
   "db": "PostgreSQL",
-  "9702ad832ffcf6bbfc8df6c21b5d8642b0fa1c914f2f3ec1bd67ff00c4d2ea7d": {
-    "query": "INSERT INTO users (name, email) VALUES ($1, $2)",
+  "56b75e1fe02981ed1704611b29ab338fabeb0b120e78c9be8b480699b09b81b0": {
+    "query": "\n        SELECT name, email\n        FROM users\n        WHERE user_id = $1;\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "email",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "8af2e366c931a1383ebb093a144d8424ee161a6c17e51036795702f481b9b955": {
+    "query": "\n        INSERT INTO users (name, email, password_hash)\n        VALUES ($1, $2, $3)\n        ",
     "describe": {
       "columns": [],
       "parameters": {
         "Left": [
           "Text",
+          "Text",
           "Text"
         ]
       },
       "nullable": []
+    }
+  },
+  "af71e4fecfb0eb2882b06d97b38796fc0215723cc4950381ab561a54acbda376": {
+    "query": "\n        UPDATE users\n        SET password_hash = $1\n        WHERE name = $2 AND user_id = $3\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "b9b1efa07ddce68fad82e5292e9340f3273a2d13698257f377ed47898cc2a27b": {
+    "query": "\n        SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\" FROM ingredients\n        WHERE $1 = ANY (category);\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "calories_per_100g",
+          "type_info": "Float4"
+        },
+        {
+          "ordinal": 2,
+          "name": "category: Vec<FoodCategory>",
+          "type_info": {
+            "Custom": {
+              "name": "_food_category",
+              "kind": {
+                "Array": {
+                  "Custom": {
+                    "name": "food_category",
+                    "kind": {
+                      "Enum": [
+                        "vegetable",
+                        "fruit",
+                        "meat",
+                        "dairy",
+                        "grains",
+                        "legumes",
+                        "baked",
+                        "eggs",
+                        "seafood",
+                        "nuts_and_seeds",
+                        "herbs_and_spices",
+                        "garnishes",
+                        "deserts_and_sweets",
+                        "supplements",
+                        "beverages"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "parameters": {
+        "Left": [
+          {
+            "Custom": {
+              "name": "food_category",
+              "kind": {
+                "Enum": [
+                  "vegetable",
+                  "fruit",
+                  "meat",
+                  "dairy",
+                  "grains",
+                  "legumes",
+                  "baked",
+                  "eggs",
+                  "seafood",
+                  "nuts_and_seeds",
+                  "herbs_and_spices",
+                  "garnishes",
+                  "deserts_and_sweets",
+                  "supplements",
+                  "beverages"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "d98ba0b18443f1d52214de33a78b38301fabb46ae2d6cb5bab7697ab4edaf0d4": {
+    "query": "\n        SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\" FROM ingredients;\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "calories_per_100g",
+          "type_info": "Float4"
+        },
+        {
+          "ordinal": 2,
+          "name": "category: Vec<FoodCategory>",
+          "type_info": {
+            "Custom": {
+              "name": "_food_category",
+              "kind": {
+                "Array": {
+                  "Custom": {
+                    "name": "food_category",
+                    "kind": {
+                      "Enum": [
+                        "vegetable",
+                        "fruit",
+                        "meat",
+                        "dairy",
+                        "grains",
+                        "legumes",
+                        "baked",
+                        "eggs",
+                        "seafood",
+                        "nuts_and_seeds",
+                        "herbs_and_spices",
+                        "garnishes",
+                        "deserts_and_sweets",
+                        "supplements",
+                        "beverages"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "f96013025be0d345c63440de9a5b327cab64a4bdbe497814c23c7e11a5d01bc4": {
+    "query": "SELECT 1 + 1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "?column?",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "ffdfba80cc30d1f37b3dfa82d07ce6cebee2f3f24e5af7804708b9935d2bfb7f": {
+    "query": "\n        SELECT user_id, password_hash\n        FROM users\n        WHERE name = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "password_hash",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
     }
   }
 }

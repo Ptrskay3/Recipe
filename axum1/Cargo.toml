@@ -24,4 +24,4 @@ argon2 = { version = "0.4", features = ["std"] }
 secrecy = { version = "0.8.0", features = ["serde"] } 
 rand = "0.8.5"
 config = "0.13.1"
-axum-extra = { version = "0.3.4", features = ["cookie", "cookie-signed"] }
+axum-extra = { version = "0.3.4", features = ["cookie", "cookie-signed", "form"] }

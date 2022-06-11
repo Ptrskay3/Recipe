@@ -6,7 +6,7 @@ use argon2::{
 use async_redis_session::RedisSessionStore;
 use async_session::{Session, SessionStore};
 use axum::{
-    extract::{Form, Path},
+    extract::Form,
     http::StatusCode,
     response::{IntoResponse, Redirect},
     routing::{delete, get, post, put},
@@ -15,7 +15,7 @@ use axum::{
 use axum1::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, RedisConnection},
-    routes::auth_router,
+    routes::{auth_router, ingredient_router},
     AXUM_SESSION_COOKIE_NAME,
 };
 use axum_extra::extract::cookie::{Cookie as AxumCookie, Key, SameSite, SignedCookieJar};
@@ -69,11 +69,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/protected", get(protected))
         .route("/update_password", put(update_password))
         .route("/clean", delete(clean))
-        .route("/all_ingredients", get(ingredients))
-        .route(
-            "/ingredients_by_category/:category",
-            get(ingredients_by_category),
-        )
+        .nest("/i", ingredient_router())
         .nest("/api", auth_router())
         .layer(TraceLayer::new_for_http())
         .layer(Extension(store))
@@ -129,9 +125,11 @@ async fn set_authorization_headers(
     session.expire_in(std::time::Duration::from_secs(1200));
     session.insert("user_id", user_id).unwrap();
     let cookie = store.store_session(session).await?.unwrap();
+    // TODO: expiry and refresh
     let cookie = AxumCookie::build(AXUM_SESSION_COOKIE_NAME, cookie)
         .path("/")
         .same_site(SameSite::Lax)
+        .expires(None)
         .finish();
     Ok(jar.add(cookie))
 }
@@ -322,69 +320,4 @@ fn compute_password_hash(password: Secret<String>) -> Result<Secret<String>, any
     .hash_password(password.expose_secret().as_bytes(), &salt)?
     .to_string();
     Ok(Secret::new(password_hash))
-}
-
-#[derive(sqlx::Type, Debug, serde::Deserialize, serde::Serialize)]
-#[sqlx(rename_all = "snake_case", type_name = "food_category")]
-#[serde(rename_all(deserialize = "snake_case"))]
-pub enum FoodCategory {
-    Vegetable,
-    Fruit,
-    Meat,
-    Dairy,
-    Grains,
-    Legumes,
-    Baked,
-    Eggs,
-    Seafood,
-    NutsAndSeeds,
-    HerbsAndSpices,
-    Garnishes,
-    DesertsAndSweets,
-    Supplements,
-    Beverage,
-}
-
-impl sqlx::postgres::PgHasArrayType for FoodCategory {
-    fn array_type_info() -> sqlx::postgres::PgTypeInfo {
-        sqlx::postgres::PgTypeInfo::with_name("_food_category")
-    }
-}
-
-#[derive(sqlx::FromRow, Debug, serde::Serialize, serde::Deserialize)]
-struct Ingredient {
-    name: String,
-    calories_per_100g: f32,
-    category: Vec<FoodCategory>,
-}
-
-async fn ingredients(
-    DatabaseConnection(mut conn): DatabaseConnection,
-) -> Result<Json<Vec<Ingredient>>, ApiError> {
-    let rows: Vec<_> = sqlx::query_as!(
-        Ingredient,
-        r#"
-        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>" FROM ingredients;
-        "#
-    )
-    .fetch_all(&mut conn)
-    .await?;
-    Ok(Json(rows))
-}
-
-async fn ingredients_by_category(
-    DatabaseConnection(mut conn): DatabaseConnection,
-    Path(category): Path<FoodCategory>,
-) -> Result<Json<Vec<Ingredient>>, ApiError> {
-    let rows: Vec<_> = sqlx::query_as!(
-        Ingredient,
-        r#"
-        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>" FROM ingredients
-        WHERE $1 = ANY (category);
-        "#,
-        category as _
-    )
-    .fetch_all(&mut conn)
-    .await?;
-    Ok(Json(rows))
 }

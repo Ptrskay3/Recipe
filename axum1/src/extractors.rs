@@ -64,7 +64,7 @@ where
 
         let cookie_jar = Option::<SignedCookieJar>::from_request(req)
             .await
-            .expect("To be added");
+            .expect("`SignedCookieJar` extension is missing");
 
         let session_cookie = cookie_jar
             .as_ref()
