@@ -6,7 +6,7 @@ use argon2::{
 use async_redis_session::RedisSessionStore;
 use async_session::{Session, SessionStore};
 use axum::{
-    extract::Form,
+    extract::{Form, Path},
     http::StatusCode,
     response::{IntoResponse, Redirect},
     routing::{delete, get, post, put},
@@ -69,7 +69,11 @@ async fn main() -> anyhow::Result<()> {
         .route("/protected", get(protected))
         .route("/update_password", put(update_password))
         .route("/clean", delete(clean))
-        .route("/try", get(try_ingredient))
+        .route("/all_ingredients", get(ingredients))
+        .route(
+            "/ingredients_by_category/:category",
+            get(ingredients_by_category),
+        )
         .nest("/api", auth_router())
         .layer(TraceLayer::new_for_http())
         .layer(Extension(store))
@@ -320,8 +324,9 @@ fn compute_password_hash(password: Secret<String>) -> Result<Secret<String>, any
     Ok(Secret::new(password_hash))
 }
 
-#[derive(sqlx::Type, Debug)]
-#[sqlx(rename_all = "snake_case")]
+#[derive(sqlx::Type, Debug, serde::Deserialize, serde::Serialize)]
+#[sqlx(rename_all = "snake_case", type_name = "food_category")]
+#[serde(rename_all(deserialize = "snake_case"))]
 pub enum FoodCategory {
     Vegetable,
     Fruit,
@@ -340,21 +345,46 @@ pub enum FoodCategory {
     Beverage,
 }
 
-#[derive(Debug, sqlx::FromRow)]
+impl sqlx::postgres::PgHasArrayType for FoodCategory {
+    fn array_type_info() -> sqlx::postgres::PgTypeInfo {
+        sqlx::postgres::PgTypeInfo::with_name("_food_category")
+    }
+}
+
+#[derive(sqlx::FromRow, Debug, serde::Serialize, serde::Deserialize)]
 struct Ingredient {
     name: String,
+    calories_per_100g: f32,
     category: Vec<FoodCategory>,
 }
 
-async fn try_ingredient(DatabaseConnection(mut conn): DatabaseConnection) -> Result<(), ApiError> {
-    let rows = sqlx::query_as!(
+async fn ingredients(
+    DatabaseConnection(mut conn): DatabaseConnection,
+) -> Result<Json<Vec<Ingredient>>, ApiError> {
+    let rows: Vec<_> = sqlx::query_as!(
         Ingredient,
         r#"
-        SELECT name, category as "category: Vec<FoodCategory>" FROM ingredients;
+        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>" FROM ingredients;
         "#
     )
     .fetch_all(&mut conn)
     .await?;
-    println!("got row:\n{:?}", rows);
-    Ok(())
+    Ok(Json(rows))
+}
+
+async fn ingredients_by_category(
+    DatabaseConnection(mut conn): DatabaseConnection,
+    Path(category): Path<FoodCategory>,
+) -> Result<Json<Vec<Ingredient>>, ApiError> {
+    let rows: Vec<_> = sqlx::query_as!(
+        Ingredient,
+        r#"
+        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>" FROM ingredients
+        WHERE $1 = ANY (category);
+        "#,
+        category as _
+    )
+    .fetch_all(&mut conn)
+    .await?;
+    Ok(Json(rows))
 }
