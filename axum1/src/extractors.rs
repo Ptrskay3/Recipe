@@ -71,7 +71,7 @@ where
             .and_then(|cookie| cookie.get(AXUM_SESSION_COOKIE_NAME));
 
         if session_cookie.is_none() {
-            tracing::debug!("No session cookie found, redirecting to auth.");
+            tracing::debug!("No session cookie found.");
             return Err(AuthRedirect);
         }
 

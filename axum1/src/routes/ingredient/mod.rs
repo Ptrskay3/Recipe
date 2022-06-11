@@ -1,16 +1,20 @@
 use axum::{
     extract::Path,
-    routing::{get, post},
+    routing::{get, patch, post},
     Json, Router,
 };
-// https://github.com/tokio-rs/axum/pull/1031
+// Because we need to deserialize a sequence from a form, we need `axum-extra`.
+// See: https://github.com/tokio-rs/axum/pull/1031
 use axum_extra::extract::Form;
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::{PgHasArrayType, PgTypeInfo};
+use sqlx::{
+    postgres::{PgHasArrayType, PgTypeInfo},
+    Connection,
+};
 
 use crate::{
     error::ApiError,
-    extractors::{AuthUser, DatabaseConnection}, 
+    extractors::{AuthUser, DatabaseConnection},
 };
 
 pub fn ingredient_router() -> Router {
@@ -18,6 +22,7 @@ pub fn ingredient_router() -> Router {
         .route("/all", get(all_ingredients))
         .route("/category/:category", get(ingredients_by_category))
         .route("/new", post(add_ingredient))
+        .route("/upgrade/:name", patch(upgrade_ingredient))
 }
 
 #[derive(sqlx::Type, Debug, Deserialize, Serialize)]
@@ -108,4 +113,50 @@ async fn add_ingredient(
     .execute(&mut conn)
     .await?;
     Ok(())
+}
+
+#[derive(sqlx::FromRow, Debug, Serialize, Deserialize)]
+struct UpgradeIngredient {
+    name: Option<String>,
+    calories_per_100g: Option<f32>,
+    category: Option<Vec<FoodCategory>>,
+}
+
+async fn upgrade_ingredient(
+    Path(name): Path<String>,
+    DatabaseConnection(mut conn): DatabaseConnection,
+    Form(ingredient): Form<UpgradeIngredient>,
+) -> Result<Json<Ingredient>, ApiError> {
+    let mut tx = conn.begin().await?;
+    let original = sqlx::query_as::<_, Ingredient>(
+        "SELECT name, category, calories_per_100g FROM ingredients WHERE name = $1",
+    )
+    .bind(name.clone())
+    .fetch_optional(&mut tx)
+    .await?
+    .ok_or(ApiError::NotFound)?;
+
+    let row = sqlx::query_as!(
+        Ingredient,
+        r#"
+        UPDATE ingredients
+        SET name = $1,
+            calories_per_100g = $2,
+            category = $3
+        WHERE name = $4
+        RETURNING name, category as "category!: Vec<FoodCategory>", calories_per_100g
+        "#,
+        ingredient.name.unwrap_or(original.name),
+        ingredient
+            .calories_per_100g
+            .unwrap_or(original.calories_per_100g),
+        ingredient.category.unwrap_or(original.category) as _,
+        name
+    )
+    .fetch_one(&mut tx)
+    .await?;
+
+    tx.commit().await?;
+
+    Ok(Json(row))
 }
