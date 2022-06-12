@@ -1,6 +1,6 @@
 use axum::{
     extract::Path,
-    routing::{get, patch, post},
+    routing::{get, post},
     Json, Router,
 };
 // Because we need to deserialize a sequence from a form, we need `axum-extra`.
@@ -22,7 +22,12 @@ pub fn ingredient_router() -> Router {
         .route("/all", get(all_ingredients))
         .route("/category/:category", get(ingredients_by_category))
         .route("/new", post(add_ingredient))
-        .route("/upgrade/:name", patch(upgrade_ingredient))
+        .route(
+            "/:name",
+            get(get_ingredient)
+                .delete(delete_ingredient)
+                .patch(upgrade_ingredient),
+        )
 }
 
 #[derive(sqlx::Type, Debug, Deserialize, Serialize)]
@@ -157,6 +162,46 @@ async fn upgrade_ingredient(
     .await?;
 
     tx.commit().await?;
+
+    Ok(Json(row))
+}
+
+async fn get_ingredient(
+    Path(name): Path<String>,
+    DatabaseConnection(mut conn): DatabaseConnection,
+) -> Result<Json<Ingredient>, ApiError> {
+    let row = sqlx::query_as!(
+        Ingredient,
+        r#"
+        SELECT name, category as "category: Vec<FoodCategory>", calories_per_100g
+        FROM ingredients
+        WHERE name = $1
+        "#,
+        name
+    )
+    .fetch_optional(&mut conn)
+    .await?
+    .ok_or(ApiError::NotFound)?;
+
+    Ok(Json(row))
+}
+
+async fn delete_ingredient(
+    Path(name): Path<String>,
+    DatabaseConnection(mut conn): DatabaseConnection,
+) -> Result<Json<Ingredient>, ApiError> {
+    let row = sqlx::query_as!(
+        Ingredient,
+        r#"
+        DELETE FROM ingredients
+        WHERE name = $1
+        RETURNING name, category as "category!: Vec<FoodCategory>", calories_per_100g
+        "#,
+        name
+    )
+    .fetch_optional(&mut conn)
+    .await?
+    .ok_or(ApiError::NotFound)?;
 
     Ok(Json(row))
 }

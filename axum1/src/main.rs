@@ -9,7 +9,7 @@ use axum::{
     extract::Form,
     http::StatusCode,
     response::{IntoResponse, Redirect},
-    routing::{delete, get, post, put},
+    routing::{get, post, put},
     Extension, Json, Router,
 };
 use axum1::{
@@ -58,6 +58,14 @@ async fn main() -> anyhow::Result<()> {
 
     let key = Key::generate();
 
+    let _guard = sentry::init((
+        "https://33db4f8bf30c4e6c8636808eed112d79@o1172026.ingest.sentry.io/6497424",
+        sentry::ClientOptions {
+            release: sentry::release_name!(),
+            ..Default::default()
+        },
+    ));
+
     let app = Router::new()
         .route("/", get(index))
         .route("/health_check", get(|| async { StatusCode::OK }))
@@ -68,7 +76,6 @@ async fn main() -> anyhow::Result<()> {
         .route("/logout", get(logout))
         .route("/protected", get(protected))
         .route("/update_password", put(update_password))
-        .route("/clean", delete(clean))
         .nest("/i", ingredient_router())
         .nest("/api", auth_router())
         .layer(TraceLayer::new_for_http())
@@ -166,13 +173,6 @@ async fn logout(
 ) -> Result<(SignedCookieJar, Redirect), ApiError> {
     let cookie_jar = unset_authorization_headers(cookie_jar, store).await?;
     Ok((cookie_jar, Redirect::to("/")))
-}
-
-async fn clean(DatabaseConnection(mut conn): DatabaseConnection) -> Result<(), ApiError> {
-    sqlx::query("TRUNCATE TABLE users")
-        .execute(&mut conn)
-        .await?;
-    Ok(())
 }
 
 async fn get_users(
