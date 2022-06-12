@@ -18,7 +18,7 @@ CREATE TYPE food_category as ENUM (
 
 CREATE TABLE "ingredients"
 (
-    id  UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
     name TEXT COLLATE "case_insensitive" UNIQUE NOT NULL,
     category food_category[] NOT NULL,
     calories_per_100g REAL NOT NULL,

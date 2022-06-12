@@ -28,6 +28,7 @@ pub fn ingredient_router() -> Router {
                 .delete(delete_ingredient)
                 .patch(upgrade_ingredient),
         )
+        .route("/favorite/:name", post(make_favorite))
 }
 
 #[derive(sqlx::Type, Debug, Deserialize, Serialize)]
@@ -204,4 +205,61 @@ async fn delete_ingredient(
     .ok_or(ApiError::NotFound)?;
 
     Ok(Json(row))
+}
+
+#[derive(sqlx::FromRow)]
+struct IngredientId {
+    id: sqlx::types::uuid::Uuid,
+}
+
+async fn make_favorite(
+    user_id: AuthUser,
+    Path(name): Path<String>,
+    DatabaseConnection(mut conn): DatabaseConnection,
+) -> Result<(), ApiError> {
+    // You can implement this either with a single query using Common Table Expressions (CTEs),
+    // or multiple queries with a transaction.
+    //
+    // The former is likely more performant as it involves only a single round-trip to the database,
+    // but the latter is more readable.
+    //
+    // It's generally a good idea to shoot for readability over raw performance for long-lived
+    // projects. You don't want to come back later and be unable to understand what you wrote
+    // because you were too clever. You can always improve performance later if the
+    // implementation proves to be a bottleneck.
+    //
+    // Readability is also paramount if you need to onboard more devs to the project.
+
+    // Begin a transaction so we have a consistent view of the database.
+    // This has the side-effect of checking out a connection for the whole function,
+    // which saves some overhead on subsequent queries.
+    //
+    // If an error occurs, this transaction will be rolled back on-drop.
+    let mut tx = conn.begin().await?;
+
+    let ingredient = sqlx::query_as!(
+        IngredientId,
+        r#"
+        SELECT id
+        FROM ingredients
+        WHERE name = $1
+        "#,
+        name
+    )
+    .fetch_optional(&mut tx)
+    .await?
+    .ok_or(ApiError::NotFound)?;
+
+    sqlx::query!(
+        // If the row already exists, we don't need to do anything.
+        r#"INSERT INTO favorite_ingredient(ingredient_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING"#,
+        ingredient.id,
+        <sqlx::types::uuid::Uuid as From<_>>::from(user_id)
+    )
+    .execute(&mut tx)
+    .await?;
+
+    tx.commit().await?;
+
+    Ok(())
 }
