@@ -104,7 +104,6 @@ where
             tracing::debug!("invalid `session_cookie`");
             return Err(AuthRedirect);
         };
-
         Ok(user_id)
     }
 }

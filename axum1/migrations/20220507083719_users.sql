@@ -1,4 +1,3 @@
-
 CREATE TABLE "users"
 (
     user_id  UUID PRIMARY KEY DEFAULT uuid_generate_v1mc(),
