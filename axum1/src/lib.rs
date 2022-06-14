@@ -1,3 +1,4 @@
+use axum::async_trait;
 use error::ApiError;
 use sqlx::PgExecutor;
 
@@ -9,7 +10,7 @@ pub mod utils;
 
 pub const AXUM_SESSION_COOKIE_NAME: &str = "axum_session";
 
-#[axum::async_trait]
+#[async_trait]
 pub trait Queryable: Sized {
     type Id;
     type Name;

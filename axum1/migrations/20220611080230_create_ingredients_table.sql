@@ -22,6 +22,7 @@ CREATE TABLE "ingredients"
     name TEXT COLLATE "case_insensitive" UNIQUE NOT NULL,
     category food_category[] NOT NULL,
     calories_per_100g REAL NOT NULL,
+    g_per_piece REAL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ,
     creator_id UUID REFERENCES users (user_id) DEFAULT NULL
@@ -29,7 +30,7 @@ CREATE TABLE "ingredients"
 
 -- FIXME: Remove these
 INSERT INTO ingredients (name, category, calories_per_100g) VALUES ('hazelnut', '{nuts_and_seeds}', 628.3);
-INSERT INTO ingredients (name, category, calories_per_100g) VALUES ('apple', '{fruit}', 52.1);
-INSERT INTO ingredients (name, category, calories_per_100g) VALUES ('tomato', '{fruit, vegetable}', 17.7);
+INSERT INTO ingredients (name, category, calories_per_100g, g_per_piece) VALUES ('apple', '{fruit}', 52.1, 130.0);
+INSERT INTO ingredients (name, category, calories_per_100g, g_per_piece) VALUES ('tomato', '{fruit, vegetable}', 17.7, 57.0);
 
 SELECT trigger_updated_at('"ingredients"');

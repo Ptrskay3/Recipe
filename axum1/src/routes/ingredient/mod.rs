@@ -1,4 +1,5 @@
 use axum::{
+    async_trait,
     extract::Path,
     routing::{get, post},
     Json, Router,
@@ -35,7 +36,7 @@ pub fn ingredient_router() -> Router {
 #[derive(sqlx::Type, Debug, Deserialize, Serialize)]
 #[sqlx(rename_all = "snake_case", type_name = "food_category")]
 #[serde(rename_all = "snake_case")]
-enum FoodCategory {
+pub enum FoodCategory {
     Vegetable,
     Fruit,
     Meat,
@@ -60,13 +61,14 @@ impl PgHasArrayType for FoodCategory {
 }
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize)]
-struct Ingredient {
-    name: String,
-    calories_per_100g: f32,
-    category: Vec<FoodCategory>,
+pub struct Ingredient {
+    pub name: String,
+    pub calories_per_100g: f32,
+    pub category: Vec<FoodCategory>,
+    pub g_per_piece: Option<f32>,
 }
 
-#[axum::async_trait]
+#[async_trait]
 impl Queryable for Ingredient {
     type Id = sqlx::types::uuid::Uuid;
     type Name = String;
@@ -78,7 +80,7 @@ impl Queryable for Ingredient {
         let query = sqlx::query_as!(
             Self,
             r#"
-            SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>"
+            SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece
             FROM ingredients
             WHERE id = $1;
             "#,
@@ -97,7 +99,7 @@ impl Queryable for Ingredient {
         let query = sqlx::query_as!(
             Self,
             r#"
-            SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>"
+            SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece
             FROM ingredients
             WHERE name = $1;
             "#,
@@ -116,7 +118,7 @@ async fn all_ingredients(
     let rows: Vec<_> = sqlx::query_as!(
         Ingredient,
         r#"
-        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>" FROM ingredients;
+        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece FROM ingredients;
         "#
     )
     .fetch_all(&mut conn)
@@ -131,7 +133,7 @@ async fn ingredients_by_category(
     let rows: Vec<_> = sqlx::query_as!(
         Ingredient,
         r#"
-        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>" FROM ingredients
+        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece FROM ingredients
         WHERE $1 = ANY (category);
         "#,
         category as _
@@ -153,12 +155,13 @@ async fn add_ingredient(
     };
     sqlx::query!(
         r#"
-        INSERT INTO ingredients (name, category, calories_per_100g, creator_id)
-        VALUES ($1, $2, $3, $4);
+        INSERT INTO ingredients (name, category, calories_per_100g, g_per_piece, creator_id)
+        VALUES ($1, $2, $3, $4, $5);
         "#,
         ingredient.name,
         ingredient.category as _,
         ingredient.calories_per_100g,
+        ingredient.g_per_piece,
         creator_id
     )
     .execute(&mut conn)
@@ -171,6 +174,7 @@ struct UpgradeIngredient {
     name: Option<String>,
     calories_per_100g: Option<f32>,
     category: Option<Vec<FoodCategory>>,
+    g_per_piece: Option<Option<f32>>,
 }
 
 async fn upgrade_ingredient(
@@ -180,7 +184,7 @@ async fn upgrade_ingredient(
 ) -> Result<Json<Ingredient>, ApiError> {
     let mut tx = conn.begin().await?;
     let original = sqlx::query_as::<_, Ingredient>(
-        "SELECT name, category, calories_per_100g FROM ingredients WHERE name = $1",
+        "SELECT name, category, calories_per_100g, g_per_piece FROM ingredients WHERE name = $1",
     )
     .bind(name.clone())
     .fetch_optional(&mut tx)
@@ -193,15 +197,17 @@ async fn upgrade_ingredient(
         UPDATE ingredients
         SET name = $1,
             calories_per_100g = $2,
-            category = $3
-        WHERE name = $4
-        RETURNING name, category as "category!: Vec<FoodCategory>", calories_per_100g
+            category = $3,
+            g_per_piece = $4
+        WHERE name = $5
+        RETURNING name, category as "category!: Vec<FoodCategory>", calories_per_100g, g_per_piece
         "#,
         ingredient.name.unwrap_or(original.name),
         ingredient
             .calories_per_100g
             .unwrap_or(original.calories_per_100g),
         ingredient.category.unwrap_or(original.category) as _,
+        ingredient.g_per_piece.unwrap_or(original.g_per_piece),
         name
     )
     .fetch_one(&mut tx)
@@ -230,7 +236,7 @@ async fn delete_ingredient(
         r#"
         DELETE FROM ingredients
         WHERE name = $1
-        RETURNING name, category as "category!: Vec<FoodCategory>", calories_per_100g
+        RETURNING name, category as "category!: Vec<FoodCategory>", calories_per_100g, g_per_piece
         "#,
         name
     )
@@ -247,7 +253,7 @@ struct IngredientId {
 }
 
 async fn make_favorite(
-    user_id: AuthUser,
+    auth_user: AuthUser,
     Path(name): Path<String>,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<(), ApiError> {
@@ -288,11 +294,12 @@ async fn make_favorite(
         // If the row already exists, we don't need to do anything.
         r#"INSERT INTO favorite_ingredient(ingredient_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING"#,
         ingredient.id,
-        <sqlx::types::uuid::Uuid as From<_>>::from(user_id)
+        sqlx::types::uuid::Uuid::from(auth_user)
     )
     .execute(&mut tx)
     .await?;
 
+    // Don't forget to commit to actually run those queries against the database.
     tx.commit().await?;
 
     Ok(())
