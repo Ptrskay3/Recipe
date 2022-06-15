@@ -91,7 +91,8 @@ async fn main() -> anyhow::Result<()> {
                     Method::DELETE,
                     Method::PATCH,
                     Method::PUT,
-                ]),
+                ])
+                .allow_credentials(true),
         );
 
     axum::Server::bind(&addr)
