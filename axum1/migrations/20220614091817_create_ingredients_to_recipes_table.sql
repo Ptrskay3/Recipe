@@ -6,5 +6,5 @@ CREATE TABLE ingredients_to_recipes
     quantity      TEXT NOT NULL COLLATE "case_insensitive",
     -- TODO: make it an enum
     quantity_unit TEXT NOT NULL COLLATE "case_insensitive",
-    PRIMARY KEY (reciple_id, ingredient_id)
+    PRIMARY KEY (recipe_id, ingredient_id)
 );

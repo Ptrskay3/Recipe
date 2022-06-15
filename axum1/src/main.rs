@@ -7,8 +7,8 @@ use async_redis_session::RedisSessionStore;
 use async_session::{Session, SessionStore};
 use axum::{
     extract::Form,
-    http::StatusCode,
-    response::{IntoResponse, Redirect},
+    http::{HeaderValue, Method, StatusCode},
+    response::IntoResponse,
     routing::{get, post, put},
     Extension, Json, Router,
 };
@@ -22,7 +22,7 @@ use axum_extra::extract::cookie::{Cookie as AxumCookie, Key, SameSite, SignedCoo
 use secrecy::{ExposeSecret, Secret};
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
-use tower_http::trace::TraceLayer;
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
@@ -81,7 +81,18 @@ async fn main() -> anyhow::Result<()> {
         .layer(TraceLayer::new_for_http())
         .layer(Extension(store))
         .layer(Extension(db_pool))
-        .layer(Extension(key));
+        .layer(Extension(key))
+        .layer(
+            CorsLayer::new()
+                .allow_origin("http://localhost:3001".parse::<HeaderValue>().unwrap())
+                .allow_methods([
+                    Method::GET,
+                    Method::POST,
+                    Method::DELETE,
+                    Method::PATCH,
+                    Method::PUT,
+                ]),
+        );
 
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
@@ -160,19 +171,19 @@ async fn authorize(
     RedisConnection(store): RedisConnection,
     conn: DatabaseConnection,
     jar: SignedCookieJar,
-) -> Result<(SignedCookieJar, Redirect), ApiError> {
+) -> Result<SignedCookieJar, ApiError> {
     let user_id = validate_credentials(credentials, conn).await?;
     let cookie_jar = set_authorization_headers(store, user_id, jar).await?;
-    Ok((cookie_jar, Redirect::to("/")))
+    Ok(cookie_jar)
 }
 
 async fn logout(
     _user: AuthUser,
     RedisConnection(store): RedisConnection,
     cookie_jar: SignedCookieJar,
-) -> Result<(SignedCookieJar, Redirect), ApiError> {
+) -> Result<SignedCookieJar, ApiError> {
     let cookie_jar = unset_authorization_headers(cookie_jar, store).await?;
-    Ok((cookie_jar, Redirect::to("/")))
+    Ok(cookie_jar)
 }
 
 async fn get_users(
