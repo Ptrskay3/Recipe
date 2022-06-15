@@ -3,6 +3,7 @@
 Technical to-do list:
 
 - guest session, more ergonomic handling
+- keep session alive, probably make a middleware layer that resets to the default expire duration
 - validate user input from forms
 - refactor the giant code blob from main
 - route paths should be less random

@@ -77,7 +77,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/protected", get(protected))
         .route("/update_password", put(update_password))
         .nest("/i", ingredient_router())
-        .nest("/api", auth_router())
+        .nest("/u", auth_router())
         .layer(TraceLayer::new_for_http())
         .layer(Extension(store))
         .layer(Extension(db_pool))

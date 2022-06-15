@@ -111,6 +111,12 @@ where
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, Copy)]
 pub struct AuthUser(uuid::Uuid);
 
+impl AuthUser {
+    fn new(uuid: uuid::Uuid) -> Self {
+        Self(uuid)
+    }
+}
+
 impl Deref for AuthUser {
     type Target = uuid::Uuid;
 
@@ -131,5 +137,64 @@ pub struct AuthRedirect;
 impl IntoResponse for AuthRedirect {
     fn into_response(self) -> Response {
         Redirect::temporary("/auth").into_response()
+    }
+}
+
+pub struct MaybeAuthUser(pub Option<AuthUser>);
+
+impl MaybeAuthUser {
+    pub fn into_inner(self) -> Option<AuthUser> {
+        self.0
+    }
+}
+
+#[async_trait]
+impl<B> FromRequest<B> for MaybeAuthUser
+where
+    B: Send,
+{
+    type Rejection = ApiError;
+
+    async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
+        let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
+            .await
+            .expect("`RedisSessionStore` extension is missing");
+
+        let cookie_jar = Option::<SignedCookieJar>::from_request(req)
+            .await
+            .expect("`SignedCookieJar` extension is missing");
+
+        let session_cookie = cookie_jar
+            .as_ref()
+            .and_then(|cookie| cookie.get(AXUM_SESSION_COOKIE_NAME));
+
+        if session_cookie.is_none() {
+            return Ok(Self(None));
+        }
+
+        tracing::debug!(
+            "got session cookie from user agent, {}={:?}",
+            AXUM_SESSION_COOKIE_NAME,
+            session_cookie
+        );
+
+        let user_id = if let Some(session) = store
+            .load_session(session_cookie.unwrap().value().into())
+            .await
+            .map_err(|_| {
+                ApiError::Anyhow(anyhow::anyhow!(
+                    "Failed to load session for some unexpected reason"
+                ))
+            })? {
+            if let Some(user_id) = session.get::<AuthUser>("user_id") {
+                user_id
+            } else {
+                return Ok(Self(None));
+            }
+        } else {
+            return Ok(Self(None));
+        };
+
+        return Ok(Self(Some(AuthUser::new(*user_id))));
     }
 }
