@@ -136,6 +136,7 @@ pub struct AuthRedirect;
 
 impl IntoResponse for AuthRedirect {
     fn into_response(self) -> Response {
+        // FIXME: where to redirect?
         Redirect::temporary("/auth").into_response()
     }
 }
@@ -171,12 +172,6 @@ where
         if session_cookie.is_none() {
             return Ok(Self(None));
         }
-
-        tracing::debug!(
-            "got session cookie from user agent, {}={:?}",
-            AXUM_SESSION_COOKIE_NAME,
-            session_cookie
-        );
 
         let user_id = if let Some(session) = store
             .load_session(session_cookie.unwrap().value().into())

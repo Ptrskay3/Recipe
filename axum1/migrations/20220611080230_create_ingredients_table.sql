@@ -28,7 +28,8 @@ CREATE TABLE "ingredients"
     creator_id UUID REFERENCES users (user_id) DEFAULT NULL
 );
 
--- FIXME: Remove these
+-- FIXME: Remove these, this is just some test data to fiddle with.
+-- We'll scrape this from some sort of food database in the future.
 INSERT INTO ingredients (name, category, calories_per_100g) VALUES ('hazelnut', '{nuts_and_seeds}', 628.3);
 INSERT INTO ingredients (name, category, calories_per_100g, g_per_piece) VALUES ('apple', '{fruit}', 52.1, 130.0);
 INSERT INTO ingredients (name, category, calories_per_100g, g_per_piece) VALUES ('tomato', '{fruit, vegetable}', 17.7, 57.0);

@@ -2,6 +2,7 @@ import type { NextPage } from 'next';
 import styles from '../styles/Home.module.css';
 import { intoFormBody } from '../utils/form';
 import { useRouter } from 'next/router';
+import { FormControl, FormLabel, Button, Input, Flex } from '@chakra-ui/react';
 
 const Home: NextPage = () => {
   const router = useRouter();
@@ -30,11 +31,15 @@ const Home: NextPage = () => {
   return (
     <div className={styles.container}>
       <form onSubmit={onSubmit}>
-        <label htmlFor="name"> name:</label>
-        <input type="text" id="name" name="name" />
-        <label htmlFor="password">password:</label>
-        <input type="password" id="password" name="password" />
-        <button type="submit">Submit</button>
+        <FormControl>
+          <FormLabel htmlFor="name"> name:</FormLabel>
+          <Input type="text" id="name" name="name" />
+          <FormLabel htmlFor="password">password:</FormLabel>
+          <Input type="password" id="password" name="password" />
+          <Button type="submit" colorScheme="teal" size="sm">
+            Submit
+          </Button>
+        </FormControl>
       </form>
     </div>
   );
