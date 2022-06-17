@@ -14,6 +14,7 @@ CREATE TABLE ingredients_to_recipes
     recipe_id     UUID NOT NULL REFERENCES "recipes"     (id) ON DELETE CASCADE,
     ingredient_id UUID NOT NULL REFERENCES "ingredients" (id) ON DELETE CASCADE,
     -- TODO: make this a number of some sort
+    -- It's not that straight forward, because we might want to support fractions such as 2/3..
     quantity      TEXT NOT NULL COLLATE "case_insensitive",
     -- TODO: make it an enum maybe?
     quantity_unit TEXT NOT NULL COLLATE "case_insensitive",

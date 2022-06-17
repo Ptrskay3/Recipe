@@ -237,11 +237,7 @@ async fn validate_credentials(
         )
     })
     .await
-    .map_err(|_| {
-        ApiError::Anyhow(anyhow::anyhow!(
-            "unexpected error happened during password hashing"
-        ))
-    })?
+    .context("unexpected error happened during password hashing")?
     .map_err(|_| ApiError::unprocessable_entity([("password", "password is wrong")]))?;
     // FIXME: after the 0.6 release of sqlx, this nonsense can go away
     Ok(uuid::Uuid::from_bytes(*user_id.as_bytes()))
@@ -272,7 +268,7 @@ async fn register(
     let password_hash =
         axum1::utils::spawn_blocking_with_tracing(move || compute_password_hash(password))
             .await
-            .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to hash password")))??;
+            .context("Failed to hash password")??;
 
     sqlx::query!(
         r#"

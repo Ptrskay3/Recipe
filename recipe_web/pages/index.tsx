@@ -29,19 +29,17 @@ const Home: NextPage = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <form onSubmit={onSubmit}>
-        <FormControl>
-          <FormLabel htmlFor="name"> name:</FormLabel>
-          <Input type="text" id="name" name="name" />
-          <FormLabel htmlFor="password">password:</FormLabel>
-          <Input type="password" id="password" name="password" />
-          <Button type="submit" colorScheme="teal" size="sm">
-            Submit
-          </Button>
-        </FormControl>
-      </form>
-    </div>
+    <form onSubmit={onSubmit}>
+      <FormControl>
+        <FormLabel htmlFor="name"> name:</FormLabel>
+        <Input type="text" id="name" name="name" />
+        <FormLabel htmlFor="password">password:</FormLabel>
+        <Input type="password" id="password" name="password" />
+        <Button type="submit" colorScheme="teal" size="sm">
+          Submit
+        </Button>
+      </FormControl>
+    </form>
   );
 };
 

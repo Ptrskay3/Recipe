@@ -1,6 +1,7 @@
 use std::ops::Deref;
 
 use crate::{error::ApiError, AXUM_SESSION_COOKIE_NAME};
+use anyhow::Context;
 use async_redis_session::RedisSessionStore;
 use async_session::SessionStore;
 use axum::{
@@ -176,11 +177,8 @@ where
         let user_id = if let Some(session) = store
             .load_session(session_cookie.unwrap().value().into())
             .await
-            .map_err(|_| {
-                ApiError::Anyhow(anyhow::anyhow!(
-                    "Failed to load session for some unexpected reason"
-                ))
-            })? {
+            .context("Failed to load session for some unexpected reason")?
+        {
             if let Some(user_id) = session.get::<AuthUser>("user_id") {
                 user_id
             } else {

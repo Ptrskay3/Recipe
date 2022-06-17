@@ -133,7 +133,8 @@ async fn ingredients_by_category(
     let rows: Vec<_> = sqlx::query_as!(
         Ingredient,
         r#"
-        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece FROM ingredients
+        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece
+        FROM ingredients
         WHERE $1 = ANY (category);
         "#,
         category as _
@@ -149,7 +150,7 @@ async fn add_ingredient(
     auth_user: Option<AuthUser>,
 ) -> Result<(), ApiError> {
     let creator_id = if let Some(uuid) = auth_user {
-        Some(<sqlx::types::uuid::Uuid as From<_>>::from(uuid))
+        Some(sqlx::types::uuid::Uuid::from(uuid))
     } else {
         None
     };
