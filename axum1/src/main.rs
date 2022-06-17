@@ -299,7 +299,7 @@ async fn update_password(
     let password_hash =
         axum1::utils::spawn_blocking_with_tracing(move || compute_password_hash(password))
             .await
-            .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to hash password")))??;
+            .context("Failed to hash password")??;
 
     sqlx::query!(
         r#"

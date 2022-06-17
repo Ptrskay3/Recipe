@@ -25,7 +25,7 @@ BEGIN
 end;
 $$ language plpgsql;
 
-CREATE or replace FUNCTION trigger_updated_at(tablename regclass)
+CREATE OR REPLACE FUNCTION trigger_updated_at(tablename regclass)
     RETURNS VOID AS
 $$
 BEGIN
@@ -33,7 +33,7 @@ BEGIN
         BEFORE UPDATE
         ON %s
         FOR EACH ROW
-        WHEN (OLD is distinct from NEW)
+        WHEN (OLD IS DISTINCT FROM NEW)
     EXECUTE FUNCTION set_updated_at();', tablename);
 end;
 $$ language plpgsql;
