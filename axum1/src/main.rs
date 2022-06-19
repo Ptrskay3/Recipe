@@ -4,9 +4,7 @@ use axum::{
     http::{HeaderValue, Method},
     Extension, Router,
 };
-use axum1::{
-    routes::{admin_router, auth_router, ingredient_router},
-};
+use axum1::routes::{admin_router, auth_router, ingredient_router};
 use axum_extra::extract::cookie::Key;
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
