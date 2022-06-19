@@ -8,3 +8,4 @@ database:
 redis:
   host: '127.0.0.1'
   port: 6379
+sentry_dsn: https://33db4f8bf30c4e6c8636808eed112d79@o1172026.ingest.sentry.io/6497424

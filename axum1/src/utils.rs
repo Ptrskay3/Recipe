@@ -1,7 +1,7 @@
 use tokio::task::JoinHandle;
 
 /// To play nicely with tokio, we must offload our CPU-intensive task to a
-/// separate threadpool using tokio::task::spawn_blocking. Those threads
+/// separate threadpool using `tokio::task::spawn_blocking`. Those threads
 /// are reserved for blocking operations and do not interfere with
 /// the scheduling of async tasks.
 ///

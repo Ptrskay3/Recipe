@@ -10,8 +10,10 @@ if ! [ -x "$(command -v sqlx)" ]; then
   exit 1
 fi
 
+cd ./docker/
 docker-compose down
-docker-compose -f docker-compose.dev.yml up -d
+cd ..
+docker-compose -f docker/docker-compose.dev.yml up -d
 
 echo "Waiting 10 seconds for pg to come alive.."
 sleep 10

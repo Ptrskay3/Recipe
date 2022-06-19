@@ -187,7 +187,6 @@ where
         } else {
             return Ok(Self(None));
         };
-
-        return Ok(Self(Some(AuthUser::new(*user_id))));
+        Ok(Self(Some(AuthUser::new(*user_id))))
     }
 }

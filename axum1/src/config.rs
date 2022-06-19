@@ -5,6 +5,7 @@ pub struct Settings {
     pub database: DatabaseSettings,
     pub redis: RedisSettings,
     pub application_port: u16,
+    pub sentry_dsn: Option<String>,
 }
 
 #[derive(Deserialize)]

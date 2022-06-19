@@ -19,6 +19,7 @@ use crate::{
     Queryable,
 };
 
+#[must_use]
 pub fn ingredient_router() -> Router {
     Router::new()
         .route("/all", get(all_ingredients))
@@ -149,11 +150,7 @@ async fn add_ingredient(
     Form(ingredient): Form<Ingredient>,
     auth_user: Option<AuthUser>,
 ) -> Result<(), ApiError> {
-    let creator_id = if let Some(uuid) = auth_user {
-        Some(sqlx::types::uuid::Uuid::from(uuid))
-    } else {
-        None
-    };
+    let creator_id = auth_user.map(<sqlx::types::uuid::Uuid as From<_>>::from);
     sqlx::query!(
         r#"
         INSERT INTO ingredients (name, category, calories_per_100g, g_per_piece, creator_id)
