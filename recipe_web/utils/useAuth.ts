@@ -6,7 +6,7 @@ export const useAuth = () => {
 
   useEffect(() => {
     (async () => {
-      const { ok } = await fetch('http://localhost:3000/u/me', { credentials: 'include' });
+      const { ok } = await fetch('http://localhost:3000/me', { credentials: 'include' });
       if (!ok) {
         router.replace(`/`);
       }

@@ -120,10 +120,10 @@ where
             .await
             .expect("`SessionLayer` should be added");
 
-        let user_id = session.get::<AuthUser>("user_id");
+        let user_id = session.get::<uuid::Uuid>("user_id");
 
         match user_id {
-            Some(id) => Ok(Self(Some(AuthUser::new(*id)))),
+            Some(id) => Ok(Self(Some(AuthUser::new(id)))),
             None => Ok(Self(None)),
         }
     }
