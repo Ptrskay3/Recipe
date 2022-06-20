@@ -2,6 +2,9 @@
 name = "axum1"
 version = "0.1.0"
 edition = "2021"
+authors = ["Peter Leeh <leeh123peter@gmail.com>"]
+license = "MIT OR Apache-2.0"
+description = "A backend for recipe app"
 
 [dependencies]
 # for idiomatic error handling
@@ -35,3 +38,8 @@ log = "0.4.14"
 argon2 = { version = "0.4", features = ["std"] }
 # for avoiding exposing sensitive information
 secrecy = { version = "0.8.0", features = ["serde"] } 
+# session ext
+tower = "0.4.13"
+futures = "0.3"
+
+axum-macros = "*"

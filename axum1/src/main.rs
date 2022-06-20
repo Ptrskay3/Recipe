@@ -4,8 +4,10 @@ use axum::{
     http::{HeaderValue, Method},
     Extension, Router,
 };
-use axum1::routes::{admin_router, auth_router, ingredient_router};
-use axum_extra::extract::cookie::Key;
+use axum1::{
+    routes::{admin_router, auth_router, ingredient_router},
+    session::SessionLayer,
+};
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
@@ -42,8 +44,6 @@ async fn main() -> anyhow::Result<()> {
     let store =
         RedisSessionStore::new(redis_conn_str.as_ref()).context("failed to connect redis")?;
 
-    let key = Key::generate();
-
     if let Some(sentry_dsn) = config.sentry_dsn {
         let _guard = sentry::init((
             sentry_dsn,
@@ -59,18 +59,18 @@ async fn main() -> anyhow::Result<()> {
         .nest("/", auth_router())
         .nest("/admin", admin_router())
         .layer(TraceLayer::new_for_http())
-        .layer(Extension(store))
         .layer(Extension(db_pool))
-        .layer(Extension(key))
+        .layer(Extension(store.clone()))
+        .layer(SessionLayer::new(store, config.redis.secret_key.as_bytes()))
         .layer(
             CorsLayer::new()
-                .allow_origin("http://localhost:3001".parse::<HeaderValue>().unwrap())
+                .allow_origin(config.frontend_url.parse::<HeaderValue>().unwrap())
                 .allow_methods([
                     Method::GET,
-                    Method::POST,
-                    Method::DELETE,
-                    Method::PATCH,
                     Method::PUT,
+                    Method::POST,
+                    Method::PATCH,
+                    Method::DELETE,
                 ])
                 .allow_credentials(true),
         );

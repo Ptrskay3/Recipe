@@ -1,21 +1,19 @@
 use anyhow::Context;
+use async_session::Session;
 use axum::{
     routing::{get, post, put},
-    Form, Json, Router,
+    Extension, Form, Json, Router,
 };
-use axum_extra::extract::SignedCookieJar;
 use secrecy::{ExposeSecret, Secret};
 use uuid::Uuid;
 
 use crate::{
     error::{ApiError, ResultExt},
-    extractors::{AuthUser, DatabaseConnection, MaybeAuthUser, RedisConnection},
+    extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
 };
 
-mod helpers;
 mod password;
 
-use helpers::{set_authorization_headers, unset_authorization_headers};
 use password::{compute_password_hash, validate_credentials};
 
 #[must_use]
@@ -43,22 +41,23 @@ pub struct Credentials {
 
 async fn authorize(
     Form(credentials): Form<Credentials>,
-    RedisConnection(store): RedisConnection,
+    Extension(mut session): Extension<Session>,
     conn: DatabaseConnection,
-    jar: SignedCookieJar,
-) -> Result<SignedCookieJar, ApiError> {
+) -> Result<(), ApiError> {
     let user_id = validate_credentials(credentials, conn).await?;
-    let cookie_jar = set_authorization_headers(store, user_id, jar).await?;
-    Ok(cookie_jar)
+    // Rotate the session cookie on privilege level change.
+    // This is to prevent session-fixation attacks.
+    session.regenerate();
+    session.insert("user_id", user_id).unwrap();
+    Ok(())
 }
 
 async fn logout(
     _user: AuthUser,
-    RedisConnection(store): RedisConnection,
-    cookie_jar: SignedCookieJar,
-) -> Result<SignedCookieJar, ApiError> {
-    let cookie_jar = unset_authorization_headers(cookie_jar, store).await?;
-    Ok(cookie_jar)
+    Extension(mut session): Extension<Session>,
+) -> Result<(), ApiError> {
+    session.destroy();
+    Ok(())
 }
 
 #[derive(serde::Deserialize)]

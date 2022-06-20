@@ -5,6 +5,7 @@ pub struct Settings {
     pub database: DatabaseSettings,
     pub redis: RedisSettings,
     pub application_port: u16,
+    pub frontend_url: String,
     pub sentry_dsn: Option<String>,
 }
 
@@ -21,6 +22,7 @@ pub struct DatabaseSettings {
 pub struct RedisSettings {
     pub host: String,
     pub port: u16,
+    pub secret_key: String,
 }
 
 impl DatabaseSettings {

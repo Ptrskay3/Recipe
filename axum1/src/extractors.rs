@@ -1,9 +1,8 @@
 use std::ops::Deref;
 
-use crate::{error::ApiError, AXUM_SESSION_COOKIE_NAME};
-use anyhow::Context;
+use crate::error::ApiError;
 use async_redis_session::RedisSessionStore;
-use async_session::SessionStore;
+use async_session::Session;
 use axum::{
     async_trait,
     extract::{FromRequest, RequestParts},
@@ -11,7 +10,6 @@ use axum::{
     response::{IntoResponse, Redirect, Response},
     Extension,
 };
-use axum_extra::extract::SignedCookieJar;
 use sqlx::{pool, PgPool, Postgres};
 
 pub struct DatabaseConnection(pub pool::PoolConnection<Postgres>);
@@ -56,56 +54,16 @@ impl<B> FromRequest<B> for AuthUser
 where
     B: Send,
 {
-    type Rejection = AuthRedirect;
+    type Rejection = ApiError;
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
+        let Extension(session) = Extension::<Session>::from_request(req)
             .await
-            .expect("`RedisSessionStore` extension is missing");
+            .expect("`SessionLayer` should be added");
 
-        let cookie_jar = Option::<SignedCookieJar>::from_request(req)
-            .await
-            .expect("`SignedCookieJar` extension is missing");
-
-        let session_cookie = cookie_jar
-            .as_ref()
-            .and_then(|cookie| cookie.get(AXUM_SESSION_COOKIE_NAME));
-
-        if session_cookie.is_none() {
-            tracing::debug!("No session cookie found.");
-            return Err(AuthRedirect);
-        }
-
-        tracing::debug!(
-            "got session cookie from user agent, {}={:?}",
-            AXUM_SESSION_COOKIE_NAME,
-            session_cookie
-        );
-
-        let user_id = if let Some(mut session) = store
-            .load_session(session_cookie.unwrap().value().into())
-            .await
-            .map_err(|_| AuthRedirect)?
-        {
-            if let Some(user_id) = session.get::<AuthUser>("user_id") {
-                tracing::debug!("session decoded success, user_id={:?}", user_id);
-                // TODO: make this a global const
-                session.set_expiry(chrono::Utc::now() + chrono::Duration::minutes(20));
-                store.store_session(session).await.unwrap();
-
-                // TODO: Rotate cookie value to prevent session fixation attacks
-                // This feature will become essential, as long as we initialize sessions for guest users.
-                // https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#renew-the-session-id-after-any-privilege-level-change
-                user_id
-            } else {
-                tracing::debug!("no `user_id` found in session");
-                return Err(AuthRedirect);
-            }
-        } else {
-            tracing::debug!("invalid `session_cookie`");
-            return Err(AuthRedirect);
-        };
-        Ok(user_id)
+        session
+            .get::<AuthUser>("user_id")
+            .ok_or(ApiError::Unauthorized)
     }
 }
 
@@ -158,35 +116,15 @@ where
     type Rejection = ApiError;
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
+        let Extension(session) = Extension::<Session>::from_request(req)
             .await
-            .expect("`RedisSessionStore` extension is missing");
+            .expect("`SessionLayer` should be added");
 
-        let cookie_jar = Option::<SignedCookieJar>::from_request(req)
-            .await
-            .expect("`SignedCookieJar` extension is missing");
+        let user_id = session.get::<AuthUser>("user_id");
 
-        let session_cookie = cookie_jar
-            .as_ref()
-            .and_then(|cookie| cookie.get(AXUM_SESSION_COOKIE_NAME));
-
-        if session_cookie.is_none() {
-            return Ok(Self(None));
+        match user_id {
+            Some(id) => Ok(Self(Some(AuthUser::new(*id)))),
+            None => Ok(Self(None)),
         }
-
-        let user_id = if let Some(session) = store
-            .load_session(session_cookie.unwrap().value().into())
-            .await
-            .context("Failed to load session for some unexpected reason")?
-        {
-            if let Some(user_id) = session.get::<AuthUser>("user_id") {
-                user_id
-            } else {
-                return Ok(Self(None));
-            }
-        } else {
-            return Ok(Self(None));
-        };
-        Ok(Self(Some(AuthUser::new(*user_id))))
     }
 }

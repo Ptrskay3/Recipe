@@ -8,4 +8,6 @@ database:
 redis:
   host: '127.0.0.1'
   port: 6379
+  secret_key: 686eGO13G4SGIxWORMgKYgLaasXCKW0oJI8DYgLstmYhWIQxnWuKfGzazkhHZc46FPZmqQnOHAgwb+998Vwc1A==
 sentry_dsn: https://33db4f8bf30c4e6c8636808eed112d79@o1172026.ingest.sentry.io/6497424
+frontend_url: http://localhost:3001/

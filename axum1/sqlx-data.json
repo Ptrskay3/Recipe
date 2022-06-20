@@ -1,7 +1,7 @@
 {
   "db": "PostgreSQL",
-  "56b75e1fe02981ed1704611b29ab338fabeb0b120e78c9be8b480699b09b81b0": {
-    "query": "\n        SELECT name, email\n        FROM users\n        WHERE user_id = $1;\n        ",
+  "1ade46e56236b85e1a95409c201d2b9f45da571eef33ee4bc4c68c8f2b6b172d": {
+    "query": "\n        DELETE FROM ingredients\n        WHERE name = $1\n        RETURNING name, category as \"category!: Vec<FoodCategory>\", calories_per_100g, g_per_piece\n        ",
     "describe": {
       "columns": [
         {
@@ -11,51 +11,167 @@
         },
         {
           "ordinal": 1,
-          "name": "email",
-          "type_info": "Text"
+          "name": "category!: Vec<FoodCategory>",
+          "type_info": {
+            "Custom": {
+              "name": "_food_category",
+              "kind": {
+                "Array": {
+                  "Custom": {
+                    "name": "food_category",
+                    "kind": {
+                      "Enum": [
+                        "vegetable",
+                        "fruit",
+                        "meat",
+                        "dairy",
+                        "grains",
+                        "legumes",
+                        "baked",
+                        "eggs",
+                        "seafood",
+                        "nuts_and_seeds",
+                        "herbs_and_spices",
+                        "garnishes",
+                        "deserts_and_sweets",
+                        "supplements",
+                        "beverages"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 2,
+          "name": "calories_per_100g",
+          "type_info": "Float4"
+        },
+        {
+          "ordinal": 3,
+          "name": "g_per_piece",
+          "type_info": "Float4"
         }
       ],
       "parameters": {
         "Left": [
-          "Uuid"
+          "Text"
         ]
       },
       "nullable": [
         false,
-        false
+        false,
+        false,
+        true
       ]
     }
   },
-  "8af2e366c931a1383ebb093a144d8424ee161a6c17e51036795702f481b9b955": {
-    "query": "\n        INSERT INTO users (name, email, password_hash)\n        VALUES ($1, $2, $3)\n        ",
+  "1c03c55f61564a858498381e01845047b1542d8ba987c7aca8baed6069092015": {
+    "query": "\n        UPDATE ingredients\n        SET name = $1,\n            calories_per_100g = $2,\n            category = $3,\n            g_per_piece = $4\n        WHERE name = $5\n        RETURNING name, category as \"category!: Vec<FoodCategory>\", calories_per_100g, g_per_piece\n        ",
     "describe": {
-      "columns": [],
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "category!: Vec<FoodCategory>",
+          "type_info": {
+            "Custom": {
+              "name": "_food_category",
+              "kind": {
+                "Array": {
+                  "Custom": {
+                    "name": "food_category",
+                    "kind": {
+                      "Enum": [
+                        "vegetable",
+                        "fruit",
+                        "meat",
+                        "dairy",
+                        "grains",
+                        "legumes",
+                        "baked",
+                        "eggs",
+                        "seafood",
+                        "nuts_and_seeds",
+                        "herbs_and_spices",
+                        "garnishes",
+                        "deserts_and_sweets",
+                        "supplements",
+                        "beverages"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 2,
+          "name": "calories_per_100g",
+          "type_info": "Float4"
+        },
+        {
+          "ordinal": 3,
+          "name": "g_per_piece",
+          "type_info": "Float4"
+        }
+      ],
       "parameters": {
         "Left": [
           "Text",
-          "Text",
+          "Float4",
+          {
+            "Custom": {
+              "name": "_food_category",
+              "kind": {
+                "Array": {
+                  "Custom": {
+                    "name": "food_category",
+                    "kind": {
+                      "Enum": [
+                        "vegetable",
+                        "fruit",
+                        "meat",
+                        "dairy",
+                        "grains",
+                        "legumes",
+                        "baked",
+                        "eggs",
+                        "seafood",
+                        "nuts_and_seeds",
+                        "herbs_and_spices",
+                        "garnishes",
+                        "deserts_and_sweets",
+                        "supplements",
+                        "beverages"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "Float4",
           "Text"
         ]
       },
-      "nullable": []
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
     }
   },
-  "af71e4fecfb0eb2882b06d97b38796fc0215723cc4950381ab561a54acbda376": {
-    "query": "\n        UPDATE users\n        SET password_hash = $1\n        WHERE name = $2 AND user_id = $3\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "b9b1efa07ddce68fad82e5292e9340f3273a2d13698257f377ed47898cc2a27b": {
-    "query": "\n        SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\" FROM ingredients\n        WHERE $1 = ANY (category);\n        ",
+  "40a570ea8018e2597a03b0b4ffda124ba2986e0be58b4a97a093a291b13aa3ce": {
+    "query": "\n        SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece\n        FROM ingredients\n        WHERE $1 = ANY (category);\n        ",
     "describe": {
       "columns": [
         {
@@ -102,6 +218,11 @@
               }
             }
           }
+        },
+        {
+          "ordinal": 3,
+          "name": "g_per_piece",
+          "type_info": "Float4"
         }
       ],
       "parameters": {
@@ -135,12 +256,66 @@
       "nullable": [
         false,
         false,
+        false,
+        true
+      ]
+    }
+  },
+  "4a4d9e45f67969e546fceab63df71a7a523b91f80860d4b9aafb17caacdb518e": {
+    "query": "INSERT INTO favorite_ingredient(ingredient_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "4c2465926c417b0e88cb3800ae2809659dae56befa6c4eb50b43614c729880c3": {
+    "query": "SELECT name FROM users WHERE user_id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
         false
       ]
     }
   },
-  "d98ba0b18443f1d52214de33a78b38301fabb46ae2d6cb5bab7697ab4edaf0d4": {
-    "query": "\n        SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\" FROM ingredients;\n        ",
+  "6dd6575374c98a583db8fe723863e23327128eb22b46bc6ef19b4b54f7a6502c": {
+    "query": "\n        SELECT id\n        FROM ingredients\n        WHERE name = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "7fb25e116966d2984d9a5c2943e7542426c8089b32233d76c55c757f450c3623": {
+    "query": "\n            SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece\n            FROM ingredients\n            WHERE id = $1;\n            ",
     "describe": {
       "columns": [
         {
@@ -187,16 +362,166 @@
               }
             }
           }
+        },
+        {
+          "ordinal": 3,
+          "name": "g_per_piece",
+          "type_info": "Float4"
         }
       ],
       "parameters": {
-        "Left": []
+        "Left": [
+          "Uuid"
+        ]
       },
       "nullable": [
         false,
         false,
-        false
+        false,
+        true
       ]
+    }
+  },
+  "8862e3f769b533b20cd5ee6438d056bf29dca6f42500e7564a08c45dd53e47d5": {
+    "query": "\n        INSERT INTO ingredients (name, category, calories_per_100g, g_per_piece, creator_id)\n        VALUES ($1, $2, $3, $4, $5);\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          {
+            "Custom": {
+              "name": "_food_category",
+              "kind": {
+                "Array": {
+                  "Custom": {
+                    "name": "food_category",
+                    "kind": {
+                      "Enum": [
+                        "vegetable",
+                        "fruit",
+                        "meat",
+                        "dairy",
+                        "grains",
+                        "legumes",
+                        "baked",
+                        "eggs",
+                        "seafood",
+                        "nuts_and_seeds",
+                        "herbs_and_spices",
+                        "garnishes",
+                        "deserts_and_sweets",
+                        "supplements",
+                        "beverages"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "Float4",
+          "Float4",
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "8af2e366c931a1383ebb093a144d8424ee161a6c17e51036795702f481b9b955": {
+    "query": "\n        INSERT INTO users (name, email, password_hash)\n        VALUES ($1, $2, $3)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "92fcca3a4a6378be22b9546b4bd8fe034b75f188ecb2bc5fbb073bf7221299f8": {
+    "query": "\n            SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece\n            FROM ingredients\n            WHERE name = $1;\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "calories_per_100g",
+          "type_info": "Float4"
+        },
+        {
+          "ordinal": 2,
+          "name": "category: Vec<FoodCategory>",
+          "type_info": {
+            "Custom": {
+              "name": "_food_category",
+              "kind": {
+                "Array": {
+                  "Custom": {
+                    "name": "food_category",
+                    "kind": {
+                      "Enum": [
+                        "vegetable",
+                        "fruit",
+                        "meat",
+                        "dairy",
+                        "grains",
+                        "legumes",
+                        "baked",
+                        "eggs",
+                        "seafood",
+                        "nuts_and_seeds",
+                        "herbs_and_spices",
+                        "garnishes",
+                        "deserts_and_sweets",
+                        "supplements",
+                        "beverages"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 3,
+          "name": "g_per_piece",
+          "type_info": "Float4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
+  "af71e4fecfb0eb2882b06d97b38796fc0215723cc4950381ab561a54acbda376": {
+    "query": "\n        UPDATE users\n        SET password_hash = $1\n        WHERE name = $2 AND user_id = $3\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Uuid"
+        ]
+      },
+      "nullable": []
     }
   },
   "f96013025be0d345c63440de9a5b327cab64a4bdbe497814c23c7e11a5d01bc4": {
@@ -214,6 +539,72 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "ff5a4916ddbf9da52a0e67fa0abd04e69ed22fefcc2d66138f999ba6ff8d15ad": {
+    "query": "\n        SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece FROM ingredients;\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "calories_per_100g",
+          "type_info": "Float4"
+        },
+        {
+          "ordinal": 2,
+          "name": "category: Vec<FoodCategory>",
+          "type_info": {
+            "Custom": {
+              "name": "_food_category",
+              "kind": {
+                "Array": {
+                  "Custom": {
+                    "name": "food_category",
+                    "kind": {
+                      "Enum": [
+                        "vegetable",
+                        "fruit",
+                        "meat",
+                        "dairy",
+                        "grains",
+                        "legumes",
+                        "baked",
+                        "eggs",
+                        "seafood",
+                        "nuts_and_seeds",
+                        "herbs_and_spices",
+                        "garnishes",
+                        "deserts_and_sweets",
+                        "supplements",
+                        "beverages"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 3,
+          "name": "g_per_piece",
+          "type_info": "Float4"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
       ]
     }
   },

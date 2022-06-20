@@ -1,5 +1,4 @@
 mod middleware;
-use middleware::AdminUser;
 
 use axum::{http::StatusCode, middleware::from_extractor, routing::get, Json, Router};
 
@@ -8,15 +7,14 @@ use crate::{
     extractors::{DatabaseConnection, RedisConnection},
 };
 
+use self::middleware::AdminUser;
+
 #[must_use]
 pub fn admin_router() -> Router {
     Router::new()
         .route("/health_check", get(|| async { StatusCode::OK }))
         .route("/pg", get(pg_health))
         .route("/redis", get(redis_health))
-        // FIXME: These routes are used for status checks, so probably that doesn't make sense
-        // to restrict them to only logged in admin privileged users. For the time being,
-        // we'll just use this as an example for the `AdminUser` extractor.
         .route_layer(from_extractor::<AdminUser>())
 }
 
