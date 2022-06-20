@@ -10,6 +10,7 @@ use crate::{error::ApiError, extractors::AuthUser};
 #[derive(sqlx::FromRow, serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct AdminUser {
     name: String,
+    is_admin: Option<bool>,
 }
 
 #[async_trait]
@@ -36,7 +37,7 @@ where
 
         let user = sqlx::query_as!(
             Self,
-            "SELECT name FROM users WHERE user_id = $1",
+            "SELECT name, is_admin FROM users WHERE user_id = $1",
             sqlx::types::uuid::Uuid::from(user_id)
         )
         .fetch_optional(&mut db)
@@ -44,9 +45,10 @@ where
         .map_err(|_| ApiError::Unauthorized)?;
 
         if let Some(user) = user {
-            // FIXME: This is only for testing purposes.
-            if user.name == "peter" {
+            if user.is_admin.unwrap_or(false) {
                 return Ok(user);
+            } else {
+                return Err(ApiError::Forbidden);
             }
         }
         Err(ApiError::Unauthorized)
