@@ -6,7 +6,19 @@
 //! known cookie is received in a request, the session is hydrated from this
 //! cookie. The middleware leverages `http::Extensions` to attach an
 //! `async_session::Session` to the request. Request handlers can then
-//! interact with the session.
+//! interact with the session:
+//!
+//! ```rust
+//! use async_session::Session;
+//! use axum::{Extension , http::StatusCode, response::IntoResponse};
+//!
+//! async fn handler(Extension(session): Extension<Session>) -> impl IntoResponse {
+//!     match session.get::<String>("key") {
+//!         Some(value) => Ok(value),
+//!         _ => Err(StatusCode::NOT_FOUND),
+//!     }
+//! }
+//! ```
 
 use std::{
     task::{Context, Poll},

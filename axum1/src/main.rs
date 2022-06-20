@@ -35,7 +35,7 @@ async fn main() -> anyhow::Result<()> {
         .connect_timeout(std::time::Duration::from_secs(3))
         .connect(&db_conn_str)
         .await
-        .context("could not connect to database_url")?;
+        .context("failed to connect to database")?;
 
     sqlx::migrate!().run(&db_pool).await?;
 
