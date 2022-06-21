@@ -7,6 +7,7 @@ import {
   MenuGroup,
   MenuItem,
   MenuList,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import * as React from 'react';
@@ -36,21 +37,44 @@ export const UserMenu = ({ name }: { name: string }) => {
       >
         {name}
       </MenuButton>
-      <MenuList minWidth="240px">
+      <MenuList
+        minWidth="240px"
+        bg={useColorModeValue('white', 'gray.800')}
+        border={'0'}
+        boxShadow={'xl'}
+        minW={'sm'}
+      >
         <MenuGroup title="Profile">
-          <MenuItem value="profile" {...primaryButtonStyles}>
+          <MenuItem
+            value="profile"
+            {...primaryButtonStyles}
+            _hover={{ textColor: 'orange.400', bg: useColorModeValue('orange.50', 'gray.900') }}
+          >
             My Profile
           </MenuItem>
-          <MenuItem value="recipes" {...primaryButtonStyles}>
+          <MenuItem
+            value="recipes"
+            {...primaryButtonStyles}
+            _hover={{ textColor: 'orange.400', bg: useColorModeValue('orange.50', 'gray.900') }}
+          >
             My Recipes
           </MenuItem>
-          <MenuItem value="settings" {...primaryButtonStyles}>
+          <MenuItem
+            value="settings"
+            {...primaryButtonStyles}
+            _hover={{ textColor: 'orange.400', bg: useColorModeValue('orange.50', 'gray.900') }}
+          >
             Settings
           </MenuItem>
         </MenuGroup>
         <MenuDivider />
         <MenuGroup>
-          <MenuItem onClick={logoutAction} value="logout" {...primaryButtonStyles}>
+          <MenuItem
+            onClick={logoutAction}
+            value="logout"
+            _hover={{ textColor: 'orange.400', bg: useColorModeValue('orange.50', 'gray.900') }}
+            {...primaryButtonStyles}
+          >
             Logout
           </MenuItem>
         </MenuGroup>
