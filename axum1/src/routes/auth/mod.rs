@@ -5,7 +5,6 @@ use axum::{
     Extension, Form, Json, Router,
 };
 use secrecy::{ExposeSecret, Secret};
-use uuid::Uuid;
 
 use crate::{
     error::{ApiError, ResultExt},

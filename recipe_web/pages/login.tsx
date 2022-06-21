@@ -63,19 +63,14 @@ export default function Login() {
                 <FormLabel htmlFor="name">Username</FormLabel>
                 <Input type="text" id="name" name="name" required />
               </FormControl>
-              <FormControl id="password">
+              <FormControl id="password" mt={4}>
                 <FormLabel htmlFor="password">Password</FormLabel>
                 <Input type="password" id="password" name="password" required />
               </FormControl>
               <Stack spacing={10}>
-                <Stack
-                  direction={{ base: 'column', sm: 'row' }}
-                  align={'start'}
-                  justify={'space-between'}
-                >
-                  <Checkbox>Remember me</Checkbox>
-                  <Link color={'orange.400'}>Forgot password?</Link>
-                </Stack>
+                <Link mt={4} color={'orange.400'}>
+                  Forgot password?
+                </Link>
                 <Button
                   type="submit"
                   bg={'orange.400'}

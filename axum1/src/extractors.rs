@@ -62,7 +62,8 @@ where
             .expect("`SessionLayer` should be added");
 
         session
-            .get::<AuthUser>("user_id")
+            .get::<uuid::Uuid>("user_id")
+            .map(Self::new)
             .ok_or(ApiError::Unauthorized)
     }
 }

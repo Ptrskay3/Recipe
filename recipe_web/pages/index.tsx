@@ -2,18 +2,19 @@ import { Divider } from '@chakra-ui/react';
 import type { NextPage } from 'next';
 import { Footer } from '../components/footer';
 import WithSubnavigation from '../components/navbar';
-import ArticleList from '../components/placeholder';
+import PlaceHolder from '../components/placeholder';
+
+import dynamic from 'next/dynamic';
 
 const Home: NextPage = () => {
   return (
     <div>
       <WithSubnavigation />
-      {/* TODO: Placeholder */}
-      {/* <ArticleList /> */}
+      <PlaceHolder />
 
       <Footer />
     </div>
   );
 };
 
-export default Home;
+export default dynamic(() => Promise.resolve(Home), { ssr: false });

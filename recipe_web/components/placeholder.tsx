@@ -1,164 +1,172 @@
-// This is only the placeholder for now.
-import React from 'react';
 import {
   Box,
-  Heading,
-  Link,
-  Image,
-  Text,
-  Divider,
-  HStack,
-  Tag,
-  Wrap,
-  WrapItem,
-  SpaceProps,
-  useColorModeValue,
   Container,
+  Stack,
+  Text,
+  Flex,
   VStack,
+  Button,
+  Heading,
+  SimpleGrid,
+  StackDivider,
+  useColorModeValue,
+  VisuallyHidden,
+  List,
+  ListItem,
 } from '@chakra-ui/react';
+import { MdLocalShipping } from 'react-icons/md';
 
-interface IBlogTags {
-  tags: Array<string>;
-  marginTop?: SpaceProps['marginTop'];
-}
-
-const BlogTags: React.FC<IBlogTags> = (props) => {
+export default function Placeholder() {
   return (
-    <HStack spacing={2} marginTop={props.marginTop}>
-      {props.tags.map((tag) => {
-        return (
-          <Tag size={'md'} variant="solid" colorScheme="orange" key={tag}>
-            {tag}
-          </Tag>
-        );
-      })}
-    </HStack>
-  );
-};
-
-interface BlogAuthorProps {
-  date: Date;
-  name: string;
-}
-
-export const BlogAuthor: React.FC<BlogAuthorProps> = (props) => {
-  return (
-    <HStack marginTop="2" spacing="2" display="flex" alignItems="center">
-      <Text fontWeight="medium">{props.name}</Text>
-      <Text>—</Text>
-      <Text>{props.date.toLocaleDateString()}</Text>
-    </HStack>
-  );
-};
-
-const ArticleList = () => {
-  return (
-    <Container maxW={'7xl'} p="12">
-      <Heading as="h1">Stories by Chakra Templates</Heading>
-      <Box
-        marginTop={{ base: '1', sm: '5' }}
-        display="flex"
-        flexDirection={{ base: 'column', sm: 'row' }}
-        justifyContent="space-between"
+    <Container maxW={'7xl'}>
+      <SimpleGrid
+        columns={{ base: 1, lg: 2 }}
+        spacing={{ base: 8, md: 10 }}
+        py={{ base: 18, md: 24 }}
       >
-        <Box display="flex" flex="1" marginRight="3" position="relative" alignItems="center">
-          <Box
-            width={{ base: '100%', sm: '85%' }}
-            zIndex="2"
-            marginLeft={{ base: '0', sm: '5%' }}
-            marginTop="5%"
-          >
-            <Link textDecoration="none" _hover={{ textDecoration: 'none' }}></Link>
-          </Box>
-          <Box zIndex="1" width="100%" position="absolute" height="100%">
-            <Box
-              bgGradient={useColorModeValue(
-                'radial(orange.600 1px, transparent 1px)',
-                'radial(orange.300 1px, transparent 1px)'
-              )}
-              backgroundSize="20px 20px"
-              opacity="0.4"
-              height="100%"
-            />
-          </Box>
-        </Box>
-        <Box
-          display="flex"
-          flex="1"
-          flexDirection="column"
-          justifyContent="center"
-          marginTop={{ base: '3', sm: '0' }}
-        >
-          <BlogTags tags={['Engineering', 'Product']} />
-          <Heading marginTop="1">
-            <Link textDecoration="none" _hover={{ textDecoration: 'none' }}>
-              Blog article title
-            </Link>
-          </Heading>
-          <Text
-            as="p"
-            marginTop="2"
-            color={useColorModeValue('gray.700', 'gray.200')}
-            fontSize="lg"
-          >
-            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum
-            has been the industry&apos;s standard dummy text ever since the 1500s, when an unknown
-            printer took a galley of type and scrambled it to make a type specimen book.
-          </Text>
-          <BlogAuthor name="John Doe" date={new Date('2021-04-06T19:01:27Z')} />
-        </Box>
-      </Box>
-      <Heading as="h2" marginTop="5">
-        Latest articles
-      </Heading>
-      <Divider marginTop="5" />
-      <Wrap spacing="30px" marginTop="5">
-        <WrapItem width={{ base: '100%', sm: '45%', md: '45%', lg: '30%' }}>
-          <Box w="100%">
-            <Box borderRadius="lg" overflow="hidden">
-              <Link textDecoration="none" _hover={{ textDecoration: 'none' }}></Link>
-            </Box>
-            <BlogTags tags={['Engineering', 'Product']} marginTop="3" />
-            <Heading fontSize="xl" marginTop="2">
-              <Link textDecoration="none" _hover={{ textDecoration: 'none' }}>
-                Some blog title
-              </Link>
+        <Flex></Flex>
+        <Stack spacing={{ base: 6, md: 10 }}>
+          <Box as={'header'}>
+            <Heading
+              lineHeight={1.1}
+              fontWeight={600}
+              fontSize={{ base: '2xl', sm: '4xl', lg: '5xl' }}
+            >
+              Automatic Watch
             </Heading>
-            <Text as="p" fontSize="md" marginTop="2">
-              Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum
-              has been the industry&apos;s standard dummy text ever since the 1500s, when an unknown
-              printer took a galley of type and scrambled it to make a type specimen book.
+            <Text
+              color={useColorModeValue('gray.900', 'gray.400')}
+              fontWeight={300}
+              fontSize={'2xl'}
+            >
+              $350.00 USD
             </Text>
-            <BlogAuthor name="John Doe" date={new Date('2021-04-06T19:01:27Z')} />
           </Box>
-        </WrapItem>
-      </Wrap>
-      <VStack paddingTop="40px" spacing="2" alignItems="flex-start">
-        <Heading as="h2">What we write about</Heading>
-        <Text as="p" fontSize="lg">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum quam arcu, eu
-          tempus tortor molestie at. Vestibulum pretium condimentum dignissim. Vestibulum ultrices
-          vitae nisi sed imperdiet. Mauris quis erat consequat, commodo massa quis, feugiat sapien.
-          Suspendisse placerat vulputate posuere. Curabitur neque tortor, mattis nec lacus non,
-          placerat congue elit.
-        </Text>
-        <Text as="p" fontSize="lg">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum quam arcu, eu
-          tempus tortor molestie at. Vestibulum pretium condimentum dignissim. Vestibulum ultrices
-          vitae nisi sed imperdiet. Mauris quis erat consequat, commodo massa quis, feugiat sapien.
-          Suspendisse placerat vulputate posuere. Curabitur neque tortor, mattis nec lacus non,
-          placerat congue elit.
-        </Text>
-        <Text as="p" fontSize="lg">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec condimentum quam arcu, eu
-          tempus tortor molestie at. Vestibulum pretium condimentum dignissim. Vestibulum ultrices
-          vitae nisi sed imperdiet. Mauris quis erat consequat, commodo massa quis, feugiat sapien.
-          Suspendisse placerat vulputate posuere. Curabitur neque tortor, mattis nec lacus non,
-          placerat congue elit.
-        </Text>
-      </VStack>
+
+          <Stack
+            spacing={{ base: 4, sm: 6 }}
+            direction={'column'}
+            divider={<StackDivider borderColor={useColorModeValue('gray.200', 'gray.600')} />}
+          >
+            <VStack spacing={{ base: 4, sm: 6 }}>
+              <Text
+                color={useColorModeValue('gray.500', 'gray.400')}
+                fontSize={'2xl'}
+                fontWeight={'300'}
+              >
+                Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
+                tempor invidunt ut labore
+              </Text>
+              <Text fontSize={'lg'}>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad aliquid amet at
+                delectus doloribus dolorum expedita hic, ipsum maxime modi nam officiis porro, quae,
+                quisquam quos reprehenderit velit? Natus, totam.
+              </Text>
+            </VStack>
+            <Box>
+              <Text
+                fontSize={{ base: '16px', lg: '18px' }}
+                color={useColorModeValue('yellow.500', 'yellow.300')}
+                fontWeight={'500'}
+                textTransform={'uppercase'}
+                mb={'4'}
+              >
+                Features
+              </Text>
+
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
+                <List spacing={2}>
+                  <ListItem>Chronograph</ListItem>
+                  <ListItem>Master Chronometer Certified</ListItem> <ListItem>Tachymeter</ListItem>
+                </List>
+                <List spacing={2}>
+                  <ListItem>Anti‑magnetic</ListItem>
+                  <ListItem>Chronometer</ListItem>
+                  <ListItem>Small seconds</ListItem>
+                </List>
+              </SimpleGrid>
+            </Box>
+            <Box>
+              <Text
+                fontSize={{ base: '16px', lg: '18px' }}
+                color={useColorModeValue('yellow.500', 'yellow.300')}
+                fontWeight={'500'}
+                textTransform={'uppercase'}
+                mb={'4'}
+              >
+                Product Details
+              </Text>
+
+              <List spacing={2}>
+                <ListItem>
+                  <Text as={'span'} fontWeight={'bold'}>
+                    Between lugs:
+                  </Text>{' '}
+                  20 mm
+                </ListItem>
+                <ListItem>
+                  <Text as={'span'} fontWeight={'bold'}>
+                    Bracelet:
+                  </Text>{' '}
+                  leather strap
+                </ListItem>
+                <ListItem>
+                  <Text as={'span'} fontWeight={'bold'}>
+                    Case:
+                  </Text>{' '}
+                  Steel
+                </ListItem>
+                <ListItem>
+                  <Text as={'span'} fontWeight={'bold'}>
+                    Case diameter:
+                  </Text>{' '}
+                  42 mm
+                </ListItem>
+                <ListItem>
+                  <Text as={'span'} fontWeight={'bold'}>
+                    Dial color:
+                  </Text>{' '}
+                  Black
+                </ListItem>
+                <ListItem>
+                  <Text as={'span'} fontWeight={'bold'}>
+                    Crystal:
+                  </Text>{' '}
+                  Domed, scratch‑resistant sapphire crystal with anti‑reflective treatment inside
+                </ListItem>
+                <ListItem>
+                  <Text as={'span'} fontWeight={'bold'}>
+                    Water resistance:
+                  </Text>{' '}
+                  5 bar (50 metres / 167 feet){' '}
+                </ListItem>
+              </List>
+            </Box>
+          </Stack>
+
+          <Button
+            rounded={'none'}
+            w={'full'}
+            mt={8}
+            size={'lg'}
+            py={'7'}
+            bg={useColorModeValue('gray.900', 'gray.50')}
+            color={useColorModeValue('white', 'gray.900')}
+            textTransform={'uppercase'}
+            _hover={{
+              transform: 'translateY(2px)',
+              boxShadow: 'lg',
+            }}
+          >
+            Add to cart
+          </Button>
+
+          <Stack direction="row" alignItems="center" justifyContent={'center'}>
+            <MdLocalShipping />
+            <Text>2-3 business days delivery</Text>
+          </Stack>
+        </Stack>
+      </SimpleGrid>
     </Container>
   );
-};
-
-export default ArticleList;
+}

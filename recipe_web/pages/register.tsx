@@ -90,7 +90,7 @@ export default function SignupCard() {
               <Text align={'center'}>
                 Already a user?{' '}
                 <NextLink href="/login" passHref>
-                  <Link color={'orange.400'}>Login</Link>
+                  <Link color={'orange.400'}>Sign in</Link>
                 </NextLink>{' '}
                 instead.
               </Text>

@@ -21,6 +21,7 @@ import {
 import { HamburgerIcon, CloseIcon, ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
+import { UserMenu } from './menu';
 
 export default function WithSubnavigation() {
   const { isOpen, onToggle } = useDisclosure();
@@ -110,9 +111,7 @@ export default function WithSubnavigation() {
             </>
           ) : (
             <Center>
-              <Heading size="s" textAlign={'center'} display={'flex'} noOfLines={1}>
-                {user.name}
-              </Heading>
+              <UserMenu name={user.name}></UserMenu>
             </Center>
           )}
         </Stack>
