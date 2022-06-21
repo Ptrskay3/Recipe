@@ -26,14 +26,29 @@ pub fn auth_router() -> Router {
         .route("/update_password", put(update_password))
 }
 
-async fn me(maybe_auth_user: MaybeAuthUser) -> Result<Json<Uuid>, ApiError> {
+#[derive(sqlx::FromRow, serde::Serialize)]
+struct UserDetails {
+    name: String,
+}
+
+async fn me(
+    maybe_auth_user: MaybeAuthUser,
+    DatabaseConnection(mut conn): DatabaseConnection,
+) -> Result<Json<UserDetails>, ApiError> {
     if let Some(auth_user) = maybe_auth_user.into_inner() {
-        return Ok(Json(*auth_user));
+        let name = sqlx::query_as!(
+            UserDetails,
+            r#"SELECT name FROM users WHERE user_id = $1"#,
+            *auth_user
+        )
+        .fetch_one(&mut conn)
+        .await?;
+        return Ok(Json(name));
     }
     Err(ApiError::Unauthorized)
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub struct Credentials {
     name: String,
     password: Secret<String>,
