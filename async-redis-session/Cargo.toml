@@ -1,0 +1,18 @@
+[package]
+name = "async-redis-session"
+version = "0.2.2"
+authors = ["Jacob Rothstein <hi@jbr.me>, Peter Leeh <leeh123peter@gmail.com>"]
+edition = "2021"
+description = "redis session store for async-session"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+keywords = ["sessions", "tide", "async-session", "redis"]
+categories = ["web-programming::http-server", "web-programming", "database"]
+
+[dependencies.redis]
+version = "0.21"
+features = ["aio", "tokio-comp"]
+
+[dependencies]
+async-session = "3.0.0"
+tokio = { version = "1", features = ["full"] }
