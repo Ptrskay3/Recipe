@@ -49,8 +49,7 @@ pub async fn validate_credentials(
         ))
     })?
     .map_err(|_| ApiError::unprocessable_entity([("password", "password is wrong")]))?;
-    // FIXME: after the 0.6 release of sqlx, this nonsense can go away
-    Ok(uuid::Uuid::from_bytes(*user_id.as_bytes()))
+    Ok(user_id)
 }
 
 pub fn compute_password_hash(password: Secret<String>) -> Result<Secret<String>, anyhow::Error> {

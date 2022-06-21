@@ -84,13 +84,6 @@ impl Deref for AuthUser {
     }
 }
 
-// FIXME: after the 0.6 release of sqlx, this nonsense can go away
-impl From<AuthUser> for sqlx::types::uuid::Uuid {
-    fn from(auth_user: AuthUser) -> Self {
-        sqlx::types::uuid::Uuid::from_bytes(*auth_user.as_bytes())
-    }
-}
-
 pub struct AuthRedirect;
 
 impl IntoResponse for AuthRedirect {

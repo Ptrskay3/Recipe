@@ -32,7 +32,7 @@ async fn main() -> anyhow::Result<()> {
 
     let db_pool = PgPoolOptions::new()
         .max_connections(5)
-        .connect_timeout(std::time::Duration::from_secs(3))
+        .acquire_timeout(std::time::Duration::from_secs(3))
         .connect(&db_conn_str)
         .await
         .context("failed to connect to database")?;

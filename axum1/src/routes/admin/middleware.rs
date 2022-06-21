@@ -38,7 +38,7 @@ where
         let user = sqlx::query_as!(
             Self,
             "SELECT name, is_admin FROM users WHERE user_id = $1",
-            sqlx::types::uuid::Uuid::from(user_id)
+            *user_id
         )
         .fetch_optional(&mut db)
         .await

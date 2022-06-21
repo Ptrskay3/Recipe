@@ -48,7 +48,9 @@ async fn authorize(
     // Rotate the session cookie on privilege level change.
     // This is to prevent session-fixation attacks.
     session.regenerate();
-    session.insert("user_id", user_id).unwrap();
+    session
+        .insert("user_id", user_id)
+        .expect("user_id is serializable");
     Ok(())
 }
 
@@ -126,8 +128,7 @@ async fn update_password(
         "#,
         password_hash.expose_secret(),
         name,
-        // FIXME: after the 0.6 release of sqlx, this nonsense can go away
-        sqlx::types::uuid::Uuid::from(user_id),
+        *user_id,
     )
     .execute(&mut conn)
     .await

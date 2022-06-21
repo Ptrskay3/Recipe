@@ -71,7 +71,7 @@ pub struct Ingredient {
 
 #[async_trait]
 impl Queryable for Ingredient {
-    type Id = sqlx::types::uuid::Uuid;
+    type Id = uuid::Uuid;
     type Name = String;
 
     async fn get_by_id<'c, E>(e: E, id: Self::Id) -> Result<Self, ApiError>
@@ -150,7 +150,7 @@ async fn add_ingredient(
     Form(ingredient): Form<Ingredient>,
     auth_user: Option<AuthUser>,
 ) -> Result<(), ApiError> {
-    let creator_id = auth_user.map(<sqlx::types::uuid::Uuid as From<_>>::from);
+    let creator_id = auth_user.map(|u| *u);
     sqlx::query!(
         r#"
         INSERT INTO ingredients (name, category, calories_per_100g, g_per_piece, creator_id)
@@ -266,8 +266,6 @@ async fn make_favorite(
     // because you were too clever. You can always improve performance later if the
     // implementation proves to be a bottleneck.
     //
-    // Readability is also paramount if you need to onboard more devs to the project.
-
     // Begin a transaction so we have a consistent view of the database.
     // This has the side-effect of checking out a connection for the whole function,
     // which saves some overhead on subsequent queries.
@@ -292,7 +290,7 @@ async fn make_favorite(
         // If the row already exists, we don't need to do anything.
         r#"INSERT INTO favorite_ingredient(ingredient_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING"#,
         ingredient.id,
-        sqlx::types::uuid::Uuid::from(auth_user)
+        *auth_user
     )
     .execute(&mut tx)
     .await?;
