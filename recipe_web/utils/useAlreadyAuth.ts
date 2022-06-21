@@ -6,11 +6,12 @@ export const useAlreadyAuth = () => {
   const router = useRouter();
 
   useEffect(() => {
-    (async () => {
-      const { ok } = await fetch('http://localhost:3000/me', { credentials: 'include' });
-      if (ok) {
-        router.replace(`/`);
-      }
-    })();
+    fetch('http://localhost:3000/me', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.name) {
+          router.replace('/');
+        }
+      });
   }, [router]);
 };

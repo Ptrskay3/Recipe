@@ -33,7 +33,7 @@ struct UserDetails {
 async fn me(
     maybe_auth_user: MaybeAuthUser,
     DatabaseConnection(mut conn): DatabaseConnection,
-) -> Result<Json<UserDetails>, ApiError> {
+) -> Result<Json<Option<UserDetails>>, ApiError> {
     if let Some(auth_user) = maybe_auth_user.into_inner() {
         let name = sqlx::query_as!(
             UserDetails,
@@ -42,9 +42,9 @@ async fn me(
         )
         .fetch_one(&mut conn)
         .await?;
-        return Ok(Json(name));
+        return Ok(Json(Some(name)));
     }
-    Err(ApiError::Unauthorized)
+    Ok(Json(None))
 }
 
 #[derive(Debug, serde::Deserialize, Clone)]

@@ -4,42 +4,50 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Checkbox,
   Stack,
   Link,
   Button,
   Heading,
   Text,
   useColorModeValue,
+  FormErrorMessage,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { intoFormBody } from '../utils/form';
 import { useAlreadyAuth } from '../utils/useAlreadyAuth';
+import { useFormik } from 'formik';
+import { useState } from 'react';
 
 export default function Login() {
   useAlreadyAuth();
   const router = useRouter();
+  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
 
-  const onSubmit = async (e: any) => {
-    e.preventDefault();
-    const state = {
-      name: e.target.elements.name.value,
-      password: e.target.elements.password.value,
-    };
-    const formBody = intoFormBody(state);
-    const { ok } = await fetch('http://localhost:3000/auth', {
-      method: 'POST',
-      body: formBody,
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    });
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      password: '',
+    },
+    validate: () => {}, // TODO
+    onSubmit: async (values) => {
+      const formBody = intoFormBody(values);
+      const response = await fetch('http://localhost:3000/auth', {
+        method: 'POST',
+        body: formBody,
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
 
-    if (ok) {
-      router.replace('/');
-    }
-  };
+      if (response.ok) {
+        router.replace('/');
+      } else {
+        let err = await response.json();
+        setErrors(err.errors);
+      }
+    },
+  });
 
   return (
     <Flex
@@ -57,15 +65,32 @@ export default function Login() {
         </Stack>
         <Box rounded={'lg'} bg={useColorModeValue('white', 'gray.700')} boxShadow={'lg'} p={8}>
           <Stack spacing={4}>
-            {/* TODO: Formik*/}
-            <form onSubmit={onSubmit}>
-              <FormControl id="name">
+            <form onSubmit={formik.handleSubmit}>
+              <FormControl id="name" isInvalid={!!errors.username}>
                 <FormLabel htmlFor="name">Username</FormLabel>
-                <Input type="text" id="name" name="name" required />
+                <Input
+                  type="text"
+                  id="name"
+                  name="name"
+                  required
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.name}
+                />
+                <FormErrorMessage>{errors.username}</FormErrorMessage>
               </FormControl>
-              <FormControl id="password" mt={4}>
+              <FormControl id="password" mt={4} isInvalid={!!errors.password}>
                 <FormLabel htmlFor="password">Password</FormLabel>
-                <Input type="password" id="password" name="password" required />
+                <Input
+                  type="password"
+                  id="password"
+                  name="password"
+                  required
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.password}
+                />
+                <FormErrorMessage>{errors.password}</FormErrorMessage>
               </FormControl>
               <Stack spacing={10}>
                 <Link mt={4} color={'orange.400'}>

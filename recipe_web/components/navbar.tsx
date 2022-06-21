@@ -32,7 +32,6 @@ export default function WithSubnavigation() {
     const fetchData = () => {
       fetch('http://localhost:3000/me', { credentials: 'include' })
         .then((r) => r.json())
-        .catch(() => {})
         .then((data) => {
           setUser(data);
         });
@@ -283,7 +282,7 @@ const NAV_ITEMS: Array<NavItem> = [
         href: '#',
       },
       {
-        label: 'News',
+        label: 'New',
         subLabel: 'Up-and-coming specialties',
         href: '#',
       },
@@ -294,7 +293,7 @@ const NAV_ITEMS: Array<NavItem> = [
     href: '#',
   },
   {
-    label: 'Suggest something for..',
+    label: 'Suggest me a ..',
     children: [
       {
         label: 'Breakfast',

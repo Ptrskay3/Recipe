@@ -1,6 +1,7 @@
 import { Box, Heading, Link, Text } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import NextLink from 'next/link';
+import { useAuth } from '../utils/useAuth';
 
 export default function Confirm() {
   return (
