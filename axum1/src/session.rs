@@ -230,12 +230,21 @@ where
     fn call(&mut self, mut request: Request<Body>) -> Self::Future {
         let session_layer = self.layer.clone();
 
-        let cookie_value = request
+        let cookie_values = request
             .headers()
             .get(COOKIE)
-            .and_then(|cookie| Cookie::parse_encoded(cookie.to_str().unwrap()).ok())
-            .filter(|cookie| cookie.name() == session_layer.cookie_name)
-            .and_then(|cookie| self.layer.verify_signature(cookie.value()).ok());
+            .map(|cookies| cookies.to_str());
+
+        let cookie_value = match cookie_values {
+            Some(Ok(cookies)) => cookies
+                .split(";")
+                .map(|cookie| cookie.trim())
+                .filter_map(|cookie| Cookie::parse_encoded(cookie).ok())
+                .filter(|cookie| cookie.name() == session_layer.cookie_name)
+                .flat_map(|cookie| self.layer.verify_signature(cookie.value()).ok())
+                .next(),
+            _ => None,
+        };
 
         let mut inner = self.inner.clone();
         Box::pin(async move {

@@ -5,7 +5,7 @@ use axum::{
 };
 use sqlx::PgPool;
 
-use crate::{error::ApiError, extractors::AuthUser};
+use crate::error::ApiError;
 
 #[derive(sqlx::FromRow, serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct AdminUser {
@@ -32,13 +32,13 @@ where
         let mut db = pool.acquire().await?;
 
         let user_id = session
-            .get::<AuthUser>("user_id")
+            .get::<uuid::Uuid>("user_id")
             .ok_or(ApiError::Unauthorized)?;
 
         let user = sqlx::query_as!(
             Self,
             "SELECT name, is_admin FROM users WHERE user_id = $1",
-            *user_id
+            user_id
         )
         .fetch_optional(&mut db)
         .await

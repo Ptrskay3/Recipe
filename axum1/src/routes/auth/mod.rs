@@ -25,7 +25,7 @@ pub fn auth_router() -> Router {
         .route("/update_password", put(update_password))
 }
 
-#[derive(sqlx::FromRow, serde::Serialize)]
+#[derive(sqlx::FromRow, serde::Serialize, Debug)]
 struct UserDetails {
     name: String,
 }

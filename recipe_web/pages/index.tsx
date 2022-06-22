@@ -1,4 +1,3 @@
-import { Divider } from '@chakra-ui/react';
 import type { NextPage } from 'next';
 import { Footer } from '../components/footer';
 import WithSubnavigation from '../components/navbar';
@@ -11,7 +10,6 @@ const Home: NextPage = () => {
     <div>
       <WithSubnavigation />
       <PlaceHolder />
-
       <Footer />
     </div>
   );
