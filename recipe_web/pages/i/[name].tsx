@@ -2,26 +2,31 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Layout } from '../../components/layout';
 import { Center, Text } from '@chakra-ui/react';
+import useSWR from 'swr';
+import { fetcher } from '../../utils/fetcher';
+import dynamic from 'next/dynamic';
 
-export default function IngredientDetailed() {
-  const [data, setData] = useState(null);
+function IngredientDetailed() {
   const router = useRouter();
   const { name } = router.query;
-  useEffect(() => {
-    if (!name) {
-      return;
-    }
-    const fetchData = () => {
-      fetch(`http://localhost:3000/i/${name}`, { credentials: 'include' })
-        .then((r) => r.json())
-        .then((data) => {
-          setData(data);
-        })
-        .catch(() => router.replace('/'));
-    };
 
-    fetchData();
-  }, [name, router]);
+  const { data, error } = useSWR(`http://localhost:3000/i/${name}`, fetcher);
+
+  if (error)
+    return (
+      <Layout>
+        <Center>{'failed to load'}</Center>
+      </Layout>
+    );
+
+  if (!data)
+    return (
+      <Layout>
+        {' '}
+        <Center>{'loading...'} </Center>
+      </Layout>
+    );
+
   return (
     data && (
       <Layout>
@@ -32,3 +37,4 @@ export default function IngredientDetailed() {
     )
   );
 }
+export default dynamic(() => Promise.resolve(IngredientDetailed), { ssr: false });
