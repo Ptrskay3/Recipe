@@ -3,11 +3,12 @@ use axum::{
     extract::{FromRequest, RequestParts},
     Extension,
 };
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
 use crate::error::ApiError;
 
-#[derive(sqlx::FromRow, serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[derive(sqlx::FromRow, Serialize, Deserialize, Clone, Debug)]
 pub struct AdminUser {
     name: String,
     is_admin: Option<bool>,

@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 services:
   postgres:
     image: postgres
@@ -8,9 +8,9 @@ services:
       - POSTGRES_DB=hummus
       - PGDATA=/var/lib/pg_data
     volumes:
-      - ./volumes/postgres/data:/var/lib/postgresql/data
+      - ./volumes/postgres/data:/var/lib/pg_data
     ports:
-      - "5432:5432"
+      - '5432:5432'
 
   pgadmin:
     image: dpage/pgadmin4
@@ -19,15 +19,15 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
-      - "5050:80"
+      - '5050:80'
     depends_on:
       - postgres
 
   redis:
-    image: "redis:alpine"
-    command: "redis-server"
+    image: 'redis:alpine'
+    command: 'redis-server'
     hostname: redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
-      - "./volumes/redis-data:/var/lib/redis"
+      - './volumes/redis-data:/var/lib/redis'
