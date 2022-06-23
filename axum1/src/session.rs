@@ -235,15 +235,15 @@ where
             .get(COOKIE)
             .map(|cookies| cookies.to_str());
 
-        let cookie_value = match cookie_values {
-            Some(Ok(cookies)) => cookies
+        let cookie_value = if let Some(Ok(cookies)) = cookie_values {
+            cookies
                 .split(";")
                 .map(|cookie| cookie.trim())
                 .filter_map(|cookie| Cookie::parse_encoded(cookie).ok())
                 .filter(|cookie| cookie.name() == session_layer.cookie_name)
-                .flat_map(|cookie| self.layer.verify_signature(cookie.value()).ok())
-                .next(),
-            _ => None,
+                .find_map(|cookie| self.layer.verify_signature(cookie.value()).ok())
+        } else {
+            None
         };
 
         let mut inner = self.inner.clone();

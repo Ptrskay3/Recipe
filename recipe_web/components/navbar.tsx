@@ -16,7 +16,6 @@ import {
   Button,
   useColorMode,
   Center,
-  Heading,
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon, ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { FaMoon, FaSun } from 'react-icons/fa';
@@ -53,11 +52,7 @@ export default function WithSubnavigation() {
         borderColor={useColorModeValue('gray.200', 'gray.900')}
         align={'center'}
       >
-        <Flex
-          flex={{ base: 1, md: 'auto' }}
-          ml={{ base: -2 }}
-          display={{ base: 'flex', md: 'none' }}
-        >
+        <Flex flex={{ base: 1, md: 'auto' }} ml={{ base: -2 }} display={{ base: 'flex', md: 'none' }}>
           <IconButton
             onClick={onToggle}
             icon={isOpen ? <CloseIcon w={3} h={3} /> : <HamburgerIcon w={5} h={5} />}
@@ -84,9 +79,7 @@ export default function WithSubnavigation() {
             as="button"
             onClick={toggleColorMode}
             aria-label="LinkedIn"
-            icon={
-              colorMode === 'light' ? <FaMoon fontSize="1.25rem" /> : <FaSun fontSize="1.25rem" />
-            }
+            icon={colorMode === 'light' ? <FaMoon fontSize="1.25rem" /> : <FaSun fontSize="1.25rem" />}
           />
           {!user ? (
             <>
@@ -150,14 +143,7 @@ const DesktopNav = () => {
             </PopoverTrigger>
 
             {navItem.children && (
-              <PopoverContent
-                border={0}
-                boxShadow={'xl'}
-                bg={popoverContentBgColor}
-                p={4}
-                rounded={'xl'}
-                minW={'sm'}
-              >
+              <PopoverContent border={0} boxShadow={'xl'} bg={popoverContentBgColor} p={4} rounded={'xl'} minW={'sm'}>
                 <Stack>
                   {navItem.children.map((child) => (
                     <DesktopSubNav key={child.label} {...child} />

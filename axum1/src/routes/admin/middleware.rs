@@ -47,9 +47,8 @@ where
         if let Some(user) = user {
             if user.is_admin.unwrap_or(false) {
                 return Ok(user);
-            } else {
-                return Err(ApiError::Forbidden);
             }
+            return Err(ApiError::Forbidden);
         }
         Err(ApiError::Unauthorized)
     }
