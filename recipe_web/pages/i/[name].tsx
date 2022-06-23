@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Layout } from '../../components/layout';
-import { Center, Text } from '@chakra-ui/react';
+import { Center, CircularProgress, Text } from '@chakra-ui/react';
 import useSWR from 'swr';
 import { fetcher } from '../../utils/fetcher';
 import dynamic from 'next/dynamic';
@@ -15,7 +14,9 @@ function IngredientDetailed() {
   if (error)
     return (
       <Layout>
-        <Center>{'failed to load'}</Center>
+        <Center mt="14">
+          <Text color="orange.400">{'failed to load'}</Text>
+        </Center>
       </Layout>
     );
 
@@ -23,7 +24,9 @@ function IngredientDetailed() {
     return (
       <Layout>
         {' '}
-        <Center>{'loading...'} </Center>
+        <Center mt="14">
+          <CircularProgress isIndeterminate color="orange.400" />
+        </Center>
       </Layout>
     );
 
