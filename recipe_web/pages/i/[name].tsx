@@ -4,6 +4,7 @@ import { Center, CircularProgress, Text } from '@chakra-ui/react';
 import useSWR from 'swr';
 import { fetcher } from '../../utils/fetcher';
 import dynamic from 'next/dynamic';
+import Ingredient from '../../components/ingredient';
 
 function IngredientDetailed() {
   const router = useRouter();
@@ -34,7 +35,7 @@ function IngredientDetailed() {
     data && (
       <Layout>
         <Center mt="14">
-          <Text color="orange.400">{JSON.stringify(data)}</Text>
+          <Ingredient {...data} />
         </Center>
       </Layout>
     )

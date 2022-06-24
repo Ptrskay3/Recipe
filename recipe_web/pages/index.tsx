@@ -7,11 +7,11 @@ import dynamic from 'next/dynamic';
 
 const Home: NextPage = () => {
   return (
-    <div>
+    <>
       <WithSubnavigation />
       <PlaceHolder />
       <Footer />
-    </div>
+    </>
   );
 };
 
