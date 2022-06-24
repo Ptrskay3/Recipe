@@ -37,13 +37,7 @@ export const UserMenu = ({ name }: { name: string }) => {
       >
         {name}
       </MenuButton>
-      <MenuList
-        minWidth="240px"
-        bg={useColorModeValue('white', 'gray.800')}
-        border={'0'}
-        boxShadow={'xl'}
-        minW={'sm'}
-      >
+      <MenuList minWidth="240px" bg={useColorModeValue('white', 'gray.800')} border={'0'} boxShadow={'xl'} minW={'sm'}>
         <MenuGroup title="Profile">
           <MenuItem
             value="profile"

@@ -19,26 +19,15 @@ import {
 } from '@chakra-ui/react';
 import { HamburgerIcon, CloseIcon, ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { FaMoon, FaSun } from 'react-icons/fa';
-import { useEffect, useState } from 'react';
 import { UserMenu } from './menu';
+import { useMe } from '../hooks/me';
 
 export default function WithSubnavigation() {
   const { isOpen, onToggle } = useDisclosure();
   const { colorMode, toggleColorMode } = useColorMode();
-  const [user, setUser] = useState<any | { name: string }>(false);
+  // const [user, setUser] = useState<any | { name: string }>(false);
 
-  useEffect(() => {
-    const fetchData = () => {
-      fetch('http://localhost:3000/me', { credentials: 'include' })
-        .then((r) => r.json())
-        .then((data) => {
-          setUser(data);
-        });
-    };
-
-    fetchData();
-  }, []);
-
+  const { me, isLoading, isError } = useMe();
   return (
     <Box>
       <Flex
@@ -65,6 +54,8 @@ export default function WithSubnavigation() {
             textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
             fontFamily={'heading'}
             color={useColorModeValue('gray.800', 'white')}
+            as={'a'}
+            href="/"
           >
             Recipes
           </Text>
@@ -81,7 +72,7 @@ export default function WithSubnavigation() {
             aria-label="LinkedIn"
             icon={colorMode === 'light' ? <FaMoon fontSize="1.25rem" /> : <FaSun fontSize="1.25rem" />}
           />
-          {!user ? (
+          {isError || isLoading || !me?.name ? (
             <>
               <Button as={'a'} fontSize={'sm'} fontWeight={400} variant={'link'} href={'/login'}>
                 Sign In
@@ -103,7 +94,7 @@ export default function WithSubnavigation() {
             </>
           ) : (
             <Center>
-              <UserMenu name={user.name}></UserMenu>
+              <UserMenu name={me.name}></UserMenu>
             </Center>
           )}
         </Stack>
