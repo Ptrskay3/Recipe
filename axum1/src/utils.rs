@@ -1,4 +1,6 @@
-use tokio::task::JoinHandle;
+use tokio::task::{JoinError, JoinHandle};
+
+use std::fmt::{Debug, Display};
 
 /// To play nicely with tokio, we must offload our CPU-intensive task to a
 /// separate threadpool using `tokio::task::spawn_blocking`. Those threads
@@ -14,4 +16,28 @@ where
 {
     let current_span = tracing::Span::current();
     tokio::task::spawn_blocking(move || current_span.in_scope(f))
+}
+
+pub fn report_exit(task_name: &str, outcome: Result<Result<(), impl Debug + Display>, JoinError>) {
+    match outcome {
+        Ok(Ok(())) => {
+            tracing::info!("{} has exited", task_name)
+        }
+        Ok(Err(e)) => {
+            tracing::error!(
+                error.cause_chain = ?e,
+                error.message = %e,
+                "{} failed",
+                task_name
+            )
+        }
+        Err(e) => {
+            tracing::error!(
+                error.cause_chain = ?e,
+                error.message = %e,
+                "{}' task failed to complete",
+                task_name
+            )
+        }
+    }
 }

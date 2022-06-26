@@ -11,8 +11,6 @@ pub mod session;
 pub mod startup;
 pub mod utils;
 
-pub const AXUM_SESSION_COOKIE_NAME: &str = "axum_session";
-
 #[async_trait]
 pub trait Queryable: Sized {
     type Id;

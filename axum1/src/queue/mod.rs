@@ -48,10 +48,10 @@ pub async fn try_execute_task(
     if task.is_none() {
         return Ok(ExecutionOutcome::EmptyQueue);
     }
-    let (transaction, issue_id, email) = task.unwrap();
+    let (transaction, confirmation_id, email) = task.unwrap();
     Span::current()
-        .record("newsletter_issue_id", &display(issue_id.clone()))
-        .record("subscriber_email", &display(&email));
+        .record("confirmation_id", &display(confirmation_id.clone()))
+        .record("user_email", &display(&email));
     match Email::parse(email.clone()) {
         Ok(email) => {
             if let Err(e) = email_client
@@ -80,7 +80,7 @@ pub async fn try_execute_task(
             );
         }
     }
-    delete_task(transaction, issue_id, &email).await?;
+    delete_task(transaction, confirmation_id, &email).await?;
     Ok(ExecutionOutcome::TaskCompleted)
 }
 

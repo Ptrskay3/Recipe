@@ -1,7 +1,7 @@
 use anyhow::Context;
 use axum::extract::Query;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
-use sqlx::{PgExecutor, Postgres, Transaction};
+use sqlx::{Acquire, PgExecutor, Postgres, Transaction};
 
 use crate::{
     error::ApiError,
@@ -44,10 +44,10 @@ pub fn generate_confirmation_token() -> String {
 
 #[tracing::instrument(
     name = "Store subscription token in the database",
-    skip(confirmation_token, transaction)
+    skip(confirmation_token, tx)
 )]
 pub async fn store_token(
-    transaction: &mut Transaction<'_, Postgres>,
+    tx: &mut Transaction<'_, Postgres>,
     confirmation_token: &str,
     user_id: uuid::Uuid,
 ) -> Result<(), ApiError> {
@@ -59,14 +59,14 @@ pub async fn store_token(
         confirmation_token,
         user_id
     )
-    .execute(transaction)
+    .execute(tx)
     .await?;
     Ok(())
 }
 
 #[tracing::instrument(skip_all)]
 pub async fn enqueue_delivery_task(
-    transaction: &mut Transaction<'_, Postgres>,
+    tx: &mut Transaction<'_, Postgres>,
     confirmation_id: String,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
@@ -81,14 +81,14 @@ pub async fn enqueue_delivery_task(
         "#,
         confirmation_id,
     )
-    .execute(transaction)
+    .execute(tx)
     .await?;
     Ok(())
 }
 
 #[derive(serde::Deserialize)]
 pub struct Parameters {
-    confirmation_token: String,
+    token: String,
 }
 
 #[tracing::instrument(name = "Confirm a registration", skip(parameters, conn))]
@@ -96,13 +96,24 @@ pub async fn confirm(
     parameters: Query<Parameters>,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<(), ApiError> {
-    let user_id = get_user_id_from_token(&mut conn, &parameters.confirmation_token)
+    let mut tx = conn.begin().await?;
+    let user_id = get_user_id_from_token(&mut tx, &parameters.token)
         .await
-        .context("Failed to retrieve the subscriber id associated with the provided token.")?
+        .context("Failed to retrieve the user_id associated with the provided token.")?
         .ok_or(ApiError::BadRequest)?;
-    confirm_subscriber(&mut conn, user_id)
+    confirm_subscriber(&mut tx, user_id)
         .await
-        .context("Failed to update the subscriber status to `confirmed`.")?;
+        .context("Failed to update the user status to `confirmed`.")?;
+
+    sqlx::query!(
+        r#"DELETE FROM confirmation_tokens WHERE user_id = $1"#,
+        user_id
+    )
+    .execute(&mut tx)
+    .await
+    .context("Failed to delete from confirmation_tokens")?;
+
+    tx.commit().await?;
     Ok(())
 }
 
