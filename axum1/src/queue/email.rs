@@ -1,13 +1,13 @@
 use reqwest::Client;
 use secrecy::{ExposeSecret, Secret};
 
-use crate::config::EmailClientSettings;
+use crate::{config::EmailClientSettings, error::ApiError};
 
 #[derive(Debug)]
 pub struct Email(String);
 
 impl Email {
-    pub fn parse(s: String) -> Result<Email, String> {
+    pub fn parse(s: String) -> Result<Email, ApiError> {
         // TODO: validation
         Ok(Self(s))
     }

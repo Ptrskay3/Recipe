@@ -8,6 +8,10 @@ CREATE TABLE "users"
 
     password_hash TEXT                                   NOT NULL,
   
+    confirmed     BOOLEAN                                NOT NULL DEFAULT 'FALSE',
+
+    is_admin      BOOLEAN                                NOT NULL DEFAULT 'FALSE',
+
     created_at    TIMESTAMPTZ                            NOT NULL DEFAULT NOW(),
 
     updated_at    TIMESTAMPTZ

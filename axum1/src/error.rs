@@ -72,6 +72,9 @@ pub enum ApiError {
     /// for security reasons.
     #[error("an internal server error occurred")]
     Anyhow(#[from] anyhow::Error),
+
+    #[error("an internal server error occured")]
+    Reqwest(#[from] reqwest::Error),
 }
 
 impl ApiError {
@@ -102,7 +105,7 @@ impl ApiError {
             Self::Forbidden => StatusCode::FORBIDDEN,
             Self::NotFound => StatusCode::NOT_FOUND,
             Self::UnprocessableEntity { .. } => StatusCode::UNPROCESSABLE_ENTITY,
-            Self::Sqlx(_) | Self::Anyhow(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::Sqlx(_) | Self::Anyhow(_) | Self::Reqwest(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }
@@ -148,6 +151,10 @@ impl IntoResponse for ApiError {
             Self::Anyhow(ref e) => {
                 // TODO: Probably `tracing`should be used to link to the HTTP request by `TraceLayer`.
                 log::error!("Generic error: {:?}", e);
+            }
+            Self::Reqwest(ref e) => {
+                // TODO: Probably `tracing`should be used to link to the HTTP request by `TraceLayer`.
+                log::error!("Reqwest error: {:?}", e);
             }
 
             // Other errors get mapped normally.

@@ -5,6 +5,7 @@ database:
   username: 'postgres'
   password: 'postgres'
   database_name: 'hummus'
+  require_ssl: false
 redis:
   host: '127.0.0.1'
   port: 6379

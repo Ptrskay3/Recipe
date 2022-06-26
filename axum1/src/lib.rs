@@ -8,6 +8,7 @@ pub mod extractors;
 pub mod queue;
 pub mod routes;
 pub mod session;
+pub mod startup;
 pub mod utils;
 
 pub const AXUM_SESSION_COOKIE_NAME: &str = "axum_session";

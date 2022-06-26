@@ -5,15 +5,19 @@ use axum::{
     Extension, Form, Json, Router,
 };
 use secrecy::{ExposeSecret, Secret};
+use sqlx::Acquire;
 
 use crate::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
 };
 
+mod confirm;
 mod password;
 
 use password::{compute_password_hash, validate_credentials};
+
+use self::confirm::{confirm, enqueue_delivery_task, generate_confirmation_token, store_token};
 
 #[must_use]
 pub fn auth_router() -> Router {
@@ -23,6 +27,7 @@ pub fn auth_router() -> Router {
         .route("/register", post(register))
         .route("/logout", get(logout))
         .route("/update_password", put(update_password))
+        .route("/confirm", get(confirm))
 }
 
 #[derive(sqlx::FromRow, serde::Serialize, Debug)]
@@ -76,6 +81,11 @@ async fn logout(
     Ok(())
 }
 
+#[derive(sqlx::FromRow, serde::Serialize, serde::Deserialize, Clone)]
+struct UserId {
+    user_id: uuid::Uuid,
+}
+
 #[derive(serde::Deserialize)]
 pub struct Register {
     name: String,
@@ -83,6 +93,7 @@ pub struct Register {
     password: Secret<String>,
 }
 
+#[tracing::instrument(name = "Registering a new user", skip(form, conn))]
 async fn register(
     Form(form): Form<Register>,
     DatabaseConnection(mut conn): DatabaseConnection,
@@ -95,18 +106,22 @@ async fn register(
     let password_hash =
         crate::utils::spawn_blocking_with_tracing(move || compute_password_hash(password))
             .await
-            .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to hash password")))??;
+            .context("Failed to hash password")??;
 
-    sqlx::query!(
+    let mut tx = conn.begin().await?;
+
+    let user_id = sqlx::query_as!(
+        UserId,
         r#"
         INSERT INTO users (name, email, password_hash)
         VALUES ($1, $2, $3)
+        RETURNING user_id;
         "#,
         name,
         email,
         password_hash.expose_secret(),
     )
-    .execute(&mut conn)
+    .fetch_one(&mut tx)
     .await
     .on_constraint("users_name_key", |_| {
         ApiError::unprocessable_entity([("name", "name already taken")])
@@ -114,6 +129,19 @@ async fn register(
     .on_constraint("users_email_key", |_| {
         ApiError::unprocessable_entity([("email", "email already taken")])
     })?;
+
+    let token = generate_confirmation_token();
+
+    store_token(&mut tx, &token, user_id.user_id)
+        .await
+        .context("Failed to store the confirmation token for a new subscriber.")?;
+
+    enqueue_delivery_task(&mut tx, token)
+        .await
+        .context("Failed to enqueue confirmation delivery task")?;
+
+    tx.commit().await?;
+
     Ok(())
 }
 

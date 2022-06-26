@@ -11,7 +11,7 @@ use crate::error::ApiError;
 #[derive(sqlx::FromRow, Serialize, Deserialize, Clone, Debug)]
 pub struct AdminUser {
     name: String,
-    is_admin: Option<bool>,
+    is_admin: bool,
 }
 
 #[async_trait]
@@ -46,7 +46,7 @@ where
         .map_err(|_| ApiError::Unauthorized)?;
 
         if let Some(user) = user {
-            if user.is_admin.unwrap_or(false) {
+            if user.is_admin {
                 return Ok(user);
             }
             return Err(ApiError::Forbidden);
