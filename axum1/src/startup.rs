@@ -2,6 +2,7 @@ use crate::{
     queue::email::EmailClient,
     routes::{admin_router, auth_router, ingredient_router},
     session::SessionLayer,
+    utils::shutdown_signal,
 };
 use anyhow::Context;
 use async_redis_session::RedisSessionStore;
@@ -81,6 +82,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
 
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
+        .with_graceful_shutdown(shutdown_signal())
         .await
         .map_err(|_| anyhow::anyhow!("Failed to start server"))
 }
