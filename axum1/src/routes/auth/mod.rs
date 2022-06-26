@@ -46,7 +46,8 @@ async fn me(
             *auth_user
         )
         .fetch_one(&mut conn)
-        .await?;
+        .await
+        .map_err(|_| ApiError::NotFound)?;
         return Ok(Json(Some(name)));
     }
     Ok(Json(None))

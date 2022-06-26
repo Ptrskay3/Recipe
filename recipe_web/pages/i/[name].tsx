@@ -3,10 +3,9 @@ import { Layout } from '../../components/layout';
 import { Center, CircularProgress, Text } from '@chakra-ui/react';
 import useSWR from 'swr';
 import { fetcher } from '../../utils/fetcher';
-import dynamic from 'next/dynamic';
 import Ingredient from '../../components/ingredient';
 
-function IngredientDetailed() {
+export default function IngredientDetailed() {
   const router = useRouter();
   const { name } = router.query;
 
@@ -41,4 +40,3 @@ function IngredientDetailed() {
     )
   );
 }
-export default dynamic(() => Promise.resolve(IngredientDetailed), { ssr: false });

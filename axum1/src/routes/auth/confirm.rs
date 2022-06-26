@@ -16,7 +16,7 @@ pub async fn _send_confirmation_email(
     subscription_token: &str,
 ) -> Result<(), ApiError> {
     let confirmation_link = format!(
-        "{}/confirm?subscription_token={}",
+        "{}/confirm?token={}",
         base_url, subscription_token
     );
     let plain_body = format!(

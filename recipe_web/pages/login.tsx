@@ -17,8 +17,9 @@ import { intoFormBody } from '../utils/form';
 import { useAlreadyAuth } from '../utils/useAlreadyAuth';
 import { useFormik } from 'formik';
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 
-export default function Login() {
+function Login() {
   useAlreadyAuth();
   const router = useRouter();
   const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
@@ -50,7 +51,12 @@ export default function Login() {
   });
 
   return (
-    <Flex minH={'100vh'} align={'center'} justify={'center'} bg={useColorModeValue('gray.50', 'gray.800')}>
+    <Flex
+      minH={'100vh'}
+      align={'center'}
+      justify={'center'}
+      bg={useColorModeValue('gray.50', 'gray.800')}
+    >
       <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
         <Stack align={'center'}>
           <Heading fontSize={'4xl'}>Sign in</Heading>
@@ -109,3 +115,5 @@ export default function Login() {
     </Flex>
   );
 }
+
+export default dynamic(() => Promise.resolve(Login), { ssr: false });

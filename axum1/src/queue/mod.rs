@@ -58,8 +58,14 @@ pub async fn try_execute_task(
                 .send_mail(
                     email,
                     "Recipe App confirm registration",
-                    "Body",
-                    "html body",
+                    &format!(
+                        "Visit http://localhost:3001/confirm?token={} to confirm your registration.",
+                        confirmation_id
+                    ),
+                    &format!(
+                        "Visit <a href=http://localhost:3001/confirm?token={}>the website</a> to confirm your registration.",
+                        confirmation_id
+                    ),
                 )
                 .await
             {
