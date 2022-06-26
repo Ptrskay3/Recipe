@@ -14,3 +14,20 @@ Technical to-do list:
 - consider making a simple stateless REST API too
 - OAuth2 based on https://github.com/tokio-rs/axum/tree/main/examples/oauth ?
 - Static file server to allow uploading files ?
+
+Emails:
+
+```
+curl "https://api.postmarkapp.com/email" \
+      -X POST \
+      -H "Accept: application/json" \
+      -H "Content-Type: application/json" \
+      -H "X-Postmark-Server-Token: b40d6f26-c6f7-4f90-9381-b5f26579e2f9" \
+      -d '{
+      "From": "peter.leeh@bitgap.com",
+      "To": "peter.leeh@bitgap.com",
+      "Subject": "Postmark test",
+      "TextBody": "Hello dear Postmark user.",
+      "HtmlBody": "<html><body><strong>Hello</strong> dear Postmark user.</body></html>"
+    }
+```

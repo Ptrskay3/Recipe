@@ -41,6 +41,8 @@ tower = "0.4.13"
 futures = "0.3"
 async-session = "3.0.0"
 async-redis-session = { path = "../async-redis-session" }
+# emails
+reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
 
 [dev-dependencies]
 axum-macros = "*"

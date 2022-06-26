@@ -1,4 +1,7 @@
+use secrecy::Secret;
 use serde::Deserialize;
+
+use crate::queue::email::Email;
 
 #[derive(Deserialize)]
 pub struct Settings {
@@ -7,6 +10,21 @@ pub struct Settings {
     pub application_port: u16,
     pub frontend_url: String,
     pub sentry_dsn: Option<String>,
+    pub email_client: EmailClientSettings,
+}
+
+#[derive(Deserialize)]
+pub struct EmailClientSettings {
+    pub base_url: String,
+    pub sender_email: String,
+    pub authorization_token: Secret<String>,
+    pub timeout_milliseconds: u64,
+}
+
+impl EmailClientSettings {
+    pub fn sender(&self) -> Result<Email, String> {
+        Email::parse(self.sender_email.clone())
+    }
 }
 
 #[derive(Deserialize)]

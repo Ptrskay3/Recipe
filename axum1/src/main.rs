@@ -5,6 +5,7 @@ use axum::{
     Extension, Router,
 };
 use axum1::{
+    queue::email::EmailClient,
     routes::{admin_router, auth_router, ingredient_router},
     session::SessionLayer,
 };
@@ -54,6 +55,8 @@ async fn main() -> anyhow::Result<()> {
         ));
     }
 
+    let email_client = EmailClient::from_config(config.email_client);
+
     let app = Router::new()
         .nest("/i", ingredient_router())
         .nest("/", auth_router())
@@ -62,6 +65,7 @@ async fn main() -> anyhow::Result<()> {
         .layer(Extension(db_pool))
         .layer(Extension(store.clone()))
         .layer(SessionLayer::new(store, config.redis.secret_key.as_bytes()))
+        .layer(Extension(email_client.clone()))
         .layer(
             CorsLayer::new()
                 .allow_origin(config.frontend_url.parse::<HeaderValue>().unwrap())
