@@ -74,6 +74,7 @@ function Login() {
                   id="name"
                   name="name"
                   required
+                  autoFocus
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   value={formik.values.name}

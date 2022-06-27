@@ -5,8 +5,10 @@ import { Layout } from '../components/layout';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import { fetcherOk } from '../utils/fetcher';
+import { useAlreadyAuth } from '../utils/useAlreadyAuth';
 
 export default function Confirm() {
+  useAlreadyAuth();
   const router = useRouter();
   const { token } = router.query;
 
@@ -64,7 +66,7 @@ export default function Confirm() {
           Something went wrong.
         </Heading>
         <Text color={'gray.500'}>
-          The provided token is invalid, or expired. &nbsp;..or you are already confirmed.
+          The provided token is invalid, or expired. &nbsp;..maybe you&apos;re already confirmed?
           Let&apos;s{' '}
           <NextLink href="/login">
             <Link color={'orange.400'}>sign in.</Link>

@@ -9,7 +9,7 @@ export default function IngredientDetailed() {
   const router = useRouter();
   const { name } = router.query;
 
-  const { data, error } = useSWR(`http://localhost:3000/i/${name}`, fetcher);
+  const { data, error } = useSWR(!!name ? `http://localhost:3000/i/${name}` : null, fetcher);
 
   if (error)
     return (
