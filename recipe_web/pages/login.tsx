@@ -22,6 +22,7 @@ import dynamic from 'next/dynamic';
 function Login() {
   useAlreadyAuth();
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
 
   const formik = useFormik({
@@ -31,6 +32,7 @@ function Login() {
     },
     validate: () => {}, // TODO
     onSubmit: async (values) => {
+      setLoading(true);
       const formBody = intoFormBody(values);
       const response = await fetch('http://localhost:3000/auth', {
         method: 'POST',
@@ -41,6 +43,7 @@ function Login() {
         },
       });
 
+      setLoading(false);
       if (response.ok) {
         router.replace('/');
       } else {
@@ -99,6 +102,7 @@ function Login() {
                   Forgot password?
                 </Link>
                 <Button
+                  isLoading={loading}
                   type="submit"
                   bg={'orange.400'}
                   color={'white'}

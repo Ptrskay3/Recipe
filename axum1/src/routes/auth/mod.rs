@@ -1,6 +1,7 @@
 use anyhow::Context;
 use async_session::Session;
 use axum::{
+    extract::Query,
     routing::{get, post, put},
     Extension, Form, Json, Router,
 };
@@ -10,6 +11,7 @@ use sqlx::Acquire;
 use crate::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
+    queue::email::{Email, EmailClient},
 };
 
 mod confirm;
@@ -28,6 +30,8 @@ pub fn auth_router() -> Router {
         .route("/logout", get(logout))
         .route("/update_password", put(update_password))
         .route("/confirm", get(confirm))
+        .route("/forget_password_gen", post(forget_password_gen))
+        .route("/forget_password", post(forget_password))
 }
 
 #[derive(sqlx::FromRow, serde::Serialize, Debug)]
@@ -157,7 +161,7 @@ async fn update_password(
     Form(form): Form<UpdatePassword>,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<(), ApiError> {
-    let UpdatePassword { name, password } = form;
+    let UpdatePassword { name, password, .. } = form;
     let password_hash =
         crate::utils::spawn_blocking_with_tracing(move || compute_password_hash(password))
             .await
@@ -176,5 +180,137 @@ async fn update_password(
     .execute(&mut conn)
     .await
     .context("Failed to change user's password in the database.")?;
+    Ok(())
+}
+
+#[derive(serde::Deserialize)]
+struct ForgetPassword {
+    name: String,
+    email: String,
+}
+
+async fn forget_password_gen(
+    Form(form): Form<ForgetPassword>,
+    DatabaseConnection(mut conn): DatabaseConnection,
+    Extension(client): Extension<EmailClient>,
+) -> Result<(), ApiError> {
+    let ForgetPassword { name, email } = form;
+
+    let result = sqlx::query!(
+        r#"
+        SELECT user_id
+        FROM users
+        WHERE name = $1 AND email = $2
+        "#,
+        name,
+        email,
+    )
+    .fetch_optional(&mut conn)
+    .await?;
+
+    if let Some(user_id) = result.map(|r| r.user_id) {
+        let token = uuid::Uuid::new_v4();
+
+        sqlx::query!(
+            r#"
+            INSERT INTO forget_password_tokens (token, user_id)
+            VALUES ($1, $2)
+            "#,
+            token,
+            user_id
+        )
+        .execute(&mut conn)
+        .await?;
+
+        client
+            .send_mail(
+                Email::parse(email)?,
+                "Recipe App - Your password reset",
+                &format!(
+                    "Visit http://localhost:3000/forget_password?token={}",
+                    token
+                ),
+                &format!(
+                    "Visit http://localhost:3000/forget_password?token={}",
+                    token
+                ),
+            )
+            .await?;
+    }
+    Ok(())
+}
+
+#[derive(serde::Deserialize)]
+struct ForgetPasswordParameters {
+    token: uuid::Uuid,
+}
+
+#[derive(serde::Deserialize)]
+pub struct ResetPassword {
+    password: Secret<String>,
+}
+
+#[derive(serde::Deserialize)]
+pub struct ResetDetails {
+    token: uuid::Uuid,
+    user_id: uuid::Uuid,
+}
+
+async fn forget_password(
+    Query(params): Query<ForgetPasswordParameters>,
+    DatabaseConnection(mut conn): DatabaseConnection,
+    Form(form): Form<ResetPassword>,
+) -> Result<(), ApiError> {
+    let mut tx = conn.begin().await?;
+
+    // TODO: expiry is a little dumb this way, but let's just don't care about it for now.
+    let result = sqlx::query_as!(
+        ResetDetails,
+        r#"
+        SELECT user_id, token
+        FROM forget_password_tokens
+        WHERE created_at > current_timestamp - INTERVAL '2 days' AND token = $1
+        ORDER BY created_at DESC
+        LIMIT 1;
+        "#,
+        params.token,
+    )
+    .fetch_optional(&mut tx)
+    .await?;
+
+    if let Some(reset_details) = result {
+        let password_hash =
+            crate::utils::spawn_blocking_with_tracing(move || compute_password_hash(form.password))
+                .await
+                .map_err(|_| ApiError::Anyhow(anyhow::anyhow!("Failed to hash password")))??;
+
+        sqlx::query!(
+            r#"
+            UPDATE users
+            SET password_hash = $1
+            WHERE user_id = $2
+            "#,
+            password_hash.expose_secret(),
+            reset_details.user_id,
+        )
+        .execute(&mut tx)
+        .await
+        .context("Failed to change user's password in the database.")?;
+
+        sqlx::query!(
+            r#"
+            DELETE FROM forget_password_tokens
+            WHERE user_id = $1 and token = $2
+            "#,
+            reset_details.user_id,
+            reset_details.token,
+        )
+        .execute(&mut tx)
+        .await
+        .context("Failed to delete from forget_password_tokens.")?;
+
+        tx.commit().await?;
+    }
+
     Ok(())
 }
