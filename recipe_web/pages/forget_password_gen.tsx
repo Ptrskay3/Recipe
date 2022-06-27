@@ -20,22 +20,21 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import NextLink from 'next/link';
 
-function Login() {
-  useAlreadyAuth();
+function ForgetPasswordGen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
 
   const formik = useFormik({
     initialValues: {
       name: '',
-      password: '',
+      email: '',
     },
     validate: () => {}, // TODO
     onSubmit: async (values) => {
       setLoading(true);
       const formBody = intoFormBody(values);
-      const response = await fetch('http://localhost:3000/auth', {
+      const response = await fetch('http://localhost:3000/forget_password_gen', {
         method: 'POST',
         body: formBody,
         credentials: 'include',
@@ -46,7 +45,7 @@ function Login() {
 
       setLoading(false);
       if (response.ok) {
-        router.replace('/');
+        router.replace('/post_pw_reset');
       } else {
         let err = await response.json();
         setErrors(err.errors);
@@ -63,16 +62,16 @@ function Login() {
     >
       <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
         <Stack align={'center'}>
-          <Heading fontSize={'4xl'}>Sign in</Heading>
+          <Heading fontSize={'4xl'}>Forget Password</Heading>
           <Text fontSize={'lg'} color={'gray.600'}>
-            to enjoy all of our cool features
+            Enter your details below, and we&apos;ll get back to you.
           </Text>
         </Stack>
         <Box rounded={'lg'} bg={useColorModeValue('white', 'gray.700')} boxShadow={'lg'} p={8}>
           <Stack spacing={4}>
             <form onSubmit={formik.handleSubmit}>
-              <FormControl id="name" isInvalid={!!errors.username}>
-                <FormLabel htmlFor="name">Username</FormLabel>
+              <FormControl id="name" isInvalid={!!errors.name}>
+                <FormLabel htmlFor="name">Name</FormLabel>
                 <Input
                   type="text"
                   id="name"
@@ -83,25 +82,25 @@ function Login() {
                   onBlur={formik.handleBlur}
                   value={formik.values.name}
                 />
-                <FormErrorMessage>{errors.username}</FormErrorMessage>
+                <FormErrorMessage>{errors.name}</FormErrorMessage>
               </FormControl>
-              <FormControl id="password" mt={4} isInvalid={!!errors.password}>
-                <FormLabel htmlFor="password">Password</FormLabel>
+              <FormControl id="email" mt={4} isInvalid={!!errors.email}>
+                <FormLabel htmlFor="email">Email</FormLabel>
                 <Input
-                  type="password"
-                  id="password"
-                  name="password"
+                  type="email"
+                  id="email"
+                  name="email"
                   required
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  value={formik.values.password}
+                  value={formik.values.email}
                 />
-                <FormErrorMessage>{errors.password}</FormErrorMessage>
+                <FormErrorMessage>{errors.email}</FormErrorMessage>
               </FormControl>
               <Stack spacing={10}>
-                <NextLink href="/forget_password_gen">
+                <NextLink href="/login">
                   <Link mt={4} color={'orange.400'}>
-                    Forgot password?
+                    Login instead?
                   </Link>
                 </NextLink>
                 <Button
@@ -113,7 +112,7 @@ function Login() {
                     bg: 'orange.500',
                   }}
                 >
-                  Sign in
+                  Reset password
                 </Button>
               </Stack>
             </form>
@@ -124,4 +123,4 @@ function Login() {
   );
 }
 
-export default dynamic(() => Promise.resolve(Login), { ssr: false });
+export default dynamic(() => Promise.resolve(ForgetPasswordGen), { ssr: false });

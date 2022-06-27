@@ -27,9 +27,8 @@ export default function SignupCard() {
   const [showPassword, setShowPassword] = useState(false);
   useAlreadyAuth();
   const router = useRouter();
-  const [errors, setErrors] = useState<{ name?: string; password?: string; email?: string }>(
-    {}
-  );
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; password?: string; email?: string }>({});
 
   const formik = useFormik({
     initialValues: {
@@ -39,6 +38,7 @@ export default function SignupCard() {
     },
     validate: () => {}, // TODO
     onSubmit: async (values) => {
+      setLoading(true);
       const formBody = intoFormBody(values);
       const response = await fetch('http://localhost:3000/register', {
         method: 'POST',
@@ -48,7 +48,7 @@ export default function SignupCard() {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-
+      setLoading(false);
       if (response.ok) {
         router.replace('/postreg');
       } else {
@@ -142,6 +142,7 @@ export default function SignupCard() {
               </FormControl>
               <Stack spacing={10} pt={2}>
                 <Button
+                  isLoading={loading}
                   type="submit"
                   loadingText="Submitting"
                   size="lg"
