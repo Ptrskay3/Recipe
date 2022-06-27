@@ -227,11 +227,11 @@ async fn forget_password_gen(
                 Email::parse(email)?,
                 "Recipe App - Your password reset",
                 &format!(
-                    "Visit http://localhost:3000/forget_password?token={}",
+                    "Visit http://localhost:3001/forget_password?token={}",
                     token
                 ),
                 &format!(
-                    "Visit http://localhost:3000/forget_password?token={}",
+                    "Visit http://localhost:3001/forget_password?token={}",
                     token
                 ),
             )
@@ -310,7 +310,8 @@ async fn forget_password(
         .context("Failed to delete from forget_password_tokens.")?;
 
         tx.commit().await?;
+        Ok(())
+    } else {
+        Err(ApiError::BadRequest)
     }
-
-    Ok(())
 }

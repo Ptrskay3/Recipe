@@ -14,18 +14,22 @@ import {
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { intoFormBody } from '../utils/form';
-import { useAlreadyAuth } from '../utils/useAlreadyAuth';
 import { useFormik } from 'formik';
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import NextLink from 'next/link';
 import { CloseIcon } from '@chakra-ui/icons';
+import { useToast } from '@chakra-ui/react';
 
 function ForgetPasswordGen() {
   const router = useRouter();
-  const { token } = router.query;
+  const {
+    query: { token },
+    isReady,
+  } = router;
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ password?: string; password_ensure?: string }>({});
+  const toast = useToast();
 
   const formik = useFormik({
     initialValues: {
@@ -54,10 +58,33 @@ function ForgetPasswordGen() {
 
       setLoading(false);
       if (response.ok) {
+        toast({
+          title: 'Password successfully changed.',
+          description: 'You can now sign in!',
+          status: 'success',
+          duration: 9000,
+          isClosable: true,
+        });
         router.replace('/login');
       } else if (response.status === 422) {
-        // Uuid serialization fail.
-        setErrors({ password: 'Token seems invalid..', password_ensure: 'Token seems invalid..' });
+        // Uuid serialization fail. Probably someone's playing with urls..
+        toast({
+          title: 'The provided token seems to be wrong',
+          description: 'Redirecting to the homepage.',
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+        });
+        router.replace('/');
+      } else {
+        toast({
+          title: 'Token is no longer valid',
+          description: 'Redirecting to the homepage.',
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+        });
+        router.replace('/');
       }
     },
   });
@@ -77,7 +104,33 @@ function ForgetPasswordGen() {
           </Text>
         </Stack>
         <Box rounded={'lg'} bg={useColorModeValue('white', 'gray.700')} boxShadow={'lg'} p={8}>
-          {!!token ? (
+          {isReady && !token ? (
+            <Box textAlign="center" py={10} px={6}>
+              <Box display="inline-block">
+                <Flex
+                  flexDirection="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  bg={'red.500'}
+                  rounded={'50px'}
+                  w={'55px'}
+                  h={'55px'}
+                  textAlign="center"
+                >
+                  <CloseIcon boxSize={'20px'} color={'white'} />
+                </Flex>
+              </Box>
+              <Heading as="h2" size="lg" mt={6} mb={2}>
+                Something went wrong.
+              </Heading>
+              <Text color={'gray.500'}>
+                No token provided. <br />
+                <NextLink href="/">
+                  <Link color={'orange.400'}>Go back to homepage.</Link>
+                </NextLink>
+              </Text>
+            </Box>
+          ) : (
             <Stack spacing={4}>
               <form onSubmit={formik.handleSubmit}>
                 <FormControl id="name" isInvalid={!!errors.password}>
@@ -123,32 +176,6 @@ function ForgetPasswordGen() {
                 </Button>
               </form>
             </Stack>
-          ) : (
-            <Box textAlign="center" py={10} px={6}>
-              <Box display="inline-block">
-                <Flex
-                  flexDirection="column"
-                  justifyContent="center"
-                  alignItems="center"
-                  bg={'red.500'}
-                  rounded={'50px'}
-                  w={'55px'}
-                  h={'55px'}
-                  textAlign="center"
-                >
-                  <CloseIcon boxSize={'20px'} color={'white'} />
-                </Flex>
-              </Box>
-              <Heading as="h2" size="lg" mt={6} mb={2}>
-                Something went wrong.
-              </Heading>
-              <Text color={'gray.500'}>
-                The provided token is invalid, or expired. <br />
-                <NextLink href="/">
-                  <Link color={'orange.400'}>Go back to homepage.</Link>
-                </NextLink>
-              </Text>
-            </Box>
           )}
         </Box>
       </Stack>
