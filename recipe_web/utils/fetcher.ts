@@ -2,4 +2,5 @@
 export const fetcher = (...args) =>
   fetch(...args, { credentials: 'include' }).then((res) => res.json());
 
-export const fetcherWithoutJson = (...args) => fetch(...args, { credentials: 'include' });
+export const fetcherOk = (...args) =>
+  fetch(...args, { credentials: 'include' }).then((res) => res.status === 200);
