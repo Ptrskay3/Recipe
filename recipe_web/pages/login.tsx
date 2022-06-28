@@ -33,6 +33,7 @@ function Login() {
     },
     validate: () => {}, // TODO
     onSubmit: async (values) => {
+      setErrors({});
       setLoading(true);
       const formBody = intoFormBody(values);
       const response = await fetch('http://localhost:3000/auth', {

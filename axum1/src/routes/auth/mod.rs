@@ -300,7 +300,7 @@ async fn forget_password(
         sqlx::query!(
             r#"
             DELETE FROM forget_password_tokens
-            WHERE user_id = $1 and token = $2
+            WHERE user_id = $1 AND token = $2
             "#,
             reset_details.user_id,
             reset_details.token,
