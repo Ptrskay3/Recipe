@@ -85,5 +85,5 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .serve(app.into_make_service())
         .with_graceful_shutdown(shutdown_signal())
         .await
-        .map_err(|_| anyhow::anyhow!("Failed to start server"))
+        .context("Failed to start server")
 }
