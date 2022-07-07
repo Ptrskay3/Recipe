@@ -1,5 +1,9 @@
 use anyhow::Context;
-use axum::{extract::Path, routing::get, Json, Router};
+use axum::{
+    extract::Path,
+    routing::{get, post},
+    Json, Router,
+};
 use axum_extra::extract::Form;
 use sqlx::Acquire;
 
@@ -9,10 +13,9 @@ use crate::{
 };
 
 pub fn recipe_router() -> Router {
-    Router::new().route(
-        "/:name",
-        get(get_recipe_with_ingredients).post(insert_recipe),
-    )
+    Router::new()
+        .route("/:name", get(get_recipe_with_ingredients))
+        .route("/", post(insert_barebone_recipe))
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
@@ -82,7 +85,7 @@ struct Recipe {
     description: String,
 }
 
-async fn insert_recipe(
+async fn insert_barebone_recipe(
     DatabaseConnection(mut conn): DatabaseConnection,
     Form(recipe): Form<Recipe>,
     auth_user: AuthUser,
