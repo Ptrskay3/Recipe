@@ -1,6 +1,6 @@
 use crate::{
     queue::email::EmailClient,
-    routes::{admin_router, auth_router, ingredient_router},
+    routes::{admin_router, auth_router, ingredient_router, recipe_router},
     session::SessionLayer,
     utils::shutdown_signal,
 };
@@ -60,6 +60,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
 
     let app = Router::new()
         .nest("/i", ingredient_router())
+        .nest("/r", recipe_router())
         .nest("/", auth_router())
         .nest("/admin", admin_router())
         .layer(TraceLayer::new_for_http())

@@ -31,6 +31,9 @@ pub enum ApiError {
     #[error("request path not found")]
     NotFound,
 
+    #[error("conflict")]
+    Conflict,
+
     /// Return `422 Unprocessable Entity`
     ///
     /// This also serializes the `errors` map to JSON.
@@ -104,6 +107,7 @@ impl ApiError {
             Self::Unauthorized => StatusCode::UNAUTHORIZED,
             Self::Forbidden => StatusCode::FORBIDDEN,
             Self::NotFound => StatusCode::NOT_FOUND,
+            Self::Conflict => StatusCode::CONFLICT,
             Self::UnprocessableEntity { .. } => StatusCode::UNPROCESSABLE_ENTITY,
             Self::Sqlx(_) | Self::Anyhow(_) | Self::Reqwest(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
