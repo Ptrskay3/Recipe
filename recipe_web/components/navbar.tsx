@@ -25,7 +25,6 @@ import { useMe } from '../hooks/me';
 export default function WithSubnavigation() {
   const { isOpen, onToggle } = useDisclosure();
   const { colorMode, toggleColorMode } = useColorMode();
-  // const [user, setUser] = useState<any | { name: string }>(false);
 
   const { me, isLoading, isError } = useMe();
   return (
@@ -41,7 +40,11 @@ export default function WithSubnavigation() {
         borderColor={useColorModeValue('gray.200', 'gray.900')}
         align={'center'}
       >
-        <Flex flex={{ base: 1, md: 'auto' }} ml={{ base: -2 }} display={{ base: 'flex', md: 'none' }}>
+        <Flex
+          flex={{ base: 1, md: 'auto' }}
+          ml={{ base: -2 }}
+          display={{ base: 'flex', md: 'none' }}
+        >
           <IconButton
             onClick={onToggle}
             icon={isOpen ? <CloseIcon w={3} h={3} /> : <HamburgerIcon w={5} h={5} />}
@@ -70,7 +73,9 @@ export default function WithSubnavigation() {
             as="button"
             onClick={toggleColorMode}
             aria-label="LinkedIn"
-            icon={colorMode === 'light' ? <FaMoon fontSize="1.25rem" /> : <FaSun fontSize="1.25rem" />}
+            icon={
+              colorMode === 'light' ? <FaMoon fontSize="1.25rem" /> : <FaSun fontSize="1.25rem" />
+            }
           />
           {isError || isLoading || !me?.name ? (
             <>
@@ -134,7 +139,14 @@ const DesktopNav = () => {
             </PopoverTrigger>
 
             {navItem.children && (
-              <PopoverContent border={0} boxShadow={'xl'} bg={popoverContentBgColor} p={4} rounded={'xl'} minW={'sm'}>
+              <PopoverContent
+                border={0}
+                boxShadow={'xl'}
+                bg={popoverContentBgColor}
+                p={4}
+                rounded={'xl'}
+                minW={'sm'}
+              >
                 <Stack>
                   {navItem.children.map((child) => (
                     <DesktopSubNav key={child.label} {...child} />

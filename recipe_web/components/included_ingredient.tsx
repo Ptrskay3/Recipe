@@ -1,21 +1,18 @@
-import { EditIcon } from '@chakra-ui/icons';
+import { DeleteIcon } from '@chakra-ui/icons';
 import {
   Box,
   Center,
   useColorModeValue,
-  Heading,
-  Text,
   Stack,
-  Button,
-  Input,
   Editable,
   EditablePreview,
-  EditableTextarea,
   EditableInput,
-  useEditableControls,
-  Tooltip,
+  IconButton,
 } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
+import { intoFormBody } from '../utils/form';
+import { EditableControls } from './editable_custom_controls';
 
 interface IncludedIngredientProps {
   name: string;
@@ -28,6 +25,29 @@ export default function IncludedIngredient({
   quantity,
   quantity_unit,
 }: IncludedIngredientProps) {
+  const [deleted, setDeleted] = useState(false);
+  const router = useRouter();
+  const { name: rName } = router.query;
+  const deleteIngredient = async (rName: string, iName: string) => {
+    const body = intoFormBody({ name: iName });
+    const { ok } = await fetch(`http://localhost:3000/r/${rName}/edit`, {
+      method: 'DELETE',
+      credentials: 'include',
+      body,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    if (ok) {
+      setDeleted(true);
+    }
+  };
+  const colorValue = useColorModeValue('white', 'gray.800');
+  if (deleted) {
+    return null;
+  }
+
   return (
     <Center py={12}>
       <Box
@@ -35,7 +55,7 @@ export default function IncludedIngredient({
         p={6}
         maxW={'330px'}
         w={'330px'}
-        bg={useColorModeValue('white', 'gray.800')}
+        bg={colorValue}
         boxShadow={'2xl'}
         rounded={'lg'}
         pos={'relative'}
@@ -63,23 +83,15 @@ export default function IncludedIngredient({
           }}
         ></Box>
         <Stack pt={10} align={'center'}>
-          <Tooltip
-            label="Click to edit"
-            fontSize="md"
-            placement="right-end"
-            hasArrow
-            bg={useColorModeValue('gray.800', 'orange.400')}
+          <Editable
+            defaultValue={name}
+            fontSize={'xl'}
+            textTransform={'uppercase'}
+            color={'orange.400'}
           >
-            <Editable
-              defaultValue={name}
-              fontSize={'xl'}
-              textTransform={'uppercase'}
-              color={'orange.400'}
-            >
-              <EditablePreview />
-              <EditableInput textAlign={'center'} />
-            </Editable>
-          </Tooltip>
+            <EditablePreview />
+            <EditableInput textAlign={'center'} />
+          </Editable>
           <Editable
             submitOnBlur={true}
             defaultValue={quantity}
@@ -88,10 +100,21 @@ export default function IncludedIngredient({
           >
             <EditablePreview />
             <EditableInput textAlign={'center'} />
+            <EditableControls />
           </Editable>
-          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
-            {quantity_unit}
-          </Heading>
+          {!!quantity_unit.trim() ? (
+            <Editable submitOnBlur={true} defaultValue={quantity_unit} fontSize={'2xl'}>
+              <EditablePreview />
+              <EditableInput textAlign={'center'} />
+              <EditableControls />
+            </Editable>
+          ) : null}
+          <IconButton
+            aria-label="delete ingredient"
+            size="xs"
+            icon={<DeleteIcon />}
+            onClick={() => deleteIngredient(rName as string, name)}
+          />
         </Stack>
       </Box>
     </Center>
