@@ -8,11 +8,13 @@ use anyhow::Context;
 use async_redis_session::RedisSessionStore;
 use axum::{
     http::{HeaderValue, Method},
+    response::IntoResponse,
+    routing::get_service,
     Extension, Router,
 };
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
-use tower_http::{cors::CorsLayer, trace::TraceLayer};
+use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 pub async fn application() -> Result<(), anyhow::Error> {
@@ -63,6 +65,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .nest("/r", recipe_router())
         .nest("/", auth_router())
         .nest("/admin", admin_router())
+        .fallback(get_service(ServeDir::new("./static")).handle_error(handle_asset_error))
         .layer(TraceLayer::new_for_http())
         .layer(Extension(db_pool))
         .layer(Extension(store.clone()))
@@ -86,4 +89,11 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .with_graceful_shutdown(shutdown_signal())
         .await
         .context("Failed to start server")
+}
+
+async fn handle_asset_error(_err: std::io::Error) -> impl IntoResponse {
+    (
+        axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+        "something went wrong",
+    )
 }
