@@ -14,8 +14,14 @@ use crate::{
 
 pub fn recipe_router() -> Router {
     Router::new()
-        .route("/:name", get(get_recipe_with_ingredients))
-        .route("/", post(insert_barebone_recipe))
+        .route(
+            "/:name",
+            get(get_recipe_with_ingredients).post(insert_barebone_recipe),
+        )
+        .route(
+            "/:name/edit",
+            post(add_or_update_ingredient_to_recipe).delete(delete_ingredient_from_recipe),
+        )
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
@@ -26,7 +32,6 @@ struct RecipeWithIngredients {
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
-
 struct DetailedIngredient {
     name: String,
     quantity: String,
@@ -102,6 +107,71 @@ async fn insert_barebone_recipe(
     .execute(&mut conn)
     .await
     .map_err(|_| ApiError::Conflict)?;
+
+    Ok(())
+}
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+struct InsertIngredient {
+    name: String,
+    quantity: String,
+    quantity_unit: String,
+}
+
+#[tracing::instrument(skip(conn))]
+async fn add_or_update_ingredient_to_recipe(
+    DatabaseConnection(mut conn): DatabaseConnection,
+    Path(name): Path<String>,
+    Form(ingredient): Form<InsertIngredient>,
+) -> Result<(), ApiError> {
+    sqlx::query!(
+        r#"
+        INSERT INTO ingredients_to_recipes (ingredient_id, recipe_id, quantity, quantity_unit)
+        VALUES (
+            (SELECT id FROM ingredients WHERE name = $1),
+            (SELECT id FROM recipes WHERE name = $2),
+            $3,
+            $4
+        ) ON CONFLICT (ingredient_id, recipe_id) DO
+        UPDATE SET
+            quantity = EXCLUDED.quantity,
+            quantity_unit = EXCLUDED.quantity_unit;
+        "#,
+        ingredient.name,
+        name,
+        ingredient.quantity,
+        ingredient.quantity_unit
+    )
+    .execute(&mut conn)
+    .await
+    .map_err(|_| ApiError::BadRequest)?;
+
+    Ok(())
+}
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+struct NamedIngredient {
+    name: String,
+}
+
+#[tracing::instrument(skip(conn))]
+async fn delete_ingredient_from_recipe(
+    DatabaseConnection(mut conn): DatabaseConnection,
+    Path(name): Path<String>,
+    Form(ingredient): Form<NamedIngredient>,
+) -> Result<(), ApiError> {
+    sqlx::query!(
+        r#"
+        DELETE FROM ingredients_to_recipes
+        WHERE recipe_id = (SELECT id FROM recipes WHERE name = $1)
+        AND ingredient_id = (SELECT id from ingredients WHERE name = $2)
+        "#,
+        name,
+        ingredient.name
+    )
+    .execute(&mut conn)
+    .await
+    .context("Failed to delete from ingredients_to_recipes")?;
 
     Ok(())
 }
