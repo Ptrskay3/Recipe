@@ -19,6 +19,7 @@ import { useFormik } from 'formik';
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import NextLink from 'next/link';
+import { AuthFormWrapper } from '../components/auth_form_wrapper';
 
 function Login() {
   useAlreadyAuth();
@@ -56,72 +57,65 @@ function Login() {
   });
 
   return (
-    <Flex
-      minH={'100vh'}
-      align={'center'}
-      justify={'center'}
-      bg={useColorModeValue('gray.50', 'gray.800')}
-    >
-      <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
-        <Stack align={'center'}>
-          <Heading fontSize={'4xl'}>Sign in</Heading>
-          <Text fontSize={'lg'} color={'gray.600'}>
-            to enjoy all of our cool features
-          </Text>
-        </Stack>
-        <Box rounded={'lg'} bg={useColorModeValue('white', 'gray.700')} boxShadow={'lg'} p={8}>
-          <Stack spacing={4}>
-            <form onSubmit={formik.handleSubmit}>
-              <FormControl id="name" isInvalid={!!errors.username}>
-                <FormLabel htmlFor="name">Username</FormLabel>
-                <Input
-                  type="text"
-                  id="name"
-                  name="name"
-                  required
-                  autoFocus
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.name}
-                />
-                <FormErrorMessage>{errors.username}</FormErrorMessage>
-              </FormControl>
-              <FormControl id="password" mt={4} isInvalid={!!errors.password}>
-                <FormLabel htmlFor="password">Password</FormLabel>
-                <Input
-                  type="password"
-                  id="password"
-                  name="password"
-                  required
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.password}
-                />
-                <FormErrorMessage>{errors.password}</FormErrorMessage>
-              </FormControl>
-              <Stack spacing={10}>
-                <NextLink href="/forget_password_gen">
-                  <Link mt={4} color={'orange.400'}>
-                    Forgot password?
-                  </Link>
-                </NextLink>
-                <Button
-                  isLoading={loading}
-                  type="submit"
-                  bg={'orange.400'}
-                  color={'white'}
-                  _hover={{
-                    bg: 'orange.500',
-                  }}
-                >
-                  Sign in
-                </Button>
-              </Stack>
-            </form>
-          </Stack>
-        </Box>
+    <AuthFormWrapper>
+      <Stack align={'center'}>
+        <Heading fontSize={'4xl'}>Sign in</Heading>
+        <Text fontSize={'lg'} color={'gray.600'}>
+          to enjoy all of our cool features
+        </Text>
       </Stack>
-    </Flex>
+      <Box rounded={'lg'} bg={useColorModeValue('white', 'gray.700')} boxShadow={'lg'} p={8}>
+        <Stack spacing={4}>
+          <form onSubmit={formik.handleSubmit}>
+            <FormControl id="name" isInvalid={!!errors.username}>
+              <FormLabel htmlFor="name">Username</FormLabel>
+              <Input
+                type="text"
+                id="name"
+                name="name"
+                required
+                autoFocus
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.name}
+              />
+              <FormErrorMessage>{errors.username}</FormErrorMessage>
+            </FormControl>
+            <FormControl id="password" mt={4} isInvalid={!!errors.password}>
+              <FormLabel htmlFor="password">Password</FormLabel>
+              <Input
+                type="password"
+                id="password"
+                name="password"
+                required
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.password}
+              />
+              <FormErrorMessage>{errors.password}</FormErrorMessage>
+            </FormControl>
+            <Stack spacing={10}>
+              <NextLink href="/forget_password_gen">
+                <Link mt={4} color={'orange.400'}>
+                  Forgot password?
+                </Link>
+              </NextLink>
+              <Button
+                isLoading={loading}
+                type="submit"
+                bg={'orange.400'}
+                color={'white'}
+                _hover={{
+                  bg: 'orange.500',
+                }}
+              >
+                Sign in
+              </Button>
+            </Stack>
+          </form>
+        </Stack>
+      </Box>
+    </AuthFormWrapper>
   );
 }
 
