@@ -1,4 +1,4 @@
-import { Button, Center } from '@chakra-ui/react';
+import { Box, Button, Center } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
@@ -12,7 +12,7 @@ const NewRecipe = () => {
   useAuth();
   return (
     <Layout>
-      <Center>
+      <Center mt="4">
         <Formik<{
           name: string;
           description: string;
@@ -24,18 +24,14 @@ const NewRecipe = () => {
             const errors: Record<string, string> = {};
 
             if (name.length < 4) {
-              return {
-                name: 'should be longer than 3 characters',
-              };
+              errors.name = 'name should be longer than 3 characters';
             }
             if (description.length < 4) {
-              return {
-                description: 'should be longer than 3 characters',
-              };
+              errors.description = 'description should be longer than 3 characters';
             }
             return errors;
           }}
-          onSubmit={async (values) => {
+          onSubmit={async (values, { setFieldError }) => {
             const { ok } = await fetch(`http://localhost:3000/r/${values.name}`, {
               method: 'POST',
               body: intoFormBody(values),
@@ -45,6 +41,8 @@ const NewRecipe = () => {
 
             if (ok) {
               push(`/r/${values.name}`);
+            } else {
+              setFieldError('name', 'A recipe with this name already exists');
             }
           }}
         >
@@ -57,25 +55,27 @@ const NewRecipe = () => {
                 autoFocus
                 errors={errors}
               />
+              <Box mt="4" />
               <InputField
                 name="description"
                 label="Description"
                 placeholder="recipe description"
-                autoFocus
                 errors={errors}
               />
-              <Button
-                type="submit"
-                isLoading={isSubmitting}
-                fontWeight={600}
-                color={'white'}
-                bg={'orange.400'}
-                _hover={{
-                  bg: 'orange.300',
-                }}
-              >
-                Create
-              </Button>
+              <Center mt="4">
+                <Button
+                  type="submit"
+                  isLoading={isSubmitting}
+                  fontWeight={600}
+                  color={'white'}
+                  bg={'orange.400'}
+                  _hover={{
+                    bg: 'orange.300',
+                  }}
+                >
+                  Create
+                </Button>
+              </Center>
             </Form>
           )}
         </Formik>

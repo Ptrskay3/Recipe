@@ -14,9 +14,8 @@ export const InputField: React.FC<
   }
 > = ({ label, errors, ref: _, className, ...props }) => {
   const [field, meta] = useField(props);
-
   return (
-    <FormControl id={props.name} isInvalid={!!errors?.name}>
+    <FormControl id={props.name} isInvalid={!!meta.error}>
       <FormLabel htmlFor={props.name}>{label}</FormLabel>
       <Input {...field} {...props} />
       <FormErrorMessage>{meta.touched && meta.error ? meta.error : null}</FormErrorMessage>
