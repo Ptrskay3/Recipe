@@ -1,4 +1,4 @@
-import { Box, Center, useColorModeValue, Heading, Text, Stack } from '@chakra-ui/react';
+import { Box, Center, Heading, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 
 interface IngredientProps {
   name: string;

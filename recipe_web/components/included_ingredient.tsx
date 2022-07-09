@@ -2,12 +2,12 @@ import { DeleteIcon } from '@chakra-ui/icons';
 import {
   Box,
   Center,
-  useColorModeValue,
-  Stack,
   Editable,
-  EditablePreview,
   EditableInput,
+  EditablePreview,
   IconButton,
+  Stack,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useState } from 'react';

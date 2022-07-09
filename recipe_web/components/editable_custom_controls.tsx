@@ -1,5 +1,5 @@
 import { CheckIcon, CloseIcon, EditIcon } from '@chakra-ui/icons';
-import { useEditableControls, ButtonGroup, IconButton, Flex } from '@chakra-ui/react';
+import { ButtonGroup, Flex, IconButton, useEditableControls } from '@chakra-ui/react';
 
 export function EditableControls() {
   const { isEditing, getSubmitButtonProps, getCancelButtonProps, getEditButtonProps } =
@@ -14,11 +14,7 @@ export function EditableControls() {
     </Flex>
   ) : (
     <Flex justifyContent="center">
-      <IconButton
-        size="xs"
-        icon={<EditIcon />}
-        {...(getEditButtonProps() as any)}
-      />
+      <IconButton size="xs" icon={<EditIcon />} {...(getEditButtonProps() as any)} />
     </Flex>
   );
 }

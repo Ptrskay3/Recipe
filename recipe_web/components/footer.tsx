@@ -1,5 +1,4 @@
 import { ButtonGroup, Container, IconButton, Stack, Text } from '@chakra-ui/react';
-import * as React from 'react';
 import { FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa';
 
 export const Footer = () => (

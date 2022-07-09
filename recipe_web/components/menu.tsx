@@ -1,5 +1,4 @@
 import {
-  Button,
   Heading,
   Menu,
   MenuButton,
@@ -10,7 +9,6 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import * as React from 'react';
 import { primaryButtonStyles } from '../common/ button_styles';
 
 export const UserMenu = ({ name }: { name: string }) => {
@@ -37,7 +35,13 @@ export const UserMenu = ({ name }: { name: string }) => {
       >
         {name}
       </MenuButton>
-      <MenuList minWidth="240px" bg={useColorModeValue('white', 'gray.800')} border={'0'} boxShadow={'xl'} minW={'sm'}>
+      <MenuList
+        minWidth="240px"
+        bg={useColorModeValue('white', 'gray.800')}
+        border={'0'}
+        boxShadow={'xl'}
+        minW={'sm'}
+      >
         <MenuGroup title="Profile">
           <MenuItem
             value="profile"

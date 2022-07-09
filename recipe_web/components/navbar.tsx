@@ -1,26 +1,27 @@
+import { ChevronDownIcon, ChevronRightIcon, CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 import {
   Box,
-  Flex,
-  Text,
-  IconButton,
-  Stack,
+  Button,
+  Center,
   Collapse,
+  Flex,
+  HStack,
   Icon,
+  IconButton,
   Link,
   Popover,
-  PopoverTrigger,
   PopoverContent,
-  useColorModeValue,
+  PopoverTrigger,
+  Stack,
+  Text,
   useBreakpointValue,
-  useDisclosure,
-  Button,
   useColorMode,
-  Center,
+  useColorModeValue,
+  useDisclosure,
 } from '@chakra-ui/react';
-import { HamburgerIcon, CloseIcon, ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons';
-import { FaMoon, FaSun } from 'react-icons/fa';
-import { UserMenu } from './menu';
+import { FaMoon, FaPlus, FaSun } from 'react-icons/fa';
 import { useMe } from '../hooks/me';
+import { UserMenu } from './menu';
 
 export default function WithSubnavigation() {
   const { isOpen, onToggle } = useDisclosure();
@@ -99,7 +100,16 @@ export default function WithSubnavigation() {
             </>
           ) : (
             <Center>
-              <UserMenu name={me.name}></UserMenu>
+              <HStack>
+                <IconButton
+                  as={'a'}
+                  href="/r/new"
+                  aria-label="new recipe"
+                  icon={<FaPlus />}
+                  mr="4"
+                ></IconButton>
+                <UserMenu name={me.name}></UserMenu>
+              </HStack>
             </Center>
           )}
         </Stack>

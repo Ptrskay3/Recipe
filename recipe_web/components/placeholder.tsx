@@ -10,7 +10,7 @@ import {
   SimpleGrid,
   StackDivider,
   useColorModeValue,
-  VisuallyHidden,
+  Image,
   List,
   ListItem,
 } from '@chakra-ui/react';
@@ -24,7 +24,17 @@ export default function Placeholder() {
         spacing={{ base: 8, md: 10 }}
         py={{ base: 18, md: 24 }}
       >
-        <Flex></Flex>
+        <Flex>
+          <Image
+            rounded={'md'}
+            alt={'product image'}
+            src={'http://localhost:3000/assets/apple.jpeg'}
+            fit={'cover'}
+            align={'center'}
+            w={'100%'}
+            h={{ base: '100%', sm: '400px', lg: '500px' }}
+          />
+        </Flex>
         <Stack spacing={{ base: 6, md: 10 }}>
           <Box as={'header'}>
             <Heading
@@ -80,7 +90,7 @@ export default function Placeholder() {
                   <ListItem>Master Chronometer Certified</ListItem> <ListItem>Tachymeter</ListItem>
                 </List>
                 <List spacing={2}>
-                  <ListItem>Anti‑magnetic</ListItem>
+                  <ListItem>Anti-magnetic</ListItem>
                   <ListItem>Chronometer</ListItem>
                   <ListItem>Small seconds</ListItem>
                 </List>
@@ -132,7 +142,7 @@ export default function Placeholder() {
                   <Text as={'span'} fontWeight={'bold'}>
                     Crystal:
                   </Text>{' '}
-                  Domed, scratch‑resistant sapphire crystal with anti‑reflective treatment inside
+                  Domed, scratch-resistant sapphire crystal with anti-reflective treatment inside
                 </ListItem>
                 <ListItem>
                   <Text as={'span'} fontWeight={'bold'}>
