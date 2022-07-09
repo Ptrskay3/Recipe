@@ -12,10 +12,12 @@ import { useFormik } from 'formik';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useSWRConfig } from 'swr';
+import { useAddIngredient } from '../stores/useAddIngredient';
 import { intoFormBody } from '../utils/form';
 
-export function AddIngredientForm({ setIsOpen }: any) {
+export function AddIngredientForm() {
   const { mutate } = useSWRConfig();
+  const setAddIngredientOpen = useAddIngredient((state) => state.setAddIngredientOpen);
 
   const router = useRouter();
   const { name } = router.query;
@@ -50,7 +52,7 @@ export function AddIngredientForm({ setIsOpen }: any) {
         setErrors({ name: 'This ingredient does not exist' });
         return;
       }
-      setIsOpen(false);
+      setAddIngredientOpen(false);
       mutate(`http://localhost:3000/r/${name}`, true);
     },
   });

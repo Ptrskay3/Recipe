@@ -1,18 +1,18 @@
-import { useRouter } from 'next/router';
-import { Layout } from '../../components/layout';
-import { Box, Center, CircularProgress, Flex, Heading, IconButton, Text } from '@chakra-ui/react';
-import useSWR from 'swr';
-import { fetcher } from '../../utils/fetcher';
-import IncludedIngredient from '../../components/included_ingredient';
 import { PlusSquareIcon } from '@chakra-ui/icons';
-import { useState } from 'react';
+import { Box, Center, CircularProgress, Flex, Heading, IconButton, Text } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
+import useSWR from 'swr';
 import { AddIngredientForm } from '../../components/add_ingredient_form';
+import IncludedIngredient from '../../components/included_ingredient';
+import { Layout } from '../../components/layout';
+import { useAddIngredient } from '../../stores/useAddIngredient';
+import { fetcher } from '../../utils/fetcher';
 
 export default function RecipeDetailed() {
   const router = useRouter();
   const { name } = router.query;
-
-  const [isAddIngredientOpen, setIsAddIngredientOpen] = useState(false);
+  const addIngredientOpen = useAddIngredient((state) => state.addIngredientOpen);
+  const setAddIngredientOpen = useAddIngredient((state) => state.setAddIngredientOpen);
 
   const { data, error } = useSWR(!!name ? `http://localhost:3000/r/${name}` : null, fetcher);
 
@@ -48,14 +48,14 @@ export default function RecipeDetailed() {
             </Flex>
           </Center>
           <Center>
-            {isAddIngredientOpen ? (
-              <AddIngredientForm setIsOpen={setIsAddIngredientOpen} />
+            {addIngredientOpen ? (
+              <AddIngredientForm />
             ) : (
               <IconButton
                 aria-label="delete ingredient"
                 size="md"
                 icon={<PlusSquareIcon />}
-                onClick={() => setIsAddIngredientOpen(true)}
+                onClick={() => setAddIngredientOpen(true)}
               />
             )}
           </Center>
