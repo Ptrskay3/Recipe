@@ -32,7 +32,7 @@ const NewRecipe = () => {
             return errors;
           }}
           onSubmit={async (values, { setFieldError }) => {
-            const { ok } = await fetch(`http://localhost:3000/r/${values.name}`, {
+            const { ok } = await fetch(`http://localhost:3000/r/new`, {
               method: 'POST',
               body: intoFormBody(values),
               credentials: 'include',

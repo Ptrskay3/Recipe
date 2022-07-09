@@ -14,10 +14,8 @@ use crate::{
 
 pub fn recipe_router() -> Router {
     Router::new()
-        .route(
-            "/:name",
-            get(get_recipe_with_ingredients).post(insert_barebone_recipe),
-        )
+        .route("/", post(insert_barebone_recipe))
+        .route("/:name", get(get_recipe_with_ingredients))
         .route(
             "/:name/edit",
             post(add_or_update_ingredient_to_recipe).delete(delete_ingredient_from_recipe),
