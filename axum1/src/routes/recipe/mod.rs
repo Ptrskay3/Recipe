@@ -15,7 +15,9 @@ use crate::{
 pub fn recipe_router() -> Router {
     Router::new()
         .route("/", post(insert_barebone_recipe))
+        .route("/new-full", post(insert_full_recipe))
         .route("/:name", get(get_recipe_with_ingredients))
+        .route("/my-recipes", get(my_recipes))
         .route(
             "/:name/edit",
             post(add_or_update_ingredient_to_recipe).delete(delete_ingredient_from_recipe),
@@ -172,4 +174,91 @@ async fn delete_ingredient_from_recipe(
     .context("Failed to delete from ingredients_to_recipes")?;
 
     Ok(())
+}
+
+async fn insert_full_recipe(
+    DatabaseConnection(mut conn): DatabaseConnection,
+    // We want to accept Json input here instead of Form, because the structure
+    // of `RecipeWithIngredients` is too complicated to handle with a form.
+    Json(recipe_with_ingredients): Json<RecipeWithIngredients>,
+    auth_user: AuthUser,
+) -> Result<(), ApiError> {
+    let RecipeWithIngredients {
+        name,
+        description,
+        ingredients,
+    } = recipe_with_ingredients;
+    let recipe = sqlx::query!(
+        r#"
+        INSERT INTO recipes ("name", "description", "creator_id")
+        VALUES ($1, $2, $3)
+        RETURNING id;
+        "#,
+        name,
+        description,
+        *auth_user
+    )
+    .fetch_one(&mut conn)
+    .await
+    .map_err(|_| ApiError::Conflict)?;
+
+    for ingredient in ingredients {
+        sqlx::query!(
+            r#"
+        INSERT INTO ingredients_to_recipes (ingredient_id, recipe_id, quantity, quantity_unit)
+        VALUES (
+            (SELECT id FROM ingredients WHERE name = $1),
+            $2,
+            $3,
+            $4
+        ) ON CONFLICT (ingredient_id, recipe_id) DO
+        UPDATE SET
+            quantity = EXCLUDED.quantity,
+            quantity_unit = EXCLUDED.quantity_unit;
+        "#,
+            ingredient.name,
+            recipe.id,
+            ingredient.quantity,
+            ingredient.quantity_unit
+        )
+        .execute(&mut conn)
+        .await
+        .map_err(|_| {
+            ApiError::unprocessable_entity([(
+                "ingredient-name",
+                format!("{} is not an ingredient", ingredient.name),
+            )])
+        })?;
+    }
+
+    Ok(())
+}
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
+struct RecipeWithIngredientCount {
+    name: String,
+    description: String,
+    ingredient_count: Option<i64>,
+}
+
+async fn my_recipes(
+    DatabaseConnection(mut conn): DatabaseConnection,
+    auth_user: AuthUser,
+) -> Result<Json<Vec<RecipeWithIngredientCount>>, ApiError> {
+    let results = sqlx::query_as!(
+        RecipeWithIngredientCount,
+        r#"
+        SELECT DISTINCT r.name,
+                r.description,
+                COUNT(ir.recipe_id) OVER (PARTITION BY r.id) AS ingredient_count
+        FROM recipes r
+        LEFT JOIN ingredients_to_recipes ir ON ir.recipe_id = r.id
+        WHERE creator_id = $1;
+        "#,
+        *auth_user
+    )
+    .fetch_all(&mut conn)
+    .await?;
+
+    Ok(Json(results))
 }

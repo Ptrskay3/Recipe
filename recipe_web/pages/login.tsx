@@ -50,8 +50,8 @@ function Login() {
       if (response.ok) {
         router.replace('/');
       } else {
-        let err = await response.json();
-        setErrors(err.errors);
+        let { errors } = await response.json();
+        setErrors(errors);
       }
     },
   });
