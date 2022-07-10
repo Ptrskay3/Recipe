@@ -17,3 +17,6 @@ email_client:
   sender_email: peter.leeh@bitgap.com
   authorization_token: b40d6f26-c6f7-4f90-9381-b5f26579e2f9
   timeout_milliseconds: 10000
+meili:
+  url: http://localhost:7700
+  master_key: SUPER_SECRET_KEY

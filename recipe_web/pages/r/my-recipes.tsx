@@ -5,7 +5,6 @@ import {
   Flex,
   Heading,
   ListItem,
-  OrderedList,
   Text,
   UnorderedList,
 } from '@chakra-ui/react';

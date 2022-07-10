@@ -4,3 +4,4 @@ redis-data/
 postgres/
 data/
 /volumes/
+docker/volumes/

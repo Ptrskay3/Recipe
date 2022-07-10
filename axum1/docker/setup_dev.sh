@@ -7,6 +7,7 @@ directories=(
     "volumes/pgadmin"
     "volumes/redis-data"
     "volumes/postgres"
+    "volumes/meili"
 )
 
 mkdir -p "${directories[@]}"

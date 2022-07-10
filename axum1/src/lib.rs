@@ -7,6 +7,7 @@ pub mod error;
 pub mod extractors;
 pub mod queue;
 pub mod routes;
+pub mod search;
 pub mod session;
 pub mod startup;
 pub mod utils;

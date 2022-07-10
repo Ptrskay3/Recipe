@@ -10,7 +10,7 @@ use crate::{
     queue::email::{Email, EmailClient},
 };
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub redis: RedisSettings,
@@ -18,9 +18,15 @@ pub struct Settings {
     pub frontend_url: String,
     pub sentry_dsn: Option<String>,
     pub email_client: EmailClientSettings,
+    pub meili: MeiliConfig,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
+pub struct MeiliConfig {
+    pub url: String,
+    pub master_key: String,
+}
+#[derive(Deserialize, Clone)]
 pub struct EmailClientSettings {
     pub base_url: String,
     pub sender_email: String,
@@ -49,7 +55,7 @@ impl EmailClientSettings {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct DatabaseSettings {
     pub username: String,
     pub password: Secret<String>,
@@ -59,7 +65,7 @@ pub struct DatabaseSettings {
     pub require_ssl: bool,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct RedisSettings {
     pub host: String,
     pub port: u16,

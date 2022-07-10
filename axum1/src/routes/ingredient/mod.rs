@@ -34,7 +34,7 @@ pub fn ingredient_router() -> Router {
         .route("/favorite/:name", post(make_favorite))
 }
 
-#[derive(sqlx::Type, Debug, Deserialize, Serialize)]
+#[derive(sqlx::Type, Debug, Deserialize, Serialize, Clone)]
 #[sqlx(rename_all = "snake_case", type_name = "food_category")]
 #[serde(rename_all = "snake_case")]
 pub enum FoodCategory {
