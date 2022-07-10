@@ -10,10 +10,15 @@ import {
   UnorderedList,
 } from '@chakra-ui/react';
 import useSWR from 'swr';
-import IncludedIngredient from '../../components/included_ingredient';
 import { Layout } from '../../components/layout';
 import { fetcher } from '../../utils/fetcher';
 import { useAuth } from '../../utils/useAuth';
+
+interface IRecipe {
+  name: string;
+  description: string;
+  ingredient_count: number;
+}
 
 export default function MyRecipes() {
   useAuth();
@@ -44,19 +49,15 @@ export default function MyRecipes() {
         <Box>
           <Center mt="14">
             <UnorderedList>
-              {data.map(
-                (recipe: { name: string; description: string; ingredient_count: number }) => {
-                  return (
-                    <ListItem key={recipe.name}>
-                      <Flex as="a" href={`/r/${recipe.name}`} _hover={{ color: 'orange.400' }}>
-                        <Heading>{recipe.name}</Heading>
-                        <Text m={4}>{recipe.description}</Text>
-                        <Text m={4}>{'ingredients: ' + recipe.ingredient_count}</Text>
-                      </Flex>
-                    </ListItem>
-                  );
-                }
-              )}
+              {data.map((recipe: IRecipe) => (
+                <ListItem key={recipe.name}>
+                  <Flex as="a" href={`/r/${recipe.name}`} _hover={{ color: 'orange.400' }}>
+                    <Heading>{recipe.name}</Heading>
+                    <Text m={4}>{recipe.description}</Text>
+                    <Text m={4}>{'ingredients: ' + recipe.ingredient_count}</Text>
+                  </Flex>
+                </ListItem>
+              ))}
             </UnorderedList>
           </Center>
         </Box>

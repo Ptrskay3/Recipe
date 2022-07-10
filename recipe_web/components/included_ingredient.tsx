@@ -7,6 +7,7 @@ import {
   EditablePreview,
   IconButton,
   Stack,
+  Text,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
@@ -83,15 +84,9 @@ export default function IncludedIngredient({
           }}
         ></Box>
         <Stack pt={10} align={'center'}>
-          <Editable
-            defaultValue={name}
-            fontSize={'xl'}
-            textTransform={'uppercase'}
-            color={'orange.400'}
-          >
-            <EditablePreview />
-            <EditableInput textAlign={'center'} />
-          </Editable>
+          <Text fontSize={'xl'} textTransform={'uppercase'} color={'orange.400'}>
+            {name}
+          </Text>
           <Editable
             submitOnBlur={true}
             defaultValue={quantity}
