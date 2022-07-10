@@ -1,17 +1,10 @@
 import { PlusSquareIcon } from '@chakra-ui/icons';
-import {
-  Box,
-  Button,
-  Center,
-  CircularProgress,
-  Flex,
-  Heading,
-  IconButton,
-  Text,
-} from '@chakra-ui/react';
+import { Box, Center, CircularProgress, Flex, Heading, IconButton, Text } from '@chakra-ui/react';
+import { instantMeiliSearch } from '@meilisearch/instant-meilisearch';
+import { Highlight, Hits, InstantSearch, SearchBox } from 'react-instantsearch-hooks-web';
 import { useRouter } from 'next/router';
 import { FaHeart, FaHeartBroken } from 'react-icons/fa';
-import useSWR, { mutate, useSWRConfig } from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import { AddIngredientForm } from '../../components/add_ingredient_form';
 import IncludedIngredient from '../../components/included_ingredient';
 import { Layout } from '../../components/layout';
@@ -20,6 +13,7 @@ import { useAddIngredient } from '../../stores/useAddIngredient';
 import { fetcher } from '../../utils/fetcher';
 
 export default function RecipeDetailed() {
+  const searchClient = instantMeiliSearch('http://localhost:7700');
   const { me } = useMe();
   const { mutate } = useSWRConfig();
   const router = useRouter();
@@ -39,6 +33,7 @@ export default function RecipeDetailed() {
       mutate(`http://localhost:3000/r/${name}`);
     }
   };
+  const Hit = ({ hit }: any) => <Text>{hit.name}</Text>;
 
   if (error)
     return (
@@ -58,7 +53,6 @@ export default function RecipeDetailed() {
         </Center>
       </Layout>
     );
-
   return (
     data && (
       <Layout>
@@ -83,7 +77,13 @@ export default function RecipeDetailed() {
           </Center>
           <Center>
             {addIngredientOpen ? (
-              <AddIngredientForm />
+              <>
+                <InstantSearch indexName="ingredients" searchClient={searchClient}>
+                  <SearchBox />
+                  <Hits results={1} hitComponent={Hit} />
+                </InstantSearch>
+                <AddIngredientForm />
+              </>
             ) : (
               <IconButton
                 aria-label="delete ingredient"
