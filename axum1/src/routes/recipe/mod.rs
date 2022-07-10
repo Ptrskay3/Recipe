@@ -5,11 +5,11 @@ use axum::{
     Json, Router,
 };
 use axum_extra::extract::Form;
-use sqlx::Acquire;
+use sqlx::{types::BigDecimal, Acquire};
 
 use crate::{
     error::ApiError,
-    extractors::{AuthUser, DatabaseConnection},
+    extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
 };
 
 pub fn recipe_router() -> Router {
@@ -17,6 +17,7 @@ pub fn recipe_router() -> Router {
         .route("/", post(insert_barebone_recipe))
         .route("/new-full", post(insert_full_recipe))
         .route("/:name", get(get_recipe_with_ingredients))
+        .route("/:name/favorite", post(toggle_favorite_recipe))
         .route("/my-recipes", get(my_recipes))
         .route(
             "/:name/edit",
@@ -24,6 +25,13 @@ pub fn recipe_router() -> Router {
         )
 }
 
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
+struct RecipeWithIngredientsAndFav {
+    name: String,
+    description: String,
+    ingredients: Vec<DetailedIngredient>,
+    favorited: bool,
+}
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
 struct RecipeWithIngredients {
     name: String,
@@ -38,11 +46,12 @@ struct DetailedIngredient {
     quantity_unit: String,
 }
 
-#[tracing::instrument(skip(conn))]
+#[tracing::instrument(skip(conn, maybe_auth_user))]
 async fn get_recipe_with_ingredients(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path(name): Path<String>,
-) -> Result<Json<RecipeWithIngredients>, ApiError> {
+    maybe_auth_user: MaybeAuthUser,
+) -> Result<Json<RecipeWithIngredientsAndFav>, ApiError> {
     let mut tx = conn.begin().await?;
 
     // A little bit clunky, but better be safe than overly smart.
@@ -75,12 +84,30 @@ async fn get_recipe_with_ingredients(
     .fetch_all(&mut tx)
     .await
     .context("Failed to query recipe ingredients")?;
+
+    let favorited = if let Some(user_id) = maybe_auth_user.into_inner() {
+        sqlx::query!(
+            r#"
+        SELECT 1 as _e FROM favorite_recipe
+        WHERE user_id = $1 AND recipe_id = (SELECT id FROM recipes WHERE name = $2)"#,
+            *user_id,
+            recipe.name
+        )
+        .fetch_optional(&mut tx)
+        .await
+        .context("failed to query for favorite recipes")?
+        .is_some()
+    } else {
+        false
+    };
+
     tx.commit().await?;
 
-    Ok(Json(RecipeWithIngredients {
+    Ok(Json(RecipeWithIngredientsAndFav {
         ingredients,
         name: recipe.name,
         description: recipe.description,
+        favorited,
     }))
 }
 
@@ -261,4 +288,34 @@ async fn my_recipes(
     .await?;
 
     Ok(Json(results))
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+enum FavoriteAction {
+    Created,
+    Deleted,
+}
+
+async fn toggle_favorite_recipe(
+    DatabaseConnection(mut conn): DatabaseConnection,
+    Path(name): Path<String>,
+    auth_user: AuthUser,
+) -> Result<Json<FavoriteAction>, ApiError> {
+    let result = sqlx::query!(
+        // This is a helper function written in the `create_favorite_recipe` migration.
+        // It helps to easily manage a 'toggle' functionality for marking favorites.
+        "SELECT toggle_favorite_recipe($1, (SELECT id FROM recipes WHERE name = $2))",
+        *auth_user,
+        name,
+    )
+    .fetch_one(&mut conn)
+    .await
+    .map_err(|_| ApiError::BadRequest)?;
+
+    let action = if result.toggle_favorite_recipe == Some(BigDecimal::from(0)) {
+        FavoriteAction::Deleted
+    } else {
+        FavoriteAction::Created
+    };
+    Ok(Json(action))
 }
