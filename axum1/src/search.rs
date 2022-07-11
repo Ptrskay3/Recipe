@@ -24,13 +24,14 @@ async fn run_meili_indexer(
 ) -> Result<(), anyhow::Error> {
     loop {
         let records = get_ingredient_records(&pool).await?;
+        tracing::info!("started indexing ingredients");
         meili_client
             .index("ingredients")
             .add_documents(&records, None)
             .await
             .unwrap();
         tracing::info!("ran indexing on ingredients...");
-        tokio::time::sleep(std::time::Duration::from_secs(100)).await;
+        tokio::time::sleep(std::time::Duration::from_secs(3600)).await;
     }
 }
 

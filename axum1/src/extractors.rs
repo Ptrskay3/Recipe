@@ -49,25 +49,6 @@ where
     }
 }
 
-#[async_trait]
-impl<B> FromRequest<B> for AuthUser
-where
-    B: Send,
-{
-    type Rejection = ApiError;
-
-    async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let Extension(session) = Extension::<Session>::from_request(req)
-            .await
-            .expect("`SessionLayer` should be added");
-
-        session
-            .get::<uuid::Uuid>("user_id")
-            .map(Self::new)
-            .ok_or(ApiError::Unauthorized)
-    }
-}
-
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, Copy)]
 pub struct AuthUser(uuid::Uuid);
 
@@ -85,12 +66,22 @@ impl Deref for AuthUser {
     }
 }
 
-pub struct AuthRedirect;
+#[async_trait]
+impl<B> FromRequest<B> for AuthUser
+where
+    B: Send,
+{
+    type Rejection = ApiError;
 
-impl IntoResponse for AuthRedirect {
-    fn into_response(self) -> Response {
-        // FIXME: where to redirect?
-        Redirect::temporary("/auth").into_response()
+    async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
+        let Extension(session) = Extension::<Session>::from_request(req)
+            .await
+            .expect("`SessionLayer` should be added");
+
+        session
+            .get::<uuid::Uuid>("user_id")
+            .map(Self::new)
+            .ok_or(ApiError::Unauthorized)
     }
 }
 
