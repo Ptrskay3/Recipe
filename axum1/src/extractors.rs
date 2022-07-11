@@ -7,7 +7,6 @@ use axum::{
     async_trait,
     extract::{FromRequest, RequestParts},
     http::StatusCode,
-    response::{IntoResponse, Redirect, Response},
     Extension,
 };
 use sqlx::{pool, PgPool, Postgres};

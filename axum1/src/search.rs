@@ -10,6 +10,14 @@ pub struct Ingredient {
     calories_per_100g: f32,
     category: Vec<FoodCategory>,
     g_per_piece: Option<f32>,
+    protein: f32,
+    water: f32,
+    fat: f32,
+    sugar: f32,
+    carbohydrate: f32,
+    fiber: f32,
+    caffeine: f32,
+    contains_alcohol: bool,
 }
 
 pub async fn run_meili_indexer_until_stopped(config: Settings) -> Result<(), anyhow::Error> {
@@ -40,7 +48,8 @@ async fn get_ingredient_records(pool: &Pool<Postgres>) -> Result<Vec<Ingredient>
     let records = sqlx::query_as!(
         Ingredient,
         r#"
-        SELECT id, name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece
+        SELECT id, name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece,
+         protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol
         FROM ingredients
         "#
     )

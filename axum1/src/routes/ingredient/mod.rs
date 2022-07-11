@@ -53,6 +53,7 @@ pub enum FoodCategory {
     DesertsAndSweets,
     Supplements,
     Beverage,
+    Uncategorized,
 }
 
 impl PgHasArrayType for FoodCategory {
@@ -67,6 +68,14 @@ pub struct Ingredient {
     pub calories_per_100g: f32,
     pub category: Vec<FoodCategory>,
     pub g_per_piece: Option<f32>,
+    pub protein: f32,
+    pub water: f32,
+    pub fat: f32,
+    pub sugar: f32,
+    pub carbohydrate: f32,
+    pub fiber: f32,
+    pub caffeine: f32,
+    pub contains_alcohol: bool,
 }
 
 #[async_trait]
@@ -81,7 +90,8 @@ impl Queryable for Ingredient {
         let query = sqlx::query_as!(
             Self,
             r#"
-            SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece
+            SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece,
+            protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol
             FROM ingredients
             WHERE id = $1;
             "#,
@@ -100,7 +110,8 @@ impl Queryable for Ingredient {
         let query = sqlx::query_as!(
             Self,
             r#"
-            SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece
+            SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece,
+            protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol
             FROM ingredients
             WHERE name = $1;
             "#,
@@ -119,7 +130,9 @@ async fn all_ingredients(
     let rows: Vec<_> = sqlx::query_as!(
         Ingredient,
         r#"
-        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece FROM ingredients;
+        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece,
+        protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol
+        FROM ingredients;
         "#
     )
     .fetch_all(&mut conn)
@@ -134,7 +147,8 @@ async fn ingredients_by_category(
     let rows: Vec<_> = sqlx::query_as!(
         Ingredient,
         r#"
-        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece
+        SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece,
+        protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol
         FROM ingredients
         WHERE $1 = ANY (category);
         "#,
@@ -153,13 +167,35 @@ async fn add_ingredient(
     let creator_id = auth_user.map(|u| *u);
     sqlx::query!(
         r#"
-        INSERT INTO ingredients (name, category, calories_per_100g, g_per_piece, creator_id)
-        VALUES ($1, $2, $3, $4, $5);
+        INSERT INTO ingredients (
+            name,
+            category,
+            calories_per_100g,
+            g_per_piece,
+            protein,
+            water,
+            fat,
+            sugar,
+            carbohydrate,
+            fiber,
+            caffeine,
+            contains_alcohol,
+            creator_id
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
         "#,
         ingredient.name,
         ingredient.category as _,
         ingredient.calories_per_100g,
         ingredient.g_per_piece,
+        ingredient.protein,
+        ingredient.water,
+        ingredient.fat,
+        ingredient.sugar,
+        ingredient.carbohydrate,
+        ingredient.fiber,
+        ingredient.caffeine,
+        ingredient.contains_alcohol,
         creator_id
     )
     .execute(&mut conn)
@@ -173,6 +209,14 @@ struct UpgradeIngredient {
     calories_per_100g: Option<f32>,
     category: Option<Vec<FoodCategory>>,
     g_per_piece: Option<Option<f32>>,
+    protein: Option<f32>,
+    water: Option<f32>,
+    fat: Option<f32>,
+    sugar: Option<f32>,
+    carbohydrate: Option<f32>,
+    fiber: Option<f32>,
+    caffeine: Option<f32>,
+    contains_alcohol: Option<bool>,
 }
 
 async fn upgrade_ingredient(
@@ -182,7 +226,9 @@ async fn upgrade_ingredient(
 ) -> Result<Json<Ingredient>, ApiError> {
     let mut tx = conn.begin().await?;
     let original = sqlx::query_as::<_, Ingredient>(
-        "SELECT name, category, calories_per_100g, g_per_piece FROM ingredients WHERE name = $1",
+        "SELECT name, category, calories_per_100g, g_per_piece,
+        protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol
+        FROM ingredients WHERE name = $1",
     )
     .bind(name.clone())
     .fetch_optional(&mut tx)
@@ -196,9 +242,18 @@ async fn upgrade_ingredient(
         SET name = $1,
             calories_per_100g = $2,
             category = $3,
-            g_per_piece = $4
-        WHERE name = $5
-        RETURNING name, category as "category!: Vec<FoodCategory>", calories_per_100g, g_per_piece
+            g_per_piece = $4,
+            protein = $5,
+            water = $6,
+            fat = $7,
+            sugar = $8,
+            carbohydrate = $9,
+            fiber = $10,
+            caffeine = $11,
+            contains_alcohol = $12
+        WHERE name = $13
+        RETURNING name, category as "category!: Vec<FoodCategory>", calories_per_100g, g_per_piece,
+                  protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol;
         "#,
         ingredient.name.unwrap_or(original.name),
         ingredient
@@ -206,6 +261,16 @@ async fn upgrade_ingredient(
             .unwrap_or(original.calories_per_100g),
         ingredient.category.unwrap_or(original.category) as _,
         ingredient.g_per_piece.unwrap_or(original.g_per_piece),
+        ingredient.protein.unwrap_or(original.protein),
+        ingredient.water.unwrap_or(original.water),
+        ingredient.fat.unwrap_or(original.fat),
+        ingredient.sugar.unwrap_or(original.sugar),
+        ingredient.carbohydrate.unwrap_or(original.carbohydrate),
+        ingredient.fiber.unwrap_or(original.fiber),
+        ingredient.caffeine.unwrap_or(original.caffeine),
+        ingredient
+            .contains_alcohol
+            .unwrap_or(original.contains_alcohol),
         name
     )
     .fetch_one(&mut tx)
@@ -234,7 +299,8 @@ async fn delete_ingredient(
         r#"
         DELETE FROM ingredients
         WHERE name = $1
-        RETURNING name, category as "category!: Vec<FoodCategory>", calories_per_100g, g_per_piece
+        RETURNING name, category as "category!: Vec<FoodCategory>", calories_per_100g, g_per_piece,
+                  protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol;
         "#,
         name
     )
