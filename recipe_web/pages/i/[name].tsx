@@ -46,22 +46,22 @@ export default function IngredientDetailed() {
             withModifiedAttributes={diffService(data, suggestions[0])}
           />
           {suggestions && suggestions.length > 0 && (
-            <Heading m="4">
-              <ArrowRightIcon></ArrowRightIcon>
-            </Heading>
-          )}
-          {suggestions && (
-            <Stack>
-              {suggestions.map(({ suggester, is_delete_vote, ...suggestion }: any) => (
-                <Ingredient
-                  key={suggester}
-                  withModifiedAttributes={diffService(data, suggestion)}
-                  isNew={true}
-                  is_delete_vote={is_delete_vote}
-                  {...suggestion}
-                />
-              ))}
-            </Stack>
+            <>
+              <Heading m="4">
+                <ArrowRightIcon></ArrowRightIcon>
+              </Heading>
+              <Stack>
+                {suggestions.map(({ suggester, is_delete_vote, ...suggestion }: any) => (
+                  <Ingredient
+                    key={suggester}
+                    withModifiedAttributes={diffService(data, suggestion)}
+                    isNew={true}
+                    isDeleteVote={is_delete_vote}
+                    {...suggestion}
+                  />
+                ))}
+              </Stack>
+            </>
           )}
         </Center>
       </Layout>
@@ -77,9 +77,19 @@ const diffService = (original: Record<string, any>, suggested: Record<string, an
   const originalKeys = Object.keys(original);
   return Object.entries(suggested)
     .map(([key, value]) => {
-      if (originalKeys.includes(key) && original[key] !== value) {
-        return key;
+      if (originalKeys.includes(key)) {
+        if (Array.isArray(value) && !arraysEqual(original[key], value)) {
+          return key;
+        } else if (!Array.isArray(value) && original[key] !== value) {
+          return key;
+        }
       }
     })
     .filter(Boolean);
 };
+
+function arraysEqual(a: any[], b: any[]): boolean {
+  a = Array.isArray(a) ? a : [];
+  b = Array.isArray(b) ? b : [];
+  return a.length === b.length && a.every((el, ix) => el === b[ix]);
+}

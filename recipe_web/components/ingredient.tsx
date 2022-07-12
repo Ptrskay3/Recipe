@@ -16,7 +16,7 @@ interface IngredientProps {
 interface ModifiedAttributes {
   withModifiedAttributes?: [keyof IngredientProps];
   isNew: boolean;
-  is_delete_vote: boolean;
+  isDeleteVote: boolean;
 }
 
 export default function Ingredient({
@@ -33,7 +33,7 @@ export default function Ingredient({
   contains_alcohol,
   withModifiedAttributes,
   isNew,
-  is_delete_vote,
+  isDeleteVote,
 }: IngredientProps & ModifiedAttributes) {
   const coloring = isNew ? 'green.400' : 'red.400';
 
@@ -76,8 +76,8 @@ export default function Ingredient({
             color={'orange.400'}
             fontSize={'xl'}
             textTransform={'uppercase'}
-            textColor={is_delete_vote ? 'red.400' : undefined}
-            as={is_delete_vote ? 'del' : undefined}
+            textColor={isDeleteVote ? 'red.400' : undefined}
+            as={isDeleteVote ? 'del' : undefined}
           >
             {name}
           </Text>
@@ -180,7 +180,12 @@ export default function Ingredient({
             {'Category'}
           </Text>
           <Stack direction={'row'} align={'center'}>
-            <Text fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+            <Text
+              fontSize={'2xl'}
+              fontFamily={'body'}
+              fontWeight={500}
+              textColor={withModifiedAttributes!.includes('category') ? coloring : undefined}
+            >
               {category.map(intoCategory).join(', ')}
             </Text>
           </Stack>

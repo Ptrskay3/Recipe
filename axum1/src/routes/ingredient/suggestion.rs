@@ -101,7 +101,7 @@ pub async fn get_ingredient_suggestions(
         r#"
         SELECT
             COALESCE(igs.name, i.name) AS name,
-            COALESCE(i.category, i.category) AS "category: Vec<FoodCategory>",
+            COALESCE(igs.category, i.category) AS "category: Vec<FoodCategory>",
             COALESCE(igs.calories_per_100g, i.calories_per_100g) AS calories_per_100g,
             COALESCE(igs.g_per_piece, i.g_per_piece) AS g_per_piece,
             COALESCE(igs.protein, i.protein) AS protein,
