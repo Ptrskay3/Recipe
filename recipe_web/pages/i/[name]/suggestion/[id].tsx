@@ -4,9 +4,8 @@ import { Center, CircularProgress, Heading, IconButton, Stack, Text } from '@cha
 import useSWR from 'swr';
 import { fetcher } from '../../../../utils/fetcher';
 import Ingredient from '../../../../components/ingredient';
-import { ArrowRightIcon } from '@chakra-ui/icons';
+import { ArrowRightIcon, CloseIcon } from '@chakra-ui/icons';
 import { diffObjects } from '../../../../utils/diff';
-import { useState } from 'react';
 import { FaCheck } from 'react-icons/fa';
 
 export default function IngredientDetailed() {
@@ -21,6 +20,13 @@ export default function IngredientDetailed() {
 
   const applySuggestion = async () => {
     const { ok } = await fetch(`http://localhost:3000/i/${name}/suggestion/${id}/apply`);
+    if (ok) {
+      router.push(`/i/${name}`);
+    }
+  };
+
+  const declineSuggestion = async () => {
+    const { ok } = await fetch(`http://localhost:3000/i/${name}/suggestion/${id}/decline`);
     if (ok) {
       router.push(`/i/${name}`);
     }
@@ -72,6 +78,11 @@ export default function IngredientDetailed() {
               onClick={applySuggestion}
               aria-label="apply"
               icon={<FaCheck />}
+            ></IconButton>
+            <IconButton
+              onClick={declineSuggestion}
+              aria-label="decline"
+              icon={<CloseIcon />}
             ></IconButton>
           </>
         </Center>
