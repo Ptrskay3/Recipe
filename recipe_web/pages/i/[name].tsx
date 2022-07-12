@@ -1,18 +1,19 @@
 import { useRouter } from 'next/router';
 import { Layout } from '../../components/layout';
-import { Center, CircularProgress, Divider, Heading, Stack, Text } from '@chakra-ui/react';
+import { Center, CircularProgress, Heading, Stack, Text } from '@chakra-ui/react';
 import useSWR from 'swr';
 import { fetcher } from '../../utils/fetcher';
 import Ingredient from '../../components/ingredient';
-import { ArrowForwardIcon, ArrowRightIcon } from '@chakra-ui/icons';
+import { ArrowRightIcon } from '@chakra-ui/icons';
 
 export default function IngredientDetailed() {
   const router = useRouter();
   const { name } = router.query;
 
   const { data, error } = useSWR(!!name ? `http://localhost:3000/i/${name}` : null, fetcher);
+  // TODO: move out the suggestion part to another route, leave this as a barebone ingredient
   const { data: suggestions, error: _ } = useSWR(
-    !!name ? `http://localhost:3000/i/${name}/suggestion` : null,
+    !!name ? `http://localhost:3000/i/${name}/suggestions` : null,
     fetcher
   );
 
@@ -51,7 +52,7 @@ export default function IngredientDetailed() {
                 <ArrowRightIcon></ArrowRightIcon>
               </Heading>
               <Stack>
-                {suggestions.map(({ suggester, is_delete_vote, ...suggestion }: any) => (
+                {suggestions.map(({ id, suggester, is_delete_vote, ...suggestion }: any) => (
                   <Ingredient
                     key={suggester}
                     withModifiedAttributes={diffService(data, suggestion)}

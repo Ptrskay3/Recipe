@@ -75,6 +75,7 @@ pub async fn add_ingredient_suggestion(
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
 pub struct SuggestedIngredient {
+    id: uuid::Uuid,
     name: Option<String>,
     calories_per_100g: Option<f32>,
     category: Option<Vec<FoodCategory>>,
@@ -100,6 +101,7 @@ pub async fn get_ingredient_suggestions(
         SuggestedIngredient,
         r#"
         SELECT
+            igs.id,
             COALESCE(igs.name, i.name) AS name,
             COALESCE(igs.category, i.category) AS "category: Vec<FoodCategory>",
             COALESCE(igs.calories_per_100g, i.calories_per_100g) AS calories_per_100g,
@@ -124,4 +126,55 @@ pub async fn get_ingredient_suggestions(
     .fetch_all(&mut conn)
     .await?;
     Ok(Json(suggestions))
+}
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
+pub struct Suggestion {
+    name: Option<String>,
+    calories_per_100g: Option<f32>,
+    category: Option<Vec<FoodCategory>>,
+    g_per_piece: Option<f32>,
+    protein: Option<f32>,
+    water: Option<f32>,
+    fat: Option<f32>,
+    sugar: Option<f32>,
+    carbohydrate: Option<f32>,
+    fiber: Option<f32>,
+    caffeine: Option<f32>,
+    contains_alcohol: Option<bool>,
+    is_delete_vote: Option<bool>,
+}
+
+pub async fn get_ingredient_suggestion(
+    DatabaseConnection(mut conn): DatabaseConnection,
+    Path((name, id)): Path<(String, uuid::Uuid)>,
+) -> Result<Json<Suggestion>, ApiError> {
+    let suggestion = sqlx::query_as!(
+        Suggestion,
+        r#"
+        SELECT
+            COALESCE(igs.name, i.name) AS name,
+            COALESCE(igs.category, i.category) AS "category: Vec<FoodCategory>",
+            COALESCE(igs.calories_per_100g, i.calories_per_100g) AS calories_per_100g,
+            COALESCE(igs.g_per_piece, i.g_per_piece) AS g_per_piece,
+            COALESCE(igs.protein, i.protein) AS protein,
+            COALESCE(igs.water, i.water) AS water,
+            COALESCE(igs.fat, i.fat) AS fat,
+            COALESCE(igs.sugar, i.sugar) AS sugar,
+            COALESCE(igs.carbohydrate, i.carbohydrate) AS carbohydrate,
+            COALESCE(igs.fiber, i.fiber) AS fiber,
+            COALESCE(igs.caffeine, i.caffeine) AS caffeine,
+            COALESCE(igs.contains_alcohol, i.contains_alcohol) AS contains_alcohol,
+            is_delete_vote
+        FROM ingredient_suggestions igs
+        INNER JOIN ingredients i ON igs.ingredient_id = i.id
+        WHERE i.name = $1 AND igs.id = $2;
+        "#,
+        name,
+        id
+    )
+    .fetch_optional(&mut conn)
+    .await?
+    .ok_or(ApiError::NotFound)?;
+    Ok(Json(suggestion))
 }

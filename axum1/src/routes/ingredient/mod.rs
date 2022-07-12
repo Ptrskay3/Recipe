@@ -22,7 +22,7 @@ use crate::{
 pub mod suggestion;
 use suggestion::add_ingredient_suggestion;
 
-use self::suggestion::get_ingredient_suggestions;
+use self::suggestion::{get_ingredient_suggestion, get_ingredient_suggestions};
 
 #[must_use]
 pub fn ingredient_router() -> Router {
@@ -37,10 +37,9 @@ pub fn ingredient_router() -> Router {
                 .patch(upgrade_ingredient),
         )
         .route("/favorite/:name", post(make_favorite)) // TODO: swap route to `/:name/favorite` maybe for consistency?
-        .route(
-            "/:name/suggestion",
-            post(add_ingredient_suggestion).get(get_ingredient_suggestions),
-        )
+        .route("/:name/suggestion", post(add_ingredient_suggestion))
+        .route("/:name/suggestion/:id", get(get_ingredient_suggestion))
+        .route("/:name/suggestions", get(get_ingredient_suggestions))
 }
 
 #[derive(sqlx::Type, Debug, Deserialize, Serialize, Clone)]
