@@ -1,7 +1,15 @@
 import { useRouter } from 'next/router';
 import { Layout } from '../../../../components/layout';
-import { Center, CircularProgress, Heading, IconButton, Stack, Text } from '@chakra-ui/react';
-import useSWR from 'swr';
+import {
+  Center,
+  CircularProgress,
+  Heading,
+  IconButton,
+  Stack,
+  Text,
+  useToast,
+} from '@chakra-ui/react';
+import useSWR, { useSWRConfig } from 'swr';
 import { fetcher } from '../../../../utils/fetcher';
 import Ingredient from '../../../../components/ingredient';
 import { ArrowRightIcon, CloseIcon } from '@chakra-ui/icons';
@@ -10,7 +18,9 @@ import { FaCheck } from 'react-icons/fa';
 
 export default function IngredientDetailed() {
   const router = useRouter();
+  const { mutate } = useSWRConfig();
   const { name, id } = router.query;
+  const toast = useToast();
 
   const { data, error } = useSWR(!!name ? `http://localhost:3000/i/${name}` : null, fetcher);
   const { data: suggestion, error: suggestionError } = useSWR(
@@ -18,17 +28,28 @@ export default function IngredientDetailed() {
     fetcher
   );
 
-  const applySuggestion = async () => {
-    const { ok } = await fetch(`http://localhost:3000/i/${name}/suggestion/${id}/apply`);
+  const suggestionAction = async (action: 'apply' | 'decline') => {
+    const { ok, status } = await fetch(`http://localhost:3000/i/${name}/suggestion/${id}/${action}`);
     if (ok) {
+      toast({
+        title: `Action "${action}" was successful.`,
+        status: 'success',
+        duration: 9000,
+        isClosable: true,
+      });
+      mutate(`i/${name}`);
       router.push(`/i/${name}`);
-    }
-  };
-
-  const declineSuggestion = async () => {
-    const { ok } = await fetch(`http://localhost:3000/i/${name}/suggestion/${id}/decline`);
-    if (ok) {
-      router.push(`/i/${name}`);
+    } else {
+      toast({
+        title: `Something went wrong`,
+        description:
+          status === 409
+            ? 'Cannot update name as it is already an existing ingredient.'
+            : undefined,
+        status: 'error',
+        duration: 9000,
+        isClosable: true,
+      });
     }
   };
 
@@ -75,12 +96,12 @@ export default function IngredientDetailed() {
               />
             </Stack>
             <IconButton
-              onClick={applySuggestion}
+              onClick={() => suggestionAction('apply')}
               aria-label="apply"
               icon={<FaCheck />}
             ></IconButton>
             <IconButton
-              onClick={declineSuggestion}
+              onClick={() => suggestionAction('decline')}
               aria-label="decline"
               icon={<CloseIcon />}
             ></IconButton>

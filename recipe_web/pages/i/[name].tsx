@@ -52,13 +52,13 @@ export default function IngredientDetailed() {
               <>
                 <Heading>Suggestions:</Heading>
                 <Stack>
-                  {suggestions.map(({ id, suggester }: { id: number; suggester: string }) => (
-                    <UnorderedList key={id}>
-                      <ListItem as={'a'} href={`/i/${name}/suggestion/${id}`}>
+                  <UnorderedList>
+                    {suggestions.map(({ id, suggester }: { id: number; suggester: string }) => (
+                      <ListItem key={id} as={'a'} href={`/i/${name}/suggestion/${id}`}>
                         {'Suggestion by ' + suggester}
                       </ListItem>
-                    </UnorderedList>
-                  ))}
+                    ))}
+                  </UnorderedList>
                 </Stack>
               </>
             )}
