@@ -16,6 +16,7 @@ interface IngredientProps {
 interface ModifiedAttributes {
   withModifiedAttributes?: [keyof IngredientProps];
   isNew: boolean;
+  is_delete_vote: boolean;
 }
 
 export default function Ingredient({
@@ -32,9 +33,10 @@ export default function Ingredient({
   contains_alcohol,
   withModifiedAttributes,
   isNew,
+  is_delete_vote,
 }: IngredientProps & ModifiedAttributes) {
   const coloring = isNew ? 'green.400' : 'red.400';
-  console.log(withModifiedAttributes);
+
   return (
     <Center py={12}>
       <Box
@@ -70,7 +72,13 @@ export default function Ingredient({
           }}
         ></Box>
         <Stack pt={10} align={'center'}>
-          <Text color={'orange.400'} fontSize={'xl'} textTransform={'uppercase'}>
+          <Text
+            color={'orange.400'}
+            fontSize={'xl'}
+            textTransform={'uppercase'}
+            textColor={is_delete_vote ? 'red.400' : undefined}
+            as={is_delete_vote ? 'del' : undefined}
+          >
             {name}
           </Text>
           <Text fontWeight={400} fontSize={'xs'}>
@@ -83,13 +91,23 @@ export default function Ingredient({
           <Text fontWeight={400} fontSize={'xl'}>
             {'💪💯🔥🚀Protein🚀🔥💯💪'}
           </Text>
-          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+          <Heading
+            fontSize={'2xl'}
+            fontFamily={'body'}
+            fontWeight={500}
+            textColor={withModifiedAttributes!.includes('protein') ? coloring : undefined}
+          >
             {protein + ' g'}
           </Heading>
           <Text fontWeight={400} fontSize={'xs'}>
             {'Carbohydrate'}
           </Text>
-          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+          <Heading
+            fontSize={'2xl'}
+            fontFamily={'body'}
+            fontWeight={500}
+            textColor={withModifiedAttributes!.includes('carbohydrate') ? coloring : undefined}
+          >
             {carbohydrate + ' g'}
           </Heading>
           <Text fontWeight={400} fontSize={'xs'}>
@@ -106,31 +124,56 @@ export default function Ingredient({
           <Text fontWeight={400} fontSize={'xs'}>
             {'Sugar'}
           </Text>
-          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+          <Heading
+            fontSize={'2xl'}
+            fontFamily={'body'}
+            fontWeight={500}
+            textColor={withModifiedAttributes!.includes('sugar') ? coloring : undefined}
+          >
             {sugar + ' g'}
           </Heading>
           <Text fontWeight={400} fontSize={'xs'}>
             {'Fiber'}
           </Text>
-          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+          <Heading
+            fontSize={'2xl'}
+            fontFamily={'body'}
+            fontWeight={500}
+            textColor={withModifiedAttributes!.includes('fiber') ? coloring : undefined}
+          >
             {fiber + ' g'}
           </Heading>
           <Text fontWeight={400} fontSize={'xs'}>
             {'Water'}
           </Text>
-          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+          <Heading
+            fontSize={'2xl'}
+            fontFamily={'body'}
+            fontWeight={500}
+            textColor={withModifiedAttributes!.includes('water') ? coloring : undefined}
+          >
             {water + ' g'}
           </Heading>
           <Text fontWeight={400} fontSize={'xs'}>
             {'caffeine'}
           </Text>
-          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+          <Heading
+            fontSize={'2xl'}
+            fontFamily={'body'}
+            fontWeight={500}
+            textColor={withModifiedAttributes!.includes('caffeine') ? coloring : undefined}
+          >
             {caffeine + ' mg'}
           </Heading>
           <Text fontWeight={400} fontSize={'xs'}>
             {'Contains alcohol'}
           </Text>
-          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+          <Heading
+            fontSize={'2xl'}
+            fontFamily={'body'}
+            fontWeight={500}
+            textColor={withModifiedAttributes!.includes('contains_alcohol') ? coloring : undefined}
+          >
             {contains_alcohol ? 'Yes' : 'No'}
           </Heading>
           <Text fontWeight={400} fontSize={'xs'}>

@@ -11,7 +11,7 @@ export default function IngredientDetailed() {
   const { name } = router.query;
 
   const { data, error } = useSWR(!!name ? `http://localhost:3000/i/${name}` : null, fetcher);
-  const { data: suggestions, error: suggestionsErr } = useSWR(
+  const { data: suggestions, error: _ } = useSWR(
     !!name ? `http://localhost:3000/i/${name}/suggestion` : null,
     fetcher
   );
@@ -36,7 +36,8 @@ export default function IngredientDetailed() {
     );
 
   return (
-    data && (
+    data &&
+    suggestions && (
       <Layout>
         <Center mt="14">
           <Ingredient
@@ -44,16 +45,19 @@ export default function IngredientDetailed() {
             isNew={false}
             withModifiedAttributes={diffService(data, suggestions[0])}
           />
-          <Heading m="4">
-            <ArrowRightIcon></ArrowRightIcon>
-          </Heading>
+          {suggestions && suggestions.length > 0 && (
+            <Heading m="4">
+              <ArrowRightIcon></ArrowRightIcon>
+            </Heading>
+          )}
           {suggestions && (
             <Stack>
               {suggestions.map(({ suggester, is_delete_vote, ...suggestion }: any) => (
                 <Ingredient
                   key={suggester}
-                  withModifiedAttributes={diffService(data, suggestions[0])}
+                  withModifiedAttributes={diffService(data, suggestion)}
                   isNew={true}
+                  is_delete_vote={is_delete_vote}
                   {...suggestion}
                 />
               ))}
@@ -65,9 +69,11 @@ export default function IngredientDetailed() {
   );
 }
 
+// TODO: Maybe this is not even frontend stuff.. idk
 const diffService = (original: Record<string, any>, suggested: Record<string, any>): any[] => {
-  console.log(original);
-  console.log(suggested);
+  if (!original || !suggested) {
+    return [];
+  }
   const originalKeys = Object.keys(original);
   return Object.entries(suggested)
     .map(([key, value]) => {
