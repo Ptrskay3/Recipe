@@ -95,7 +95,7 @@ export default function Ingredient({
             fontSize={'2xl'}
             fontFamily={'body'}
             fontWeight={500}
-            textColor={withModifiedAttributes!.includes('protein') ? coloring : undefined}
+            textColor={withModifiedAttributes.includes('protein') ? coloring : undefined}
           >
             {protein + ' g'}
           </Heading>
@@ -106,7 +106,7 @@ export default function Ingredient({
             fontSize={'2xl'}
             fontFamily={'body'}
             fontWeight={500}
-            textColor={withModifiedAttributes!.includes('carbohydrate') ? coloring : undefined}
+            textColor={withModifiedAttributes.includes('carbohydrate') ? coloring : undefined}
           >
             {carbohydrate + ' g'}
           </Heading>
@@ -117,7 +117,7 @@ export default function Ingredient({
             fontSize={'2xl'}
             fontFamily={'body'}
             fontWeight={500}
-            textColor={withModifiedAttributes!.includes('fat') ? coloring : undefined}
+            textColor={withModifiedAttributes.includes('fat') ? coloring : undefined}
           >
             {fat + ' g'}
           </Heading>
@@ -128,7 +128,7 @@ export default function Ingredient({
             fontSize={'2xl'}
             fontFamily={'body'}
             fontWeight={500}
-            textColor={withModifiedAttributes!.includes('sugar') ? coloring : undefined}
+            textColor={withModifiedAttributes.includes('sugar') ? coloring : undefined}
           >
             {sugar + ' g'}
           </Heading>
@@ -139,7 +139,7 @@ export default function Ingredient({
             fontSize={'2xl'}
             fontFamily={'body'}
             fontWeight={500}
-            textColor={withModifiedAttributes!.includes('fiber') ? coloring : undefined}
+            textColor={withModifiedAttributes.includes('fiber') ? coloring : undefined}
           >
             {fiber + ' g'}
           </Heading>
@@ -150,7 +150,7 @@ export default function Ingredient({
             fontSize={'2xl'}
             fontFamily={'body'}
             fontWeight={500}
-            textColor={withModifiedAttributes!.includes('water') ? coloring : undefined}
+            textColor={withModifiedAttributes.includes('water') ? coloring : undefined}
           >
             {water + ' g'}
           </Heading>
@@ -161,7 +161,7 @@ export default function Ingredient({
             fontSize={'2xl'}
             fontFamily={'body'}
             fontWeight={500}
-            textColor={withModifiedAttributes!.includes('caffeine') ? coloring : undefined}
+            textColor={withModifiedAttributes.includes('caffeine') ? coloring : undefined}
           >
             {caffeine + ' mg'}
           </Heading>
@@ -172,7 +172,7 @@ export default function Ingredient({
             fontSize={'2xl'}
             fontFamily={'body'}
             fontWeight={500}
-            textColor={withModifiedAttributes!.includes('contains_alcohol') ? coloring : undefined}
+            textColor={withModifiedAttributes.includes('contains_alcohol') ? coloring : undefined}
           >
             {contains_alcohol ? 'Yes' : 'No'}
           </Heading>
@@ -184,7 +184,7 @@ export default function Ingredient({
               fontSize={'2xl'}
               fontFamily={'body'}
               fontWeight={500}
-              textColor={withModifiedAttributes!.includes('category') ? coloring : undefined}
+              textColor={withModifiedAttributes.includes('category') ? coloring : undefined}
             >
               {category.map(intoCategory).join(', ')}
             </Text>

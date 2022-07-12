@@ -12,7 +12,6 @@ import {
 import useSWR from 'swr';
 import { fetcher } from '../../utils/fetcher';
 import Ingredient from '../../components/ingredient';
-import { ArrowRightIcon } from '@chakra-ui/icons';
 
 export default function IngredientDetailed() {
   const router = useRouter();
@@ -44,17 +43,16 @@ export default function IngredientDetailed() {
     );
 
   return (
-    data &&
-    suggestions && (
+    data && (
       <Layout>
         <Center mt="14">
           <Stack>
             <Ingredient {...data} />
-            <Heading>Suggestions:</Heading>
             {suggestions && suggestions.length > 0 && (
               <>
+                <Heading>Suggestions:</Heading>
                 <Stack>
-                  {suggestions.map(({ id, suggester, is_delete_vote, ...suggestion }: any) => (
+                  {suggestions.map(({ id, suggester }: { id: number; suggester: string }) => (
                     <UnorderedList key={id}>
                       <ListItem as={'a'} href={`/i/${name}/suggestion/${id}`}>
                         {'Suggestion by ' + suggester}
