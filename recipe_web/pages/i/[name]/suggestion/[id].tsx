@@ -1,31 +1,23 @@
 import { useRouter } from 'next/router';
-import { Layout } from '../../components/layout';
-import {
-  Center,
-  CircularProgress,
-  Heading,
-  ListItem,
-  Stack,
-  Text,
-  UnorderedList,
-} from '@chakra-ui/react';
+import { Layout } from '../../../../components/layout';
+import { Center, CircularProgress, Heading, Stack, Text } from '@chakra-ui/react';
 import useSWR from 'swr';
-import { fetcher } from '../../utils/fetcher';
-import Ingredient from '../../components/ingredient';
+import { fetcher } from '../../../../utils/fetcher';
+import Ingredient from '../../../../components/ingredient';
 import { ArrowRightIcon } from '@chakra-ui/icons';
 
 export default function IngredientDetailed() {
   const router = useRouter();
-  const { name } = router.query;
+  const { name, id } = router.query;
 
   const { data, error } = useSWR(!!name ? `http://localhost:3000/i/${name}` : null, fetcher);
   // TODO: move out the suggestion part to another route, leave this as a barebone ingredient
-  const { data: suggestions, error: _ } = useSWR(
-    !!name ? `http://localhost:3000/i/${name}/suggestions` : null,
+  const { data: suggestion, error: suggestionError } = useSWR(
+    !!name && !!id ? `http://localhost:3000/i/${name}/suggestion/${id}` : null,
     fetcher
   );
 
-  if (error)
+  if (error || suggestionError)
     return (
       <Layout>
         <Center mt="14">
@@ -34,7 +26,7 @@ export default function IngredientDetailed() {
       </Layout>
     );
 
-  if (!data)
+  if (!data || !suggestion)
     return (
       <Layout>
         {' '}
@@ -46,26 +38,28 @@ export default function IngredientDetailed() {
 
   return (
     data &&
-    suggestions && (
+    suggestion && (
       <Layout>
         <Center mt="14">
-          <Stack>
-            <Ingredient {...data} />
-            <Heading>Suggestions:</Heading>
-            {suggestions && suggestions.length > 0 && (
-              <>
-                <Stack>
-                  {suggestions.map(({ id, suggester, is_delete_vote, ...suggestion }: any) => (
-                    <UnorderedList key={id}>
-                      <ListItem as={'a'} href={`/i/${name}/suggestion/${id}`}>
-                        {'Suggestion by ' + suggester}
-                      </ListItem>
-                    </UnorderedList>
-                  ))}
-                </Stack>
-              </>
-            )}
-          </Stack>
+          <Ingredient
+            {...data}
+            isNew={false}
+            withModifiedAttributes={diffService(data, suggestion)}
+          />
+          <>
+            <Heading m="4">
+              <ArrowRightIcon></ArrowRightIcon>
+            </Heading>
+            <Stack>
+              <Ingredient
+                key={id}
+                withModifiedAttributes={diffService(data, suggestion)}
+                isNew={true}
+                isDeleteVote={suggestion.is_delete_vote}
+                {...suggestion}
+              />
+            </Stack>
+          </>
         </Center>
       </Layout>
     )

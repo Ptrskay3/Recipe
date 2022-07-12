@@ -14,7 +14,7 @@ interface IngredientProps {
   contains_alcohol: boolean;
 }
 interface ModifiedAttributes {
-  withModifiedAttributes?: [keyof IngredientProps];
+  withModifiedAttributes?: (keyof IngredientProps)[];
   isNew: boolean;
   isDeleteVote: boolean;
 }
@@ -31,7 +31,7 @@ export default function Ingredient({
   fiber,
   caffeine,
   contains_alcohol,
-  withModifiedAttributes,
+  withModifiedAttributes = [],
   isNew,
   isDeleteVote,
 }: IngredientProps & ModifiedAttributes) {
