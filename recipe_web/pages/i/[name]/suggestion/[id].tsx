@@ -1,10 +1,13 @@
 import { useRouter } from 'next/router';
 import { Layout } from '../../../../components/layout';
-import { Center, CircularProgress, Heading, Stack, Text } from '@chakra-ui/react';
+import { Center, CircularProgress, Heading, IconButton, Stack, Text } from '@chakra-ui/react';
 import useSWR from 'swr';
 import { fetcher } from '../../../../utils/fetcher';
 import Ingredient from '../../../../components/ingredient';
 import { ArrowRightIcon } from '@chakra-ui/icons';
+import { diffObjects } from '../../../../utils/diff';
+import { useState } from 'react';
+import { FaCheck } from 'react-icons/fa';
 
 export default function IngredientDetailed() {
   const router = useRouter();
@@ -16,11 +19,18 @@ export default function IngredientDetailed() {
     fetcher
   );
 
+  const applySuggestion = async () => {
+    const { ok } = await fetch(`http://localhost:3000/i/${name}/suggestion/${id}/apply`);
+    if (ok) {
+      router.push(`/i/${name}`);
+    }
+  };
+
   if (error || suggestionError)
     return (
       <Layout>
         <Center mt="14">
-          <Text color="orange.400">{'failed to load'}</Text>
+          <Text color="orange.400">{'This suggestion does not exist.'}</Text>
         </Center>
       </Layout>
     );
@@ -43,7 +53,7 @@ export default function IngredientDetailed() {
           <Ingredient
             {...data}
             isNew={false}
-            withModifiedAttributes={diffService(data, suggestion)}
+            withModifiedAttributes={diffObjects(data, suggestion)}
           />
           <>
             <Heading m="4">
@@ -52,40 +62,20 @@ export default function IngredientDetailed() {
             <Stack>
               <Ingredient
                 key={id}
-                withModifiedAttributes={diffService(data, suggestion)}
+                withModifiedAttributes={diffObjects(data, suggestion)}
                 isNew={true}
                 isDeleteVote={suggestion.is_delete_vote}
                 {...suggestion}
               />
             </Stack>
+            <IconButton
+              onClick={applySuggestion}
+              aria-label="apply"
+              icon={<FaCheck />}
+            ></IconButton>
           </>
         </Center>
       </Layout>
     )
   );
-}
-
-// TODO: Maybe this is not even frontend stuff.. idk
-const diffService = (original: Record<string, any>, suggested: Record<string, any>): any[] => {
-  if (!original || !suggested) {
-    return [];
-  }
-  const originalKeys = Object.keys(original);
-  return Object.entries(suggested)
-    .map(([key, value]) => {
-      if (originalKeys.includes(key)) {
-        if (Array.isArray(value) && !arraysEqual(original[key], value)) {
-          return key;
-        } else if (!Array.isArray(value) && original[key] !== value) {
-          return key;
-        }
-      }
-    })
-    .filter(Boolean);
-};
-
-function arraysEqual(a: any[], b: any[]): boolean {
-  a = Array.isArray(a) ? a : [];
-  b = Array.isArray(b) ? b : [];
-  return a.length === b.length && a.every((el, ix) => el === b[ix]);
 }

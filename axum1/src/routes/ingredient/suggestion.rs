@@ -1,7 +1,9 @@
+use anyhow::Context;
 use axum::{extract::Path, Json};
+use sqlx::Acquire;
 
 use crate::{
-    error::ApiError,
+    error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection},
     routes::AdminUser,
 };
@@ -177,4 +179,84 @@ pub async fn get_ingredient_suggestion(
     .await?
     .ok_or(ApiError::NotFound)?;
     Ok(Json(suggestion))
+}
+
+pub async fn apply_suggestion(
+    DatabaseConnection(mut conn): DatabaseConnection,
+    Path((name, id)): Path<(String, uuid::Uuid)>,
+) -> Result<(), ApiError> {
+    let mut tx = conn.begin().await?;
+
+    let suggestion_row = sqlx::query!(
+        r#"SELECT is_delete_vote FROM ingredient_suggestions WHERE id = $1"#,
+        id
+    )
+    .fetch_optional(&mut tx)
+    .await?
+    .ok_or(ApiError::NotFound)?;
+
+    if suggestion_row.is_delete_vote.unwrap_or(false) {
+        sqlx::query!(r#"DELETE FROM ingredients WHERE name = $1"#, name)
+            .execute(&mut tx)
+            .await
+            .context("failed to delete from ingredients")?;
+    } else {
+        sqlx::query!(
+            r#"
+        UPDATE ingredients i 
+            SET
+                name = COALESCE(igs.name, i.name),
+                category = COALESCE(igs.category, i.category),
+                calories_per_100g = COALESCE(igs.calories_per_100g, i.calories_per_100g),
+                g_per_piece = COALESCE(igs.g_per_piece, i.g_per_piece),
+                protein = COALESCE(igs.protein, i.protein),
+                water = COALESCE(igs.water, i.water),
+                fat = COALESCE(igs.fat, i.fat),
+                sugar = COALESCE(igs.sugar, i.sugar),
+                carbohydrate = COALESCE(igs.carbohydrate, i.carbohydrate),
+                fiber = COALESCE(igs.fiber, i.fiber),
+                caffeine = COALESCE(igs.caffeine, i.caffeine),
+                contains_alcohol = COALESCE(igs.contains_alcohol, i.contains_alcohol)
+        FROM ingredient_suggestions igs
+        WHERE i.name = $1 AND igs.id = $2
+        "#,
+            name,
+            id
+        )
+        .execute(&mut tx)
+        .await
+        .on_constraint("ingredients_name_key", |_| ApiError::Conflict)?;
+
+        sqlx::query!(
+            r#"
+            DELETE FROM ingredient_suggestions
+            WHERE id = $1
+            "#,
+            id
+        )
+        .execute(&mut tx)
+        .await
+        .context("failed to delete from suggestions table")?;
+    }
+    tx.commit().await?;
+
+    Ok(())
+}
+
+pub async fn decline_suggestion(
+    DatabaseConnection(mut conn): DatabaseConnection,
+    Path((_, id)): Path<(String, uuid::Uuid)>,
+) -> Result<(), ApiError> {
+    sqlx::query!(
+        r#"
+        DELETE FROM ingredient_suggestions
+        WHERE id = $1
+        "#,
+        id
+    )
+    .execute(&mut conn)
+    .await
+    .context("failed to delete from suggestions table")?;
+
+    Ok(())
 }
