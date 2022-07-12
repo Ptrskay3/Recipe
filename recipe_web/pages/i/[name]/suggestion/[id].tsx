@@ -11,7 +11,6 @@ export default function IngredientDetailed() {
   const { name, id } = router.query;
 
   const { data, error } = useSWR(!!name ? `http://localhost:3000/i/${name}` : null, fetcher);
-  // TODO: move out the suggestion part to another route, leave this as a barebone ingredient
   const { data: suggestion, error: suggestionError } = useSWR(
     !!name && !!id ? `http://localhost:3000/i/${name}/suggestion/${id}` : null,
     fetcher
