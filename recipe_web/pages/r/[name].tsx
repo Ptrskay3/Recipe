@@ -33,7 +33,7 @@ export default function RecipeDetailed() {
       mutate(`http://localhost:3000/r/${name}`);
     }
   };
-  const Hit = ({ hit }: any) => <Text>{hit.name}</Text>;
+  const Hit = ({ hit }: any) => <Highlight attribute="name" hit={hit} />;
 
   if (error)
     return (

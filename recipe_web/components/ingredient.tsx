@@ -4,9 +4,37 @@ interface IngredientProps {
   name: string;
   calories_per_100g: number;
   category: string[];
+  protein: number;
+  water: number;
+  fat: number;
+  sugar: number;
+  carbohydrate: number;
+  fiber: number;
+  caffeine: number;
+  contains_alcohol: boolean;
+}
+interface ModifiedAttributes {
+  withModifiedAttributes?: [keyof IngredientProps];
+  isNew: boolean;
 }
 
-export default function Ingredient({ name, calories_per_100g, category }: IngredientProps) {
+export default function Ingredient({
+  name,
+  calories_per_100g,
+  category,
+  protein,
+  water,
+  fat,
+  sugar,
+  carbohydrate,
+  fiber,
+  caffeine,
+  contains_alcohol,
+  withModifiedAttributes,
+  isNew,
+}: IngredientProps & ModifiedAttributes) {
+  const coloring = isNew ? 'green.400' : 'red.400';
+  console.log(withModifiedAttributes);
   return (
     <Center py={12}>
       <Box
@@ -50,6 +78,60 @@ export default function Ingredient({ name, calories_per_100g, category }: Ingred
           </Text>
           <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
             {calories_per_100g}
+          </Heading>
+          {/* TODO: Make this a mapping of some sort */}
+          <Text fontWeight={400} fontSize={'xl'}>
+            {'💪💯🔥🚀Protein🚀🔥💯💪'}
+          </Text>
+          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+            {protein + ' g'}
+          </Heading>
+          <Text fontWeight={400} fontSize={'xs'}>
+            {'Carbohydrate'}
+          </Text>
+          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+            {carbohydrate + ' g'}
+          </Heading>
+          <Text fontWeight={400} fontSize={'xs'}>
+            {'Fat'}
+          </Text>
+          <Heading
+            fontSize={'2xl'}
+            fontFamily={'body'}
+            fontWeight={500}
+            textColor={withModifiedAttributes!.includes('fat') ? coloring : undefined}
+          >
+            {fat + ' g'}
+          </Heading>
+          <Text fontWeight={400} fontSize={'xs'}>
+            {'Sugar'}
+          </Text>
+          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+            {sugar + ' g'}
+          </Heading>
+          <Text fontWeight={400} fontSize={'xs'}>
+            {'Fiber'}
+          </Text>
+          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+            {fiber + ' g'}
+          </Heading>
+          <Text fontWeight={400} fontSize={'xs'}>
+            {'Water'}
+          </Text>
+          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+            {water + ' g'}
+          </Heading>
+          <Text fontWeight={400} fontSize={'xs'}>
+            {'caffeine'}
+          </Text>
+          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+            {caffeine + ' mg'}
+          </Heading>
+          <Text fontWeight={400} fontSize={'xs'}>
+            {'Contains alcohol'}
+          </Text>
+          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+            {contains_alcohol ? 'Yes' : 'No'}
           </Heading>
           <Text fontWeight={400} fontSize={'xs'}>
             {'Category'}

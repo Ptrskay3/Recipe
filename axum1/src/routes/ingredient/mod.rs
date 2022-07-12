@@ -19,6 +19,11 @@ use crate::{
     Queryable,
 };
 
+pub mod suggestion;
+use suggestion::add_ingredient_suggestion;
+
+use self::suggestion::get_ingredient_suggestions;
+
 #[must_use]
 pub fn ingredient_router() -> Router {
     Router::new()
@@ -31,7 +36,11 @@ pub fn ingredient_router() -> Router {
                 .delete(delete_ingredient)
                 .patch(upgrade_ingredient),
         )
-        .route("/favorite/:name", post(make_favorite))
+        .route("/favorite/:name", post(make_favorite)) // TODO: swap route to `/:name/favorite` maybe for consistency?
+        .route(
+            "/:name/suggestion",
+            post(add_ingredient_suggestion).get(get_ingredient_suggestions),
+        )
 }
 
 #[derive(sqlx::Type, Debug, Deserialize, Serialize, Clone)]
@@ -203,8 +212,8 @@ async fn add_ingredient(
     Ok(())
 }
 
-#[derive(sqlx::FromRow, Debug, Serialize, Deserialize)]
-struct UpgradeIngredient {
+#[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone, Default)]
+pub struct UpgradeIngredient {
     name: Option<String>,
     calories_per_100g: Option<f32>,
     category: Option<Vec<FoodCategory>>,

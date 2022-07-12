@@ -1,4 +1,5 @@
 mod middleware;
+pub use middleware::AdminUser;
 
 use axum::{http::StatusCode, middleware::from_extractor, routing::get, Json, Router};
 
@@ -6,8 +7,6 @@ use crate::{
     error::ApiError,
     extractors::{DatabaseConnection, RedisConnection},
 };
-
-use self::middleware::AdminUser;
 
 #[must_use]
 pub fn admin_router() -> Router {

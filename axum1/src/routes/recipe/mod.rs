@@ -1,6 +1,7 @@
 use anyhow::Context;
 use axum::{
     extract::Path,
+    http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
@@ -290,17 +291,11 @@ async fn my_recipes(
     Ok(Json(results))
 }
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-enum FavoriteAction {
-    Created,
-    Deleted,
-}
-
 async fn toggle_favorite_recipe(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path(name): Path<String>,
     auth_user: AuthUser,
-) -> Result<Json<FavoriteAction>, ApiError> {
+) -> Result<StatusCode, ApiError> {
     let result = sqlx::query!(
         // This is a helper function written in the `create_favorite_recipe` migration.
         // It helps to easily manage a 'toggle' functionality for marking favorites.
@@ -312,10 +307,9 @@ async fn toggle_favorite_recipe(
     .await
     .map_err(|_| ApiError::BadRequest)?;
 
-    let action = if result.toggle_favorite_recipe == Some(BigDecimal::from(0)) {
-        FavoriteAction::Deleted
+    if result.toggle_favorite_recipe == Some(BigDecimal::from(0)) {
+        Ok(StatusCode::OK)
     } else {
-        FavoriteAction::Created
-    };
-    Ok(Json(action))
+        Ok(StatusCode::CREATED)
+    }
 }

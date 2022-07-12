@@ -84,7 +84,13 @@ export default function IncludedIngredient({
           }}
         ></Box>
         <Stack pt={10} align={'center'}>
-          <Text fontSize={'xl'} textTransform={'uppercase'} color={'orange.400'}>
+          <Text
+            as={'a'}
+            href={`/i/${name}`}
+            fontSize={'xl'}
+            textTransform={'uppercase'}
+            color={'orange.400'}
+          >
             {name}
           </Text>
           <Editable
