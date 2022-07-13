@@ -71,7 +71,9 @@ pub async fn add_ingredient_suggestion(
         ingredient_suggestion.is_delete_vote,
     )
     .execute(&mut conn)
-    .await?;
+    .await
+    .on_constraint("ingredient_suggestions_ingredient_id_user_id_key", |_| ApiError::Conflict)
+    ?;
     Ok(())
 }
 

@@ -1,6 +1,21 @@
-import { Box, Center, Heading, Stack, Text, useColorModeValue } from '@chakra-ui/react';
+import {
+  Box,
+  Center,
+  Editable,
+  EditableInput,
+  EditablePreview,
+  Flex,
+  Heading,
+  Stack,
+  Text,
+  useColorModeValue,
+} from '@chakra-ui/react';
+import { useRef, useState } from 'react';
+import { useIngredientEditMode } from '../stores/useIngredientEditMode';
+import { EditableControls } from './editable_custom_controls';
+import { IngredientEditControls } from './ingredient_edit_controls';
 
-interface IngredientProps {
+export interface IngredientProps {
   name: string;
   calories_per_100g: number;
   category: string[];
@@ -36,6 +51,22 @@ export default function Ingredient({
   isDeleteVote,
 }: IngredientProps & ModifiedAttributes) {
   const coloring = isNew ? 'green.400' : 'red.400';
+  const editModeOpen = useIngredientEditMode((state) => state.editModeOpen);
+  const editedValues = useIngredientEditMode((state) => state.editedValues);
+  const updateEditedValues = useIngredientEditMode((state) => state.updateEditedValues);
+  const originals = {
+    name,
+    calories_per_100g,
+    category,
+    protein,
+    water,
+    fat,
+    sugar,
+    carbohydrate,
+    fiber,
+    caffeine,
+    contains_alcohol,
+  };
 
   return (
     <Center py={12}>
@@ -72,6 +103,7 @@ export default function Ingredient({
           }}
         ></Box>
         <Stack pt={10} align={'center'}>
+          <IngredientEditControls name={name} originals={originals} />
           <Text
             color={'orange.400'}
             fontSize={'xl'}
@@ -84,9 +116,36 @@ export default function Ingredient({
           <Text fontWeight={400} fontSize={'xs'}>
             {'Calories per 100g'}
           </Text>
-          <Heading fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
-            {calories_per_100g}
-          </Heading>
+          {editModeOpen ? (
+            <Editable
+              defaultValue={'' + calories_per_100g}
+              fontSize={'2xl'}
+              fontFamily={'body'}
+              fontWeight={500}
+              textColor={!!editedValues.calories_per_100g ? 'green.400' : undefined}
+            >
+              <EditablePreview />
+              <EditableInput
+                onChange={(e) =>
+                  updateEditedValues({ calories_per_100g: parseFloat(e.target.value) })
+                }
+                onBlur={(e) =>
+                  updateEditedValues({ calories_per_100g: parseFloat(e.target.value) })
+                }
+              />
+            </Editable>
+          ) : (
+            <Heading
+              fontSize={'2xl'}
+              fontFamily={'body'}
+              fontWeight={500}
+              textColor={
+                withModifiedAttributes.includes('calories_per_100g') ? coloring : undefined
+              }
+            >
+              {calories_per_100g}
+            </Heading>
+          )}
           {/* TODO: Make this a mapping of some sort */}
           <Text fontWeight={400} fontSize={'xl'}>
             {'💪💯🔥🚀Protein🚀🔥💯💪'}

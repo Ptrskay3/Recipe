@@ -72,16 +72,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .layer(SessionLayer::new(store, config.redis.secret_key.as_bytes()))
         .layer(Extension(email_client.clone()))
         .layer(
-            CorsLayer::new()
-                .allow_origin(config.frontend_url.parse::<HeaderValue>().unwrap())
-                .allow_methods([
-                    Method::GET,
-                    Method::PUT,
-                    Method::POST,
-                    Method::PATCH,
-                    Method::DELETE,
-                ])
-                .allow_credentials(true),
+            CorsLayer::very_permissive().allow_credentials(true),
         );
 
     axum::Server::bind(&addr)

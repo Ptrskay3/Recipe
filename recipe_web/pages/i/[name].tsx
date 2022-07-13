@@ -54,9 +54,11 @@ export default function IngredientDetailed() {
                 <Stack>
                   <UnorderedList>
                     {suggestions.map(({ id, suggester }: { id: number; suggester: string }) => (
-                      <ListItem key={id} as={'a'} href={`/i/${name}/suggestion/${id}`}>
-                        {'Suggestion by ' + suggester}
-                      </ListItem>
+                      <Stack mb="2" key={id}>
+                        <ListItem as={'a'} href={`/i/${name}/suggestion/${id}`}>
+                          {'Suggestion by ' + suggester}
+                        </ListItem>
+                      </Stack>
                     ))}
                   </UnorderedList>
                 </Stack>

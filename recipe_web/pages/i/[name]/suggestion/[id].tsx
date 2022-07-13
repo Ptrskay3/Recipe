@@ -1,5 +1,4 @@
-import { useRouter } from 'next/router';
-import { Layout } from '../../../../components/layout';
+import { ArrowRightIcon, CloseIcon } from '@chakra-ui/icons';
 import {
   Center,
   CircularProgress,
@@ -9,14 +8,18 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import useSWR, { useSWRConfig } from 'swr';
-import { fetcher } from '../../../../utils/fetcher';
-import Ingredient from '../../../../components/ingredient';
-import { ArrowRightIcon, CloseIcon } from '@chakra-ui/icons';
-import { diffObjects } from '../../../../utils/diff';
+import { useRouter } from 'next/router';
 import { FaCheck } from 'react-icons/fa';
+import useSWR, { useSWRConfig } from 'swr';
+import Ingredient from '../../../../components/ingredient';
+import { Layout } from '../../../../components/layout';
+import { useIngredientEditMode } from '../../../../stores/useIngredientEditMode';
+import { diffObjects } from '../../../../utils/diff';
+import { fetcher } from '../../../../utils/fetcher';
 
 export default function IngredientDetailed() {
+  const setEditModeOpen = useIngredientEditMode((state) => state.setEditModeOpen);
+  setEditModeOpen(false);
   const router = useRouter();
   const { mutate } = useSWRConfig();
   const { name, id } = router.query;
@@ -29,7 +32,9 @@ export default function IngredientDetailed() {
   );
 
   const suggestionAction = async (action: 'apply' | 'decline') => {
-    const { ok, status } = await fetch(`http://localhost:3000/i/${name}/suggestion/${id}/${action}`);
+    const { ok, status } = await fetch(
+      `http://localhost:3000/i/${name}/suggestion/${id}/${action}`
+    );
     if (ok) {
       toast({
         title: `Action "${action}" was successful.`,
@@ -42,10 +47,7 @@ export default function IngredientDetailed() {
     } else {
       toast({
         title: `Something went wrong`,
-        description:
-          status === 409
-            ? 'Cannot update name as it is already an existing ingredient.'
-            : undefined,
+        description: status === 409 ? 'Cannot update due to name conflicts.' : undefined,
         status: 'error',
         duration: 9000,
         isClosable: true,
