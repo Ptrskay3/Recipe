@@ -103,7 +103,7 @@ export default function WithSubnavigation() {
               <HStack>
                 <IconButton
                   as={'a'}
-                  href="/r/new"
+                  href="/r/action/new"
                   aria-label="new recipe"
                   icon={<FaPlus />}
                   mr="4"

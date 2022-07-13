@@ -14,18 +14,21 @@ use crate::{
 };
 
 pub fn recipe_router() -> Router {
+    let action_router = Router::new()
+        .route("/my-recipes", get(my_recipes))
+        .route("/favorites", get(my_favorite_recipes))
+        .route("/popular", get(most_popular_recipes));
+
     Router::new()
         .route("/", post(insert_barebone_recipe))
         .route("/new-full", post(insert_full_recipe))
         .route("/:name", get(get_recipe_with_ingredients))
         .route("/:name/favorite", post(toggle_favorite_recipe))
-        .route("/my-recipes", get(my_recipes))
         .route(
             "/:name/edit",
             post(add_or_update_ingredient_to_recipe).delete(delete_ingredient_from_recipe),
         )
-        .route("/favorites", get(my_favorite_recipes))
-        .route("/popular", get(most_popular_recipes))
+        .nest("/action", action_router)
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]

@@ -2,10 +2,10 @@ import { Box, Button, Center } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { InputField } from '../../components/form/field';
-import { Layout } from '../../components/layout';
-import { intoFormBody } from '../../utils/form';
-import { useAuth } from '../../utils/useAuth';
+import { InputField } from '../../../components/form/field';
+import { Layout } from '../../../components/layout';
+import { intoFormBody } from '../../../utils/form';
+import { useAuth } from '../../../utils/useAuth';
 
 const NewRecipe = () => {
   const { push } = useRouter();

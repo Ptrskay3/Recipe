@@ -55,7 +55,7 @@ export const UserMenu = ({ name }: { name: string }) => {
             {...primaryButtonStyles}
             _hover={{ textColor: 'orange.400', bg: useColorModeValue('orange.50', 'gray.900') }}
             as={'a'}
-            href="/r/my-recipes"
+            href="/r/action/my-recipes"
           >
             My Recipes
           </MenuItem>
@@ -64,7 +64,7 @@ export const UserMenu = ({ name }: { name: string }) => {
             {...primaryButtonStyles}
             _hover={{ textColor: 'orange.400', bg: useColorModeValue('orange.50', 'gray.900') }}
             as={'a'}
-            href="/r/favorite-recipes"
+            href="/r/action/favorite-recipes"
           >
             Favorite recipes
           </MenuItem>
