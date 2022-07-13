@@ -6,12 +6,7 @@ use crate::{
 };
 use anyhow::Context;
 use async_redis_session::RedisSessionStore;
-use axum::{
-    http::{HeaderValue, Method},
-    response::IntoResponse,
-    routing::get_service,
-    Extension, Router,
-};
+use axum::{http::HeaderValue, response::IntoResponse, routing::get_service, Extension, Router};
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
@@ -72,7 +67,9 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .layer(SessionLayer::new(store, config.redis.secret_key.as_bytes()))
         .layer(Extension(email_client.clone()))
         .layer(
-            CorsLayer::very_permissive().allow_credentials(true),
+            CorsLayer::very_permissive()
+                .allow_origin(config.frontend_url.parse::<HeaderValue>().unwrap())
+                .allow_credentials(true),
         );
 
     axum::Server::bind(&addr)

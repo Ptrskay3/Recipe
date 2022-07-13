@@ -12,7 +12,7 @@ interface IngredientEditMode {
 export const useIngredientEditMode = create<IngredientEditMode>(
   combine(
     {
-      editModeOpen: true,
+      editModeOpen: false,
       editedValues: {},
     },
     (set) => ({

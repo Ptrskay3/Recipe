@@ -1,6 +1,7 @@
 use axum::{
     async_trait,
     extract::Path,
+    middleware::from_extractor,
     routing::{get, post},
     Json, Router,
 };
@@ -26,8 +27,17 @@ use self::suggestion::{
     apply_suggestion, decline_suggestion, get_ingredient_suggestion, get_ingredient_suggestions,
 };
 
+use super::AdminUser;
+
 #[must_use]
 pub fn ingredient_router() -> Router {
+    let admin_services = Router::new()
+        .route("/:name/suggestion/:id/apply", get(apply_suggestion))
+        .route("/:name/suggestion/:id/decline", get(decline_suggestion))
+        .route("/:name/suggestion/:id", get(get_ingredient_suggestion))
+        .route("/:name/suggestions", get(get_ingredient_suggestions))
+        .route_layer(from_extractor::<AdminUser>());
+
     Router::new()
         .route("/all", get(all_ingredients))
         .route("/category/:category", get(ingredients_by_category))
@@ -40,10 +50,7 @@ pub fn ingredient_router() -> Router {
         )
         .route("/favorite/:name", post(make_favorite)) // TODO: swap route to `/:name/favorite` maybe for consistency?
         .route("/:name/suggestion", post(add_ingredient_suggestion))
-        .route("/:name/suggestion/:id", get(get_ingredient_suggestion))
-        .route("/:name/suggestion/:id/apply", get(apply_suggestion))
-        .route("/:name/suggestion/:id/decline", get(decline_suggestion))
-        .route("/:name/suggestions", get(get_ingredient_suggestions))
+        .merge(admin_services)
 }
 
 #[derive(sqlx::Type, Debug, Deserialize, Serialize, Clone)]

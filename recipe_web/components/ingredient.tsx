@@ -4,15 +4,12 @@ import {
   Editable,
   EditableInput,
   EditablePreview,
-  Flex,
   Heading,
   Stack,
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { useRef, useState } from 'react';
 import { useIngredientEditMode } from '../stores/useIngredientEditMode';
-import { EditableControls } from './editable_custom_controls';
 import { IngredientEditControls } from './ingredient_edit_controls';
 
 export interface IngredientProps {
@@ -118,6 +115,7 @@ export default function Ingredient({
           </Text>
           {editModeOpen ? (
             <Editable
+              textAlign="center"
               defaultValue={'' + calories_per_100g}
               fontSize={'2xl'}
               fontFamily={'body'}

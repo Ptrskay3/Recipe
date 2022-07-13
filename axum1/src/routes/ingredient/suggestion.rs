@@ -5,7 +5,6 @@ use sqlx::Acquire;
 use crate::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection},
-    routes::AdminUser,
 };
 
 use super::{FoodCategory, UpgradeIngredient};
@@ -99,7 +98,6 @@ pub struct SuggestedIngredient {
 pub async fn get_ingredient_suggestions(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path(name): Path<String>,
-    _user: AdminUser, // FIXME: this is just used as a request guard, so maybe a `route_layer` would suffice..
 ) -> Result<Json<Vec<SuggestedIngredient>>, ApiError> {
     let suggestions: Vec<_> = sqlx::query_as!(
         SuggestedIngredient,

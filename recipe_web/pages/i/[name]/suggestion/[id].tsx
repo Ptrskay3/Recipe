@@ -33,7 +33,8 @@ export default function IngredientDetailed() {
 
   const suggestionAction = async (action: 'apply' | 'decline') => {
     const { ok, status } = await fetch(
-      `http://localhost:3000/i/${name}/suggestion/${id}/${action}`
+      `http://localhost:3000/i/${name}/suggestion/${id}/${action}`,
+      { credentials: 'include' }
     );
     if (ok) {
       toast({
