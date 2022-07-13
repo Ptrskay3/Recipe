@@ -24,6 +24,7 @@ pub fn recipe_router() -> Router {
             "/:name/edit",
             post(add_or_update_ingredient_to_recipe).delete(delete_ingredient_from_recipe),
         )
+        .route("/favorites", get(my_favorite_recipes))
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
@@ -312,4 +313,26 @@ async fn toggle_favorite_recipe(
     } else {
         Ok(StatusCode::CREATED)
     }
+}
+
+async fn my_favorite_recipes(
+    DatabaseConnection(mut conn): DatabaseConnection,
+    auth_user: AuthUser,
+) -> Result<Json<Vec<RecipeWithIngredientCount>>, ApiError> {
+    let results = sqlx::query_as!(
+        RecipeWithIngredientCount,
+        r#"
+        SELECT DISTINCT r.name,
+                r.description,
+                COUNT(ir.recipe_id) OVER (PARTITION BY r.id) AS ingredient_count
+        FROM recipes r
+        LEFT JOIN ingredients_to_recipes ir ON ir.recipe_id = r.id
+        INNER JOIN favorite_recipe fr ON fr.recipe_id = r.id AND fr.user_id = $1; 
+        "#,
+        *auth_user
+    )
+    .fetch_all(&mut conn)
+    .await?;
+
+    Ok(Json(results))
 }

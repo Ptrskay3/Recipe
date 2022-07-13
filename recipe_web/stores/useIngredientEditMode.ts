@@ -9,6 +9,7 @@ interface IngredientEditMode {
   updateEditedValues: (value: Partial<Record<keyof IngredientProps, any>>) => void;
   resetEditedValues: () => void;
 }
+
 export const useIngredientEditMode = create<IngredientEditMode>(
   combine(
     {
