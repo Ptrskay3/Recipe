@@ -1,12 +1,16 @@
 import { ArrowRightIcon, CloseIcon } from '@chakra-ui/icons';
 import {
+  Box,
   Center,
   CircularProgress,
+  Flex,
   Heading,
+  HStack,
   IconButton,
   Stack,
   Text,
   useToast,
+  VStack,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { FaCheck } from 'react-icons/fa';
@@ -85,19 +89,17 @@ export default function IngredientDetailed() {
             isNew={false}
             withModifiedAttributes={diffObjects(data, suggestion)}
           />
-          <>
-            <Heading m="4">
-              <ArrowRightIcon></ArrowRightIcon>
-            </Heading>
-            <Stack>
-              <Ingredient
-                key={id}
-                withModifiedAttributes={diffObjects(data, suggestion)}
-                isNew={true}
-                isDeleteVote={suggestion.is_delete_vote}
-                {...suggestion}
-              />
-            </Stack>
+          <Heading m="4">
+            <ArrowRightIcon></ArrowRightIcon>
+          </Heading>
+          <Ingredient
+            key={id}
+            withModifiedAttributes={diffObjects(data, suggestion)}
+            isNew={true}
+            isDeleteVote={suggestion.is_delete_vote}
+            {...suggestion}
+          />
+          <HStack>
             <IconButton
               onClick={() => suggestionAction('apply')}
               aria-label="apply"
@@ -108,7 +110,7 @@ export default function IngredientDetailed() {
               aria-label="decline"
               icon={<CloseIcon />}
             ></IconButton>
-          </>
+          </HStack>
         </Center>
       </Layout>
     )

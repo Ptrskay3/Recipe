@@ -25,6 +25,7 @@ pub fn recipe_router() -> Router {
             post(add_or_update_ingredient_to_recipe).delete(delete_ingredient_from_recipe),
         )
         .route("/favorites", get(my_favorite_recipes))
+        .route("/popular", get(most_popular_recipes))
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
@@ -331,6 +332,31 @@ async fn my_favorite_recipes(
         "#,
         *auth_user
     )
+    .fetch_all(&mut conn)
+    .await?;
+
+    Ok(Json(results))
+}
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
+struct RecipeWithFavoriteCount {
+    name: String,
+    count: Option<i64>,
+}
+
+async fn most_popular_recipes(
+    DatabaseConnection(mut conn): DatabaseConnection,
+) -> Result<Json<Vec<RecipeWithFavoriteCount>>, ApiError> {
+    let results = sqlx::query_as!(
+        RecipeWithFavoriteCount,
+        r#"
+        SELECT r.name, COUNT(fr.recipe_id) FROM recipes r
+        INNER JOIN favorite_recipe fr ON r.id = fr.recipe_id
+        GROUP BY r.name
+        ORDER BY count DESC
+        LIMIT 10;
+        "#
+    ) // TODO: LIMIT might come from query with validation
     .fetch_all(&mut conn)
     .await?;
 

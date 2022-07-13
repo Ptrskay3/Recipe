@@ -107,11 +107,23 @@ export const IngredientEditControls = ({
           {editModeOpen ? 'Cancel edit' : 'Suggest edit'}
         </MenuItem>
         {editModeOpen ? (
-          <MenuItem onClick={() => handleSubmitSuggestion(data)} icon={<CheckIcon />}>
+          <MenuItem
+            onClick={() => {
+              setEditModeOpen(!editModeOpen);
+              handleSubmitSuggestion(data);
+            }}
+            icon={<CheckIcon />}
+          >
             Submit edit
           </MenuItem>
         ) : null}
-        <MenuItem onClick={() => handleSubmitDelete()} icon={<DeleteIcon />}>
+        <MenuItem
+          onClick={() => {
+            setEditModeOpen(!editModeOpen);
+            handleSubmitDelete();
+          }}
+          icon={<DeleteIcon />}
+        >
           Suggest delete
         </MenuItem>
       </MenuList>
