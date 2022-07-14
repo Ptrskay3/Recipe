@@ -43,9 +43,11 @@ export default function Ingredient({
   editableMapping,
 }: { iProps: IngredientProps } & ModifiedAttributes) {
   const coloring = isNew ? 'green.400' : 'red.400';
-  const editModeOpen = useIngredientEditMode((state) => state.editModeOpen);
-  const editedValues = useIngredientEditMode((state) => state.editedValues);
-  const updateEditedValues = useIngredientEditMode((state) => state.updateEditedValues);
+  const [editModeOpen, editedValues, updateEditedValues] = useIngredientEditMode((state) => [
+    state.editModeOpen,
+    state.editedValues,
+    state.updateEditedValues,
+  ]);
   const { name, category, contains_alcohol } = iProps;
 
   return (

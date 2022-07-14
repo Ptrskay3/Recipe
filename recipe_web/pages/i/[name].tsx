@@ -27,7 +27,7 @@ export default function IngredientDetailed() {
   if (error)
     return (
       <Layout>
-        <Center mt="14">
+        <Center mt="4">
           <Text color="orange.400">{'failed to load'}</Text>
         </Center>
       </Layout>
@@ -37,7 +37,7 @@ export default function IngredientDetailed() {
     return (
       <Layout>
         {' '}
-        <Center mt="14">
+        <Center mt="4">
           <CircularProgress isIndeterminate color="orange.400" />
         </Center>
       </Layout>
@@ -46,7 +46,7 @@ export default function IngredientDetailed() {
   return (
     data && (
       <Layout>
-        <Center mt="14">
+        <Center mt="4">
           <Stack>
             <Ingredient iProps={data} shouldShowEditControls editableMapping={editableMapping} />
             {suggestions && suggestions.length > 0 && (
