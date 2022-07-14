@@ -29,6 +29,7 @@ interface ModifiedAttributes {
   withModifiedAttributes?: (keyof IngredientProps)[];
   isNew: boolean;
   isDeleteVote: boolean;
+  shouldShowEditControls: boolean;
 }
 
 export default function Ingredient({
@@ -46,6 +47,7 @@ export default function Ingredient({
   withModifiedAttributes = [],
   isNew,
   isDeleteVote,
+  shouldShowEditControls = false,
 }: IngredientProps & ModifiedAttributes) {
   const coloring = isNew ? 'green.400' : 'red.400';
   const editModeOpen = useIngredientEditMode((state) => state.editModeOpen);
@@ -100,7 +102,9 @@ export default function Ingredient({
           }}
         ></Box>
         <Stack pt={10} align={'center'}>
-          <IngredientEditControls name={name} originals={originals} />
+          {shouldShowEditControls ? (
+            <IngredientEditControls name={name} originals={originals} />
+          ) : null}
           <Text
             color={'orange.400'}
             fontSize={'xl'}
@@ -116,7 +120,7 @@ export default function Ingredient({
           {editModeOpen ? (
             <Editable
               textAlign="center"
-              defaultValue={'' + calories_per_100g}
+              defaultValue={calories_per_100g.toString()}
               fontSize={'2xl'}
               fontFamily={'body'}
               fontWeight={500}

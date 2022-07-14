@@ -47,7 +47,7 @@ export default function IngredientDetailed() {
       <Layout>
         <Center mt="14">
           <Stack>
-            <Ingredient {...data} />
+            <Ingredient {...data} shouldShowEditControls/>
             {suggestions && suggestions.length > 0 && (
               <>
                 <Heading>Suggestions:</Heading>
