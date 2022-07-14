@@ -60,7 +60,6 @@ export default function IncludedIngredient({
         boxShadow={'2xl'}
         rounded={'lg'}
         pos={'relative'}
-        zIndex={1}
       >
         <Box
           rounded={'lg'}

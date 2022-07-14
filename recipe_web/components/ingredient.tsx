@@ -103,18 +103,19 @@ export default function Ingredient({
               {editModeOpen ? (
                 <Editable
                   textAlign="center"
-                  defaultValue={iProps[key as keyof IngredientProps] as string}
+                  defaultValue={iProps[key as keyof IngredientProps].toString()}
                   fontSize={'2xl'}
                   fontFamily={'body'}
                   fontWeight={500}
-                  textColor={!!editedValues[key as keyof IngredientProps] ? 'green.400' : undefined}
+                  textColor={
+                    Object.prototype.hasOwnProperty.call(editedValues, key as keyof IngredientProps)
+                      ? 'green.400'
+                      : undefined
+                  }
                 >
                   <EditablePreview />
                   <EditableInput
-                    onChange={(e) => {
-                      console.log({ [key]: parseFloat(e.target.value) });
-                      updateEditedValues({ [key]: parseFloat(e.target.value) });
-                    }}
+                    onChange={(e) => updateEditedValues({ [key]: parseFloat(e.target.value) })}
                     onBlur={(e) => updateEditedValues({ [key]: parseFloat(e.target.value) })}
                   />
                   {!!value.unitSuffix ? (

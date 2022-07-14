@@ -1,5 +1,16 @@
 import { PlusSquareIcon } from '@chakra-ui/icons';
-import { Box, Center, CircularProgress, Flex, Heading, IconButton, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Center,
+  CircularProgress,
+  Flex,
+  Heading,
+  IconButton,
+  Text,
+  VStack,
+  Wrap,
+  WrapItem,
+} from '@chakra-ui/react';
 import { instantMeiliSearch } from '@meilisearch/instant-meilisearch';
 import { Highlight, Hits, InstantSearch, SearchBox } from 'react-instantsearch-hooks-web';
 import { useRouter } from 'next/router';
@@ -59,20 +70,28 @@ export default function RecipeDetailed() {
         <Box>
           <Center mt="14">
             <Flex>
-              <Heading>{data.name}</Heading>
-              <Text m={4}>{data.description}</Text>
-              <Box>
-                {me ? (
-                  <IconButton
-                    aria-label="toggle favorite"
-                    size="md"
-                    icon={data.favorited ? <FaHeart color="red" /> : <FaHeartBroken />}
-                    onClick={toggleFavorite}
-                  />
-                ) : null}
-              </Box>
-              {data.ingredients &&
-                data.ingredients.map((i: any) => <IncludedIngredient key={i.name} {...i} />)}
+              <VStack>
+                <Heading>{data.name}</Heading>
+                <Text m={4}>{data.description}</Text>
+                <Box>
+                  {me ? (
+                    <IconButton
+                      aria-label="toggle favorite"
+                      size="md"
+                      icon={data.favorited ? <FaHeart color="red" /> : <FaHeartBroken />}
+                      onClick={toggleFavorite}
+                    />
+                  ) : null}
+                </Box>
+                <Wrap>
+                  {data.ingredients &&
+                    data.ingredients.map((i: any) => (
+                      <WrapItem key={i.name}>
+                        <IncludedIngredient {...i} />
+                      </WrapItem>
+                    ))}
+                </Wrap>
+              </VStack>
             </Flex>
           </Center>
           <Center>
