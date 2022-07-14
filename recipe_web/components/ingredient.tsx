@@ -9,6 +9,7 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
+import { Fragment } from 'react';
 import { useIngredientEditMode } from '../stores/useIngredientEditMode';
 import { IngredientEditControls } from './ingredient_edit_controls';
 
@@ -27,45 +28,25 @@ export interface IngredientProps {
 }
 interface ModifiedAttributes {
   withModifiedAttributes?: (keyof IngredientProps)[];
-  isNew: boolean;
-  isDeleteVote: boolean;
-  shouldShowEditControls: boolean;
+  isNew?: boolean;
+  isDeleteVote?: boolean;
+  shouldShowEditControls?: boolean;
+  editableMapping: any;
 }
 
 export default function Ingredient({
-  name,
-  calories_per_100g,
-  category,
-  protein,
-  water,
-  fat,
-  sugar,
-  carbohydrate,
-  fiber,
-  caffeine,
-  contains_alcohol,
+  iProps,
   withModifiedAttributes = [],
   isNew,
   isDeleteVote,
   shouldShowEditControls = false,
-}: IngredientProps & ModifiedAttributes) {
+  editableMapping,
+}: { iProps: IngredientProps } & ModifiedAttributes) {
   const coloring = isNew ? 'green.400' : 'red.400';
   const editModeOpen = useIngredientEditMode((state) => state.editModeOpen);
   const editedValues = useIngredientEditMode((state) => state.editedValues);
   const updateEditedValues = useIngredientEditMode((state) => state.updateEditedValues);
-  const originals = {
-    name,
-    calories_per_100g,
-    category,
-    protein,
-    water,
-    fat,
-    sugar,
-    carbohydrate,
-    fiber,
-    caffeine,
-    contains_alcohol,
-  };
+  const { name, category, contains_alcohol } = iProps;
 
   return (
     <Center py={12}>
@@ -103,7 +84,7 @@ export default function Ingredient({
         ></Box>
         <Stack pt={10} align={'center'}>
           {shouldShowEditControls ? (
-            <IngredientEditControls name={name} originals={originals} />
+            <IngredientEditControls name={name} originals={iProps} />
           ) : null}
           <Text
             color={'orange.400'}
@@ -114,155 +95,50 @@ export default function Ingredient({
           >
             {name}
           </Text>
-          <Text fontWeight={400} fontSize={'xs'}>
-            {'Calories per 100g'}
-          </Text>
-          {editModeOpen ? (
-            <Editable
-              textAlign="center"
-              defaultValue={calories_per_100g.toString()}
-              fontSize={'2xl'}
-              fontFamily={'body'}
-              fontWeight={500}
-              textColor={!!editedValues.calories_per_100g ? 'green.400' : undefined}
-            >
-              <EditablePreview />
-              <EditableInput
-                onChange={(e) =>
-                  updateEditedValues({ calories_per_100g: parseFloat(e.target.value) })
-                }
-                onBlur={(e) =>
-                  updateEditedValues({ calories_per_100g: parseFloat(e.target.value) })
-                }
-              />
-            </Editable>
-          ) : (
-            <Heading
-              fontSize={'2xl'}
-              fontFamily={'body'}
-              fontWeight={500}
-              textColor={
-                withModifiedAttributes.includes('calories_per_100g') ? coloring : undefined
-              }
-            >
-              {calories_per_100g}
-            </Heading>
-          )}
-          {/* TODO: Make this a mapping of some sort */}
-          <Text fontWeight={400} fontSize={'xs'}>
-            {'Protein'}
-          </Text>
-          {editModeOpen ? (
-            <>
-              <Editable
-                textAlign="center"
-                defaultValue={protein.toString()}
-                fontSize={'2xl'}
-                fontFamily={'body'}
-                fontWeight={500}
-                textColor={!!editedValues.protein ? 'green.400' : undefined}
-              >
-                <EditablePreview />
-                <EditableInput
-                  onChange={(e) => updateEditedValues({ protein: parseFloat(e.target.value) })}
-                  onBlur={(e) => updateEditedValues({ protein: parseFloat(e.target.value) })}
-                />
-                <Text as={'span'} fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
-                  {' g'}
-                </Text>
-              </Editable>
-            </>
-          ) : (
-            <Heading
-              fontSize={'2xl'}
-              fontFamily={'body'}
-              fontWeight={500}
-              textColor={withModifiedAttributes.includes('protein') ? coloring : undefined}
-            >
-              {protein}
-              <Text as={'span'} fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
-                {' g'}
+          {Object.entries(editableMapping).map(([key, value]: [string, any], i: number) => (
+            <Fragment key={i}>
+              <Text fontWeight={400} fontSize={'xs'}>
+                {value.namePretty}
               </Text>
-            </Heading>
-          )}
-
-          {/* <Text fontWeight={400} fontSize={'xs'}>
-            {'Protein'}
-          </Text>
-          <Heading
-            fontSize={'2xl'}
-            fontFamily={'body'}
-            fontWeight={500}
-            textColor={withModifiedAttributes.includes('protein') ? coloring : undefined}
-          >
-            {protein + ' g'}
-          </Heading> */}
-          <Text fontWeight={400} fontSize={'xs'}>
-            {'Carbohydrate'}
-          </Text>
-          <Heading
-            fontSize={'2xl'}
-            fontFamily={'body'}
-            fontWeight={500}
-            textColor={withModifiedAttributes.includes('carbohydrate') ? coloring : undefined}
-          >
-            {carbohydrate + ' g'}
-          </Heading>
-          <Text fontWeight={400} fontSize={'xs'}>
-            {'Fat'}
-          </Text>
-          <Heading
-            fontSize={'2xl'}
-            fontFamily={'body'}
-            fontWeight={500}
-            textColor={withModifiedAttributes.includes('fat') ? coloring : undefined}
-          >
-            {fat + ' g'}
-          </Heading>
-          <Text fontWeight={400} fontSize={'xs'}>
-            {'Sugar'}
-          </Text>
-          <Heading
-            fontSize={'2xl'}
-            fontFamily={'body'}
-            fontWeight={500}
-            textColor={withModifiedAttributes.includes('sugar') ? coloring : undefined}
-          >
-            {sugar + ' g'}
-          </Heading>
-          <Text fontWeight={400} fontSize={'xs'}>
-            {'Fiber'}
-          </Text>
-          <Heading
-            fontSize={'2xl'}
-            fontFamily={'body'}
-            fontWeight={500}
-            textColor={withModifiedAttributes.includes('fiber') ? coloring : undefined}
-          >
-            {fiber + ' g'}
-          </Heading>
-          <Text fontWeight={400} fontSize={'xs'}>
-            {'Water'}
-          </Text>
-          <Heading
-            fontSize={'2xl'}
-            fontFamily={'body'}
-            fontWeight={500}
-            textColor={withModifiedAttributes.includes('water') ? coloring : undefined}
-          >
-            {water + ' g'}
-          </Heading>
-          <Text fontWeight={400} fontSize={'xs'}>
-            {'caffeine'}
-          </Text>
-          <Heading
-            fontSize={'2xl'}
-            fontFamily={'body'}
-            fontWeight={500}
-            textColor={withModifiedAttributes.includes('caffeine') ? coloring : undefined}
-          >
-            {caffeine + ' mg'}
-          </Heading>
+              {editModeOpen ? (
+                <Editable
+                  textAlign="center"
+                  defaultValue={iProps[key as keyof IngredientProps] as string}
+                  fontSize={'2xl'}
+                  fontFamily={'body'}
+                  fontWeight={500}
+                  textColor={!!editedValues[key as keyof IngredientProps] ? 'green.400' : undefined}
+                >
+                  <EditablePreview />
+                  <EditableInput
+                    onChange={(e) => {
+                      console.log({ [key]: parseFloat(e.target.value) });
+                      updateEditedValues({ [key]: parseFloat(e.target.value) });
+                    }}
+                    onBlur={(e) => updateEditedValues({ [key]: parseFloat(e.target.value) })}
+                  />
+                  {!!value.unitSuffix ? (
+                    <Text as={'span'} fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+                      {value.unitSuffix}
+                    </Text>
+                  ) : null}
+                </Editable>
+              ) : (
+                <Heading
+                  fontSize={'2xl'}
+                  fontFamily={'body'}
+                  fontWeight={500}
+                  textColor={
+                    withModifiedAttributes.includes(key as keyof IngredientProps)
+                      ? coloring
+                      : undefined
+                  }
+                >
+                  {iProps[key as keyof IngredientProps] + (value.unitSuffix || '')}
+                </Heading>
+              )}
+            </Fragment>
+          ))}
           <Text fontWeight={400} fontSize={'xs'}>
             {'Contains alcohol'}
           </Text>

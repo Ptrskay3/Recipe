@@ -12,6 +12,7 @@ import {
 import useSWR from 'swr';
 import { fetcher } from '../../utils/fetcher';
 import Ingredient from '../../components/ingredient';
+import { editableMapping } from '../../utils/constants';
 
 export default function IngredientDetailed() {
   const router = useRouter();
@@ -47,7 +48,7 @@ export default function IngredientDetailed() {
       <Layout>
         <Center mt="14">
           <Stack>
-            <Ingredient {...data} shouldShowEditControls/>
+            <Ingredient iProps={data} shouldShowEditControls editableMapping={editableMapping} />
             {suggestions && suggestions.length > 0 && (
               <>
                 <Heading>Suggestions:</Heading>

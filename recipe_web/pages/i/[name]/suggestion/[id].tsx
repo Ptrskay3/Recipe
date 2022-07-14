@@ -18,6 +18,7 @@ import useSWR, { useSWRConfig } from 'swr';
 import Ingredient from '../../../../components/ingredient';
 import { Layout } from '../../../../components/layout';
 import { useIngredientEditMode } from '../../../../stores/useIngredientEditMode';
+import { editableMapping } from '../../../../utils/constants';
 import { diffObjects } from '../../../../utils/diff';
 import { fetcher } from '../../../../utils/fetcher';
 
@@ -85,19 +86,21 @@ export default function IngredientDetailed() {
       <Layout>
         <Center mt="14">
           <Ingredient
-            {...data}
+            iProps={data}
             isNew={false}
             withModifiedAttributes={diffObjects(data, suggestion)}
+            editableMapping={editableMapping}
           />
           <Heading m="4">
             <ArrowRightIcon></ArrowRightIcon>
           </Heading>
           <Ingredient
-            key={id}
+            key={id as string}
             withModifiedAttributes={diffObjects(data, suggestion)}
             isNew={true}
             isDeleteVote={suggestion.is_delete_vote}
-            {...suggestion}
+            iProps={suggestion}
+            editableMapping={editableMapping}
           />
           <HStack>
             <IconButton
