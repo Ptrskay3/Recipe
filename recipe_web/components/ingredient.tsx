@@ -149,8 +149,45 @@ export default function Ingredient({
             </Heading>
           )}
           {/* TODO: Make this a mapping of some sort */}
-          <Text fontWeight={400} fontSize={'xl'}>
-            {'💪💯🔥🚀Protein🚀🔥💯💪'}
+          <Text fontWeight={400} fontSize={'xs'}>
+            {'Protein'}
+          </Text>
+          {editModeOpen ? (
+            <>
+              <Editable
+                textAlign="center"
+                defaultValue={protein.toString()}
+                fontSize={'2xl'}
+                fontFamily={'body'}
+                fontWeight={500}
+                textColor={!!editedValues.protein ? 'green.400' : undefined}
+              >
+                <EditablePreview />
+                <EditableInput
+                  onChange={(e) => updateEditedValues({ protein: parseFloat(e.target.value) })}
+                  onBlur={(e) => updateEditedValues({ protein: parseFloat(e.target.value) })}
+                />
+                <Text as={'span'} fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+                  {' g'}
+                </Text>
+              </Editable>
+            </>
+          ) : (
+            <Heading
+              fontSize={'2xl'}
+              fontFamily={'body'}
+              fontWeight={500}
+              textColor={withModifiedAttributes.includes('protein') ? coloring : undefined}
+            >
+              {protein}
+              <Text as={'span'} fontSize={'2xl'} fontFamily={'body'} fontWeight={500}>
+                {' g'}
+              </Text>
+            </Heading>
+          )}
+
+          {/* <Text fontWeight={400} fontSize={'xs'}>
+            {'Protein'}
           </Text>
           <Heading
             fontSize={'2xl'}
@@ -159,7 +196,7 @@ export default function Ingredient({
             textColor={withModifiedAttributes.includes('protein') ? coloring : undefined}
           >
             {protein + ' g'}
-          </Heading>
+          </Heading> */}
           <Text fontWeight={400} fontSize={'xs'}>
             {'Carbohydrate'}
           </Text>
