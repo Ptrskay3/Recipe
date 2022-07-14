@@ -19,11 +19,7 @@ export const useIngredientEditMode = create<IngredientEditMode>(
     (set) => ({
       setEditModeOpen: (value) => set(() => ({ editModeOpen: value })),
       updateEditedValues: (edited) =>
-        set((state) => {
-          const st = { ...state, editedValues: { ...state.editedValues, ...edited } };
-          console.log(st.editedValues);
-          return st;
-        }),
+        set((state) => ({ ...state, editedValues: { ...state.editedValues, ...edited } })),
       resetEditedValues: () => set((state) => ({ ...state, editedValues: {} })),
     })
   )
