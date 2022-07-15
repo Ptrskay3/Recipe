@@ -1,3 +1,4 @@
+import { Center, CircularProgress, Heading, VStack } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { Layout } from '../../components/layout';
@@ -15,5 +16,14 @@ export default function DiscordAuthorize() {
         }
       });
   }, [router, code, state]);
-  return <Layout>{'waiting for discord auth...'}</Layout>;
+  return (
+    <Layout>
+      <Center mt="14">
+        <VStack>
+          <Heading>{'waiting for discord auth...'}</Heading>
+          <CircularProgress isIndeterminate color="orange.400" />
+        </VStack>
+      </Center>
+    </Layout>
+  );
 }
