@@ -35,9 +35,15 @@ pub fn recipe_router() -> Router {
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
-struct RecipeWithIngredientsAndFav {
+struct RecipeDetailedWithFav {
     name: String,
     description: String,
+    prep_time: i32,
+    cook_time: i32,
+    difficulty: DifficultyLevel,
+    steps: Vec<String>,
+    cuisine: String,
+    meal_type: TypeByTime,
     ingredients: Vec<DetailedIngredient>,
     favorited: bool,
 }
@@ -66,16 +72,18 @@ async fn get_recipe_with_ingredients(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path(name): Path<String>,
     maybe_auth_user: MaybeAuthUser,
-) -> Result<Json<RecipeWithIngredientsAndFav>, ApiError> {
+) -> Result<Json<RecipeDetailedWithFav>, ApiError> {
     let mut tx = conn.begin().await?;
 
     // A little bit clunky, but better be safe than overly smart.
     let recipe = sqlx::query_as!(
-        Recipe,
+        RecipeFull,
         r#"
-        SELECT name, description
-        FROM recipes
-        WHERE name = $1
+        SELECT r.name, description, prep_time, cook_time, difficulty as "difficulty: DifficultyLevel",
+        steps, c.name as cuisine, meal_type as "meal_type: TypeByTime"
+        FROM recipes r
+        INNER JOIN cuisines c ON c.id = r.cuisine_id
+        WHERE r.name = $1
         "#,
         name
     )
@@ -118,10 +126,16 @@ async fn get_recipe_with_ingredients(
 
     tx.commit().await?;
 
-    Ok(Json(RecipeWithIngredientsAndFav {
+    Ok(Json(RecipeDetailedWithFav {
         ingredients,
         name: recipe.name,
         description: recipe.description,
+        prep_time: recipe.prep_time,
+        cook_time: recipe.cook_time,
+        difficulty: recipe.difficulty,
+        steps: recipe.steps,
+        cuisine: recipe.cuisine,
+        meal_type: recipe.meal_type,
         favorited,
     }))
 }
@@ -130,6 +144,18 @@ async fn get_recipe_with_ingredients(
 struct Recipe {
     name: String,
     description: String,
+}
+
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
+struct RecipeFull {
+    name: String,
+    description: String,
+    prep_time: i32,
+    cook_time: i32,
+    difficulty: DifficultyLevel,
+    steps: Vec<String>,
+    cuisine: String,
+    meal_type: TypeByTime,
 }
 
 async fn insert_barebone_recipe(
@@ -225,6 +251,8 @@ async fn insert_full_recipe(
     Json(recipe_with_ingredients): Json<RecipeWithIngredients>,
     auth_user: AuthUser,
 ) -> Result<(), ApiError> {
+    let mut tx = conn.begin().await?;
+
     let RecipeWithIngredients {
         name,
         description,
@@ -236,6 +264,7 @@ async fn insert_full_recipe(
         meal_type,
         ingredients,
     } = recipe_with_ingredients;
+
     let recipe = sqlx::query!(
         r#"
         INSERT INTO recipes (
@@ -262,7 +291,7 @@ async fn insert_full_recipe(
         cuisine,
         meal_type as _,
     )
-    .fetch_one(&mut conn)
+    .fetch_one(&mut tx)
     .await
     .on_code("23502", |_| {
         ApiError::unprocessable_entity([("cuisine", "does not exist")])
@@ -288,7 +317,7 @@ async fn insert_full_recipe(
             ingredient.quantity,
             ingredient.quantity_unit
         )
-        .execute(&mut conn)
+        .execute(&mut tx)
         .await
         .map_err(|_| {
             ApiError::unprocessable_entity([(
@@ -298,6 +327,7 @@ async fn insert_full_recipe(
         })?;
     }
 
+    tx.commit().await?;
     Ok(())
 }
 

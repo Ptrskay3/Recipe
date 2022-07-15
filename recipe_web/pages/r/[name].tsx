@@ -72,7 +72,23 @@ export default function RecipeDetailed() {
             <Flex>
               <VStack>
                 <Heading>{data.name}</Heading>
-                <Text m={4}>{data.description}</Text>
+                <Text fontSize={'sm'} m={4}>
+                  {data.description}
+                </Text>
+                <Text m={4}>{`Preparation time: ${data.prep_time} minues`}</Text>
+                <Text m={4}>{`Cook time: ${data.cook_time} minues`}</Text>
+                <Text m={4}>{`Difficulty: ${data.difficulty}`}</Text>
+                <Text m={4}>{`Cuisine: ${data.cuisine}`}</Text>
+                <Text m={4}>{`Type: ${data.meal_type}`}</Text>
+                {data.steps.length > 0 ? (
+                  <>
+                    <Heading>Steps:</Heading>
+                    {data.steps.map((step: any, i: number) => (
+                      <Text key={i} m={4}>{`${i + 1}. step: ${step}`}</Text>
+                    ))}
+                  </>
+                ) : null}
+
                 <Box>
                   {me ? (
                     <IconButton
