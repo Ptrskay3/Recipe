@@ -196,6 +196,16 @@ pub trait ResultExt<T> {
         name: &str,
         f: impl FnOnce(Box<dyn DatabaseError>) -> ApiError,
     ) -> Result<T, ApiError>;
+
+    /// If `self` contains a SQLx database error with the given code,
+    /// transform the error.
+    ///
+    /// Otherwise, the result is passed through unchanged.
+    fn on_code(
+        self,
+        code: &str,
+        f: impl FnOnce(Box<dyn DatabaseError>) -> ApiError,
+    ) -> Result<T, ApiError>;
 }
 
 impl<T, E> ResultExt<T> for Result<T, E>
@@ -209,6 +219,18 @@ where
     ) -> Result<T, ApiError> {
         self.map_err(|e| match e.into() {
             ApiError::Sqlx(sqlx::Error::Database(dbe)) if dbe.constraint() == Some(name) => {
+                map_err(dbe)
+            }
+            e => e,
+        })
+    }
+    fn on_code(
+        self,
+        code: &str,
+        map_err: impl FnOnce(Box<dyn DatabaseError>) -> ApiError,
+    ) -> Result<T, ApiError> {
+        self.map_err(|e| match e.into() {
+            ApiError::Sqlx(sqlx::Error::Database(dbe)) if dbe.code() == Some(code.into()) => {
                 map_err(dbe)
             }
             e => e,

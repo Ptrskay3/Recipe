@@ -9,7 +9,7 @@ use axum_extra::extract::Form;
 use sqlx::{types::BigDecimal, Acquire};
 
 use crate::{
-    error::ApiError,
+    error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
 };
 
@@ -264,7 +264,10 @@ async fn insert_full_recipe(
     )
     .fetch_one(&mut conn)
     .await
-    .map_err(|_| ApiError::Conflict)?; // TODO: We should ideally distinguish between duplicate name, and non-existing cuisine.
+    .on_code("23502", |_| {
+        ApiError::unprocessable_entity([("cuisine", "does not exist")])
+    })
+    .on_constraint("recipes_name_key", |_| ApiError::Conflict)?;
 
     for ingredient in ingredients {
         sqlx::query!(
