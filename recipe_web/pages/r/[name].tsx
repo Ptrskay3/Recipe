@@ -80,7 +80,7 @@ export default function RecipeDetailed() {
                 <Text m={4}>{`Difficulty: ${data.difficulty}`}</Text>
                 <Text m={4}>{`Cuisine: ${data.cuisine}`}</Text>
                 <Text m={4}>{`Type: ${data.meal_type}`}</Text>
-                {data.steps.length > 0 ? (
+                {data.steps && data.steps.length > 0 ? (
                   <>
                     <Heading>Steps:</Heading>
                     {data.steps.map((step: any, i: number) => (
