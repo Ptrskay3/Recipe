@@ -20,3 +20,7 @@ email_client:
 meili:
   url: http://localhost:7700
   master_key: SUPER_SECRET_KEY
+oauth:
+  discord:
+    client_id: 997545848957313054
+    client_secret: JR9XG-8qR1D8JhuNEV-3-Df1p-013_ap

@@ -2,7 +2,7 @@ use crate::{
     queue::email::EmailClient,
     routes::{admin_router, auth_router, ingredient_router, recipe_router},
     session::SessionLayer,
-    utils::shutdown_signal,
+    utils::{oauth_client_discord, shutdown_signal},
 };
 use anyhow::Context;
 use async_redis_session::RedisSessionStore;
@@ -26,6 +26,8 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .init();
 
     let addr = SocketAddr::from(([127, 0, 0, 1], config.application_port));
+
+    let oauth_client = oauth_client_discord(&config);
 
     let db_conn_str = config.database.connection_string();
 
@@ -66,6 +68,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .layer(Extension(store.clone()))
         .layer(SessionLayer::new(store, config.redis.secret_key.as_bytes()))
         .layer(Extension(email_client.clone()))
+        .layer(Extension(oauth_client))
         .layer(
             CorsLayer::very_permissive()
                 .allow_origin(config.frontend_url.parse::<HeaderValue>().unwrap())

@@ -2,8 +2,13 @@ use anyhow::Context;
 use async_session::Session;
 use axum::{
     extract::Query,
+    response::{IntoResponse, Redirect},
     routing::{get, post, put},
     Extension, Form, Json, Router,
+};
+use oauth2::{
+    basic::BasicClient, reqwest::async_http_client, AuthorizationCode, CsrfToken, Scope,
+    TokenResponse,
 };
 use secrecy::{ExposeSecret, Secret};
 use sqlx::Acquire;
@@ -32,6 +37,8 @@ pub fn auth_router() -> Router {
         .route("/confirm", get(confirm))
         .route("/forget_password_gen", post(forget_password_gen))
         .route("/forget_password", post(forget_password))
+        .route("/auth/discord_authorize", get(discord_authorize))
+        .route("/auth/discord", get(discord_auth))
 }
 
 #[derive(sqlx::FromRow, serde::Serialize, Debug)]
@@ -314,4 +321,69 @@ async fn forget_password(
     } else {
         Err(ApiError::BadRequest)
     }
+}
+
+#[derive(Debug, serde::Deserialize)]
+#[allow(dead_code)]
+struct AuthRequest {
+    code: String,
+    state: String,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct DiscordUser {
+    id: String,
+    avatar: Option<String>,
+    username: String,
+    discriminator: String,
+}
+
+async fn discord_authorize(
+    Query(query): Query<AuthRequest>,
+    Extension(mut session): Extension<Session>,
+    Extension(oauth_client): Extension<BasicClient>,
+) -> Result<(), ApiError> {
+    // Get an auth token
+    let token = oauth_client
+        .exchange_code(AuthorizationCode::new(query.code.clone()))
+        .request_async(async_http_client)
+        .await
+        .unwrap();
+
+    // Fetch user data from discord
+    let client = reqwest::Client::new();
+    let user_data: DiscordUser = client
+        .get("https://discordapp.com/api/users/@me")
+        .bearer_auth(token.access_token().secret())
+        .send()
+        .await
+        .unwrap()
+        .json::<DiscordUser>()
+        .await
+        .unwrap();
+
+    println!("{:#?}", user_data);
+
+    let temporal_user_id = uuid::Uuid::new_v4();
+    session.insert("user", &temporal_user_id).unwrap();
+
+    Ok(())
+}
+
+#[derive(Clone, serde::Serialize)]
+struct RedirectUri {
+    uri: String,
+}
+
+async fn discord_auth(
+    Extension(client): Extension<BasicClient>,
+) -> Result<Json<RedirectUri>, ApiError> {
+    let (auth_url, _csrf_token) = client
+        .authorize_url(CsrfToken::new_random)
+        .add_scope(Scope::new("identify".to_string()))
+        .url();
+
+    Ok(Json(RedirectUri {
+        uri: auth_url.to_string(),
+    }))
 }

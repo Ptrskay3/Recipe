@@ -19,6 +19,7 @@ pub struct Settings {
     pub sentry_dsn: Option<String>,
     pub email_client: EmailClientSettings,
     pub meili: MeiliConfig,
+    pub oauth: OAuth,
 }
 
 #[derive(Deserialize, Clone)]
@@ -26,12 +27,24 @@ pub struct MeiliConfig {
     pub url: String,
     pub master_key: String,
 }
+
 #[derive(Deserialize, Clone)]
 pub struct EmailClientSettings {
     pub base_url: String,
     pub sender_email: String,
     pub authorization_token: Secret<String>,
     pub timeout_milliseconds: u64,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct OAuth {
+    pub discord: DiscordCredentials,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct DiscordCredentials {
+    pub client_id: String,
+    pub client_secret: String,
 }
 
 impl EmailClientSettings {
