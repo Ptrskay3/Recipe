@@ -11,6 +11,8 @@ services:
       - ./volumes/postgres/data:/var/lib/pg_data
     ports:
       - '5432:5432'
+    networks:
+      - axum_net
 
   pgadmin:
     image: dpage/pgadmin4
@@ -22,6 +24,8 @@ services:
       - '5050:80'
     depends_on:
       - postgres
+    networks:
+      - axum_net
 
   redis:
     image: 'redis:alpine'
@@ -31,6 +35,8 @@ services:
       - '6379:6379'
     volumes:
       - './volumes/redis-data:/var/lib/redis'
+    networks:
+      - axum_net
 
   meili:
     image: getmeili/meilisearch:v0.27.2
@@ -41,3 +47,10 @@ services:
       - MEILI_ENV=development
     volumes:
       - ./volumes/meili:/meili_data
+    networks:
+      - axum_net
+
+networks:
+  axum_net:
+    external:
+      name: axum_net

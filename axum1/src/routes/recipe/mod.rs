@@ -13,6 +13,9 @@ use crate::{
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
 };
 
+mod helpers;
+use helpers::{DifficultyLevel, TypeByTime};
+
 pub fn recipe_router() -> Router {
     let action_router = Router::new()
         .route("/my-recipes", get(my_recipes))
@@ -42,6 +45,12 @@ struct RecipeWithIngredientsAndFav {
 struct RecipeWithIngredients {
     name: String,
     description: String,
+    prep_time: i32,
+    cook_time: i32,
+    difficulty: DifficultyLevel,
+    steps: Vec<String>,
+    cuisine: String,
+    meal_type: TypeByTime,
     ingredients: Vec<DetailedIngredient>,
 }
 
@@ -219,21 +228,43 @@ async fn insert_full_recipe(
     let RecipeWithIngredients {
         name,
         description,
+        prep_time,
+        cook_time,
+        difficulty,
+        steps,
+        cuisine,
+        meal_type,
         ingredients,
     } = recipe_with_ingredients;
     let recipe = sqlx::query!(
         r#"
-        INSERT INTO recipes ("name", "description", "creator_id")
-        VALUES ($1, $2, $3)
+        INSERT INTO recipes (
+            "name",
+            "description",
+            "creator_id",
+            "prep_time",
+            "cook_time",
+            "difficulty",
+            "steps",
+            "cuisine_id",
+            "meal_type"
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, (SELECT id FROM cuisines WHERE name = $8), $9)
         RETURNING id;
         "#,
         name,
         description,
-        *auth_user
+        *auth_user,
+        prep_time,
+        cook_time,
+        difficulty as _,
+        &steps,
+        cuisine,
+        meal_type as _,
     )
     .fetch_one(&mut conn)
     .await
-    .map_err(|_| ApiError::Conflict)?;
+    .map_err(|_| ApiError::Conflict)?; // TODO: We should ideally distinguish between duplicate name, and non-existing cuisine.
 
     for ingredient in ingredients {
         sqlx::query!(
