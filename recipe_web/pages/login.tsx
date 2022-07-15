@@ -11,6 +11,8 @@ import {
   Text,
   useColorModeValue,
   FormErrorMessage,
+  Divider,
+  HStack,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { intoFormBody } from '../utils/form';
@@ -20,6 +22,7 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import NextLink from 'next/link';
 import { AuthFormWrapper } from '../components/auth_form_wrapper';
+import { OAuthButtonGroup } from '../components/OAuthGroup';
 
 function Login() {
   useAlreadyAuth();
@@ -111,6 +114,14 @@ function Login() {
               >
                 Sign in
               </Button>
+              <HStack>
+                <Divider />
+                <Text fontSize="sm" whiteSpace="nowrap" color="muted">
+                  or continue with
+                </Text>
+                <Divider />
+              </HStack>
+              <OAuthButtonGroup />
             </Stack>
           </form>
         </Stack>
