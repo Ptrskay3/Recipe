@@ -68,8 +68,8 @@ pub(super) async fn discord_authorize(
 
     let user = sqlx::query!(
         r#"
-            SELECT user_id FROM users
-            WHERE oauth_provider = 'discord' AND oauth_id = $1
+        SELECT user_id FROM users
+        WHERE oauth_provider = 'discord' AND oauth_id = $1
         "#,
         user_data.id
     )

@@ -2,10 +2,12 @@ import { CloseIcon } from '@chakra-ui/icons';
 import { Box, Center, CircularProgress, Flex, Heading, Link, VStack } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { useSWRConfig } from 'swr';
 import { Layout } from '../../components/layout';
 
 export default function DiscordAuthorize() {
   const router = useRouter();
+  const { mutate } = useSWRConfig();
   const { code, state } = router.query;
   const [error, setError] = useState<boolean>(false);
   useEffect(() => {
@@ -16,12 +18,13 @@ export default function DiscordAuthorize() {
       .then((r) => r.ok)
       .then((ok) => {
         if (ok) {
+          mutate(`http://localhost:3000/me`);
           router.push('/');
         } else {
           setError(true);
         }
       });
-  }, [router, code, state]);
+  }, [router, code, state, mutate]);
 
   if (error) {
     return (
