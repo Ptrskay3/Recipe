@@ -38,7 +38,7 @@ pub(super) async fn discord_authorize(
         .exchange_code(AuthorizationCode::new(query.code.clone()))
         .request_async(async_http_client)
         .await
-        .context("Failed to exchange authorization code")?;
+        .map_err(|_| ApiError::BadRequest)?;
 
     let csrf_token = session
         .get::<CsrfToken>("oauth_csrf_token")
