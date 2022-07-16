@@ -18,7 +18,7 @@ mod confirm;
 mod oauth;
 mod password;
 
-use oauth::{discord_auth, discord_authorize};
+use oauth::{discord_auth, discord_authorize, google_auth, google_authorize};
 use password::{compute_password_hash, validate_credentials};
 
 use self::confirm::{confirm, enqueue_delivery_task, generate_confirmation_token, store_token};
@@ -35,7 +35,9 @@ pub fn auth_router() -> Router {
         .route("/forget_password_gen", post(forget_password_gen))
         .route("/forget_password", post(forget_password))
         .route("/auth/discord_authorize", get(discord_authorize))
+        .route("/auth/google_authorize", get(google_authorize))
         .route("/auth/discord", get(discord_auth))
+        .route("/auth/google", get(google_auth))
 }
 
 #[derive(sqlx::FromRow, serde::Serialize, Debug)]

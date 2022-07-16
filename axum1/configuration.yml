@@ -24,3 +24,6 @@ oauth:
   discord:
     client_id: 997545848957313054
     client_secret: JR9XG-8qR1D8JhuNEV-3-Df1p-013_ap
+  google:
+    client_id: 193420761201-v858oknq8mfaps3l262njru2j0o776qg.apps.googleusercontent.com
+    client_secret: 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

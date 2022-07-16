@@ -38,11 +38,12 @@ pub struct EmailClientSettings {
 
 #[derive(Deserialize, Clone)]
 pub struct OAuth {
-    pub discord: DiscordCredentials,
+    pub discord: OAuthCredentials,
+    pub google: OAuthCredentials,
 }
 
 #[derive(Deserialize, Clone)]
-pub struct DiscordCredentials {
+pub struct OAuthCredentials {
     pub client_id: String,
     pub client_secret: String,
 }
