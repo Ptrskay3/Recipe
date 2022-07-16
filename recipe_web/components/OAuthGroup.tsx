@@ -2,7 +2,7 @@ import { Button, ButtonGroup, VisuallyHidden } from '@chakra-ui/react';
 import { DiscordLogo } from './logos';
 
 const discordOAuth = async () => {
-  const res = await fetch('http://localhost:3000/auth/discord');
+  const res = await fetch('http://localhost:3000/auth/discord', { credentials: 'include' });
   const { uri } = await res.json();
   window.location.href = uri;
 };
