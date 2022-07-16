@@ -8,9 +8,11 @@ services:
       - POSTGRES_DB=hummus
       - PGDATA=/var/lib/pg_data
     volumes:
-      - ./volumes/postgres/data:/var/lib/postgresql/data
+      - ./volumes/postgres/data:/var/lib/pg_data
     ports:
-      - "5432:5432"
+      - '5432:5432'
+    networks:
+      - axum_net
 
   pgadmin:
     image: dpage/pgadmin4
@@ -19,18 +21,34 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
-      - "5050:80"
+      - '5050:80'
     depends_on:
       - postgres
+    networks:
+      - axum_net
 
   redis:
-    image: "redis:alpine"
-    command: "redis-server"
+    image: 'redis:alpine'
+    command: 'redis-server'
     hostname: redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
-      - "./volumes/redis-data:/var/lib/redis"
+      - './volumes/redis-data:/var/lib/redis'
+    networks:
+      - axum_net
+
+  meili:
+    image: getmeili/meilisearch:v0.27.2
+    ports:
+      - 7700:7700
+    environment:
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_ENV=development
+    volumes:
+      - ./volumes/meili:/meili_data
+    networks:
+      - axum_net
 
   server:
     restart: always
@@ -44,5 +62,11 @@ services:
     depends_on:
       - postgres
       - redis
+      - meili
     ports:
       - "3000:3000"
+
+networks:
+  axum_net:
+    external:
+      name: axum_net

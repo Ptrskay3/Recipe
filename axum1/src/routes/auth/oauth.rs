@@ -136,7 +136,7 @@ pub(super) async fn discord_auth(
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub struct GoogleUser {
+pub(super) struct GoogleUser {
     email: String,
     sub: String,
     name: String,
