@@ -13,7 +13,6 @@ use crate::{error::ApiError, extractors::DatabaseConnection};
 use super::{confirm::generate_confirmation_token, password::compute_password_hash};
 
 #[derive(Debug, serde::Deserialize)]
-#[allow(dead_code)]
 pub(super) struct AuthRequest {
     code: String,
     state: String,

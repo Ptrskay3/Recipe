@@ -8,9 +8,13 @@ import { Layout } from '../../components/layout';
 export default function DiscordAuthorize() {
   const router = useRouter();
   const { mutate } = useSWRConfig();
-  const { code, state } = router.query;
+  const { code, state, error: discordError } = router.query;
   const [error, setError] = useState<boolean>(false);
   useEffect(() => {
+    if (discordError) {
+      setError(true);
+      return;
+    }
     if (!state || !code) return;
     fetch(`http://localhost:3000/auth/discord_authorize?code=${code}&state=${state}`, {
       credentials: 'include',
@@ -24,7 +28,7 @@ export default function DiscordAuthorize() {
           setError(true);
         }
       });
-  }, [router, code, state, mutate]);
+  }, [router, code, state, mutate, discordError]);
 
   if (error) {
     return (
