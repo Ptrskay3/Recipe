@@ -10,20 +10,12 @@ use axum::{http::HeaderValue, response::IntoResponse, routing::get_service, Exte
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
 
 pub async fn application() -> Result<(), anyhow::Error> {
     dotenv::dotenv().ok();
 
     let config = crate::config::get_config().expect("Configuration file is missing");
-
-    // TODO: move this outside of the application worker
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::EnvFilter::new(
-            std::env::var("RUST_LOG").unwrap_or_else(|_| "axum1=debug".into()),
-        ))
-        .with(tracing_subscriber::fmt::layer())
-        .init();
 
     let addr = SocketAddr::from(([127, 0, 0, 1], config.application_port));
 
