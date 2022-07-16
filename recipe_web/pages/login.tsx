@@ -28,11 +28,11 @@ function Login() {
   useAlreadyAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const formik = useFormik({
     initialValues: {
-      name: '',
+      email: '',
       password: '',
     },
     validate: () => {}, // TODO
@@ -70,19 +70,19 @@ function Login() {
       <Box rounded={'lg'} bg={useColorModeValue('white', 'gray.700')} boxShadow={'lg'} p={8}>
         <Stack spacing={4}>
           <form onSubmit={formik.handleSubmit}>
-            <FormControl id="name" isInvalid={!!errors.username}>
-              <FormLabel htmlFor="name">Username</FormLabel>
+            <FormControl id="name" isInvalid={!!errors.email}>
+              <FormLabel htmlFor="name">Email</FormLabel>
               <Input
-                type="text"
-                id="name"
-                name="name"
+                type="email"
+                id="email"
+                name="email"
                 required
                 autoFocus
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                value={formik.values.name}
+                value={formik.values.email}
               />
-              <FormErrorMessage>{errors.username}</FormErrorMessage>
+              <FormErrorMessage>{errors.email}</FormErrorMessage>
             </FormControl>
             <FormControl id="password" mt={4} isInvalid={!!errors.password}>
               <FormLabel htmlFor="password">Password</FormLabel>

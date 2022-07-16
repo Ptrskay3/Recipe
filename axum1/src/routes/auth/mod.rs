@@ -65,7 +65,7 @@ async fn me(
 
 #[derive(Debug, serde::Deserialize, Clone)]
 pub struct Credentials {
-    name: String,
+    email: String,
     password: Secret<String>,
 }
 
@@ -374,14 +374,6 @@ async fn discord_authorize(
         .await
         .expect("Discord promised");
 
-    // Assign a random strong password for the user.
-    let random_pw = Secret::new(generate_confirmation_token());
-
-    let password_hash =
-        crate::utils::spawn_blocking_with_tracing(move || compute_password_hash(random_pw))
-            .await
-            .context("Failed to hash password")??;
-
     let mut tx = conn.begin().await?;
 
     let user = sqlx::query!(
@@ -397,6 +389,13 @@ async fn discord_authorize(
     let user_id = if let Some(u) = user {
         u.user_id
     } else {
+        // Assign a random strong password for the user.
+        let random_pw = Secret::new(generate_confirmation_token());
+
+        let password_hash =
+            crate::utils::spawn_blocking_with_tracing(move || compute_password_hash(random_pw))
+                .await
+                .context("Failed to hash password")??;
         let user = sqlx::query!(
             r#"
             INSERT INTO users (name, email, confirmed, password_hash, oauth_provider, oauth_id)

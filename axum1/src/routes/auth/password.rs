@@ -17,9 +17,9 @@ pub async fn validate_credentials(
         r#"
         SELECT user_id, password_hash
         FROM users
-        WHERE name = $1
+        WHERE email = $1
         "#,
-        credentials.name,
+        credentials.email,
     )
     .fetch_optional(&mut conn)
     .await
