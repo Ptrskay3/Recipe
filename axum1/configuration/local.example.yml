@@ -1,0 +1,29 @@
+application_port: 3000
+database:
+  host: '127.0.0.1'
+  port: 5432
+  username: 'postgres'
+  password: 'postgres'
+  database_name: 'hummus'
+  require_ssl: false
+redis:
+  host: '127.0.0.1'
+  port: 6379
+  secret_key: # Run `openssl rand -base64 64` to generate one
+sentry_dsn: # Your Sentry DSN, if you need one. A default Rust Sentry project will suffice.
+frontend_url: http://localhost:3001
+email_client:
+  base_url: https://api.postmarkapp.com
+  sender_email: # Your registered Postmark email
+  authorization_token: # Your Postmark token
+  timeout_milliseconds: 10000
+meili:
+  url: http://localhost:7700
+  master_key: SUPER_SECRET_KEY
+oauth:
+  discord:
+    client_id: # Your Discord client ID
+    client_secret: # Your Discord client secret
+  google:
+    client_id: # Your Google client ID
+    client_secret: # Your Google client secret
