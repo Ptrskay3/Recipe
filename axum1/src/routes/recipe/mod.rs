@@ -7,6 +7,7 @@ use axum::{
 };
 use axum_extra::extract::Form;
 use sqlx::{types::BigDecimal, Acquire};
+use validator::Validate;
 
 use crate::{
     error::{ApiError, ResultExt},
@@ -47,8 +48,11 @@ struct RecipeDetailedWithFav {
     ingredients: Vec<DetailedIngredient>,
     favorited: bool,
 }
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
+#[derive(
+    Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow, validator::Validate,
+)]
 struct RecipeWithIngredients {
+    #[validate(length(min = 2))]
     name: String,
     description: String,
     prep_time: i32,
@@ -179,9 +183,11 @@ async fn insert_barebone_recipe(
     Ok(())
 }
 
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, validator::Validate)]
 struct InsertIngredient {
+    #[validate(length(min = 2, message = "must be at least 2 character(s)"))]
     name: String,
+    #[validate(length(min = 1, message = "must be at least 1 character(s)"))]
     quantity: String,
     quantity_unit: String,
 }
@@ -192,6 +198,11 @@ async fn add_or_update_ingredient_to_recipe(
     Path(name): Path<String>,
     Form(ingredient): Form<InsertIngredient>,
 ) -> Result<(), ApiError> {
+    if let Err(errors) = ingredient.validate() {
+        return Err(ApiError::unprocessable_entity_from_validation_errors(
+            errors,
+        ));
+    }
     sqlx::query!(
         r#"
         INSERT INTO ingredients_to_recipes (ingredient_id, recipe_id, quantity, quantity_unit)

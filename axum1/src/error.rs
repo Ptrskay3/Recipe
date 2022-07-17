@@ -5,6 +5,7 @@ use axum::Json;
 use sqlx::error::DatabaseError;
 use std::borrow::Cow;
 use std::collections::HashMap;
+use validator::ValidationErrors;
 
 /// A common error type that can be used throughout the API.
 ///
@@ -96,6 +97,26 @@ impl ApiError {
                 .entry(key.into())
                 .or_insert_with(Vec::new)
                 .push(val.into());
+        }
+
+        Self::UnprocessableEntity { errors }
+    }
+
+    pub fn unprocessable_entity_from_validation_errors(
+        validation_errors: ValidationErrors,
+    ) -> Self {
+        let mut errors = HashMap::new();
+        let validation_error_map = validation_errors.field_errors();
+
+        for (key, field_errors) in validation_error_map {
+            let field_errors = field_errors
+                .iter()
+                .filter_map(|v| v.message.clone())
+                .collect::<Vec<Cow<'_, _>>>();
+            errors
+                .entry(key.into())
+                .or_insert_with(Vec::new)
+                .extend(field_errors);
         }
 
         Self::UnprocessableEntity { errors }

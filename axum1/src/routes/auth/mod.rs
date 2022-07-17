@@ -7,6 +7,7 @@ use axum::{
 };
 use secrecy::{ExposeSecret, Secret};
 use sqlx::Acquire;
+use validator::Validate;
 
 use crate::{
     error::{ApiError, ResultExt},
@@ -97,9 +98,11 @@ struct UserId {
     user_id: uuid::Uuid,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, validator::Validate)]
 pub struct Register {
+    #[validate(length(min = 2, max = 40, message = "must be between 2 and 40 characters"))]
     name: String,
+    #[validate(email(message = "must be a valid email"))]
     email: String,
     password: Secret<String>,
 }
@@ -109,11 +112,18 @@ async fn register(
     Form(form): Form<Register>,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<(), ApiError> {
+    if let Err(validation_errors) = form.validate() {
+        return Err(ApiError::unprocessable_entity_from_validation_errors(
+            validation_errors,
+        ));
+    }
+
     let Register {
         name,
         email,
         password,
     } = form;
+
     let password_hash =
         crate::utils::spawn_blocking_with_tracing(move || compute_password_hash(password))
             .await
@@ -167,7 +177,7 @@ async fn update_password(
     Form(form): Form<UpdatePassword>,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<(), ApiError> {
-    let UpdatePassword { name, password, .. } = form;
+    let UpdatePassword { name, password } = form;
     let password_hash =
         crate::utils::spawn_blocking_with_tracing(move || compute_password_hash(password))
             .await
