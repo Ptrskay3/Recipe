@@ -21,6 +21,6 @@ RUN apt-get update -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/target/release/axum1 /usr/local/bin
-COPY configuration.yml configuration.yml
+COPY configuration configuration
 ENV APP_ENVIRONMENT production
 ENTRYPOINT ["/usr/local/bin/axum1"]
