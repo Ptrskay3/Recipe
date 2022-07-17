@@ -14,3 +14,4 @@ Technical to-do list:
 - [x] consider making a simple stateless REST API too
 - [x] OAuth2 based on https://github.com/tokio-rs/axum/tree/main/examples/oauth ?
 - [ ] Static file server to allow uploading files ?
+- [ ] Validate `src/routes/recipe/mod.rs#InsertIngredient` quantity and quantity_unit fields

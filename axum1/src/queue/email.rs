@@ -8,8 +8,11 @@ pub struct Email(String);
 
 impl Email {
     pub fn parse(s: String) -> Result<Email, ApiError> {
-        // TODO: validation
-        Ok(Self(s))
+        if validator::validate_email(&s) {
+            Ok(Self(s))
+        } else {
+            Err(ApiError::unprocessable_entity([("email", "invalid email")]))
+        }
     }
 }
 
