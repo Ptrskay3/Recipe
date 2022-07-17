@@ -6,7 +6,7 @@ use secrecy::{ExposeSecret, Secret};
 use sqlx::Acquire;
 
 use crate::{
-    error::ApiError,
+    error::{ApiError, ResultExt},
     extractors::DatabaseConnection,
     utils::{DiscordOAuthClient, GoogleOAuthClient},
 };
@@ -98,7 +98,10 @@ pub(super) async fn discord_authorize(
             user_data.id,
         )
         .fetch_one(&mut tx)
-        .await?;
+        .await
+        .on_constraint("users_email_key", |_| {
+            ApiError::unprocessable_entity([("email", "email already exists")])
+        })?;
         user.user_id
     };
     tx.commit().await?;
@@ -232,7 +235,10 @@ pub(super) async fn google_authorize(
             user_data.sub,
         )
         .fetch_one(&mut tx)
-        .await?;
+        .await
+        .on_constraint("users_email_key", |_| {
+            ApiError::unprocessable_entity([("email", "email already exists")])
+        })?;
         user.user_id
     };
     tx.commit().await?;
