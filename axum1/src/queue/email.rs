@@ -14,6 +14,10 @@ impl Email {
             Err(ApiError::unprocessable_entity([("email", "invalid email")]))
         }
     }
+
+    pub unsafe fn new_unchecked(s: String) -> Self {
+        Self(s)
+    }
 }
 
 impl AsRef<str> for Email {
