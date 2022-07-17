@@ -13,6 +13,7 @@ use crate::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
     queue::email::{Email, EmailClient},
+    RE_USERNAME,
 };
 
 mod confirm;
@@ -100,7 +101,13 @@ struct UserId {
 
 #[derive(serde::Deserialize, validator::Validate)]
 pub struct Register {
-    #[validate(length(min = 2, max = 40, message = "must be between 2 and 40 characters"))]
+    #[validate(
+        length(min = 2, max = 40, message = "must be between 2 and 40 characters"),
+        regex(
+            path = "RE_USERNAME",
+            message = "can only contain letters, digits and . (period), with non consecutive periods."
+        )
+    )]
     name: String,
     #[validate(email(message = "must be a valid email"))]
     email: String,
