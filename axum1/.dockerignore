@@ -1,2 +1,4 @@
 target/
 pgdata/
+docker/volumes/
+crates/**/target

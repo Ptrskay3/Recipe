@@ -1,12 +1,12 @@
 FROM lukemathwalker/cargo-chef:latest-rust-1.61.0 AS chef
 WORKDIR /app
-ENV SQLX_OFFLINE=1
 
 FROM chef as planner
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef as builder
+ENV SQLX_OFFLINE=1
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
@@ -22,4 +22,5 @@ RUN apt-get update -y \
 
 COPY --from=builder /app/target/release/axum1 /usr/local/bin
 ENV APP_ENVIRONMENT production
+EXPOSE 3000
 ENTRYPOINT ["/usr/local/bin/axum1"]
