@@ -53,15 +53,14 @@ export default function SignupCard() {
       if (response.ok) {
         router.replace('/postreg');
       } else {
-        let {
+        const {
           errors: { name, password, email },
         } = await response.json();
-        const errorsReceived = {
+        setErrors({
           name: Array.isArray(name) ? name.join(', ') : name,
           password,
           email: Array.isArray(email) ? email.join(', ') : email,
-        };
-        setErrors(errorsReceived);
+        });
       }
     },
   });
