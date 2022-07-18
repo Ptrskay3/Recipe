@@ -9,12 +9,12 @@ import {
   Text,
   VStack,
   Wrap,
-  WrapItem,
+  WrapItem
 } from '@chakra-ui/react';
 import { instantMeiliSearch } from '@meilisearch/instant-meilisearch';
-import { Highlight, Hits, InstantSearch, SearchBox } from 'react-instantsearch-hooks-web';
 import { useRouter } from 'next/router';
 import { FaHeart, FaHeartBroken } from 'react-icons/fa';
+import { Highlight, Hits, InstantSearch, SearchBox } from 'react-instantsearch-hooks-web';
 import useSWR, { useSWRConfig } from 'swr';
 import { AddIngredientForm } from '../../components/add_ingredient_form';
 import IncludedIngredient from '../../components/included_ingredient';

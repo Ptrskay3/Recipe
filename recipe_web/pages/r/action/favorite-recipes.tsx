@@ -7,7 +7,7 @@ import {
   ListItem,
   Text,
   UnorderedList,
-  VStack,
+  VStack
 } from '@chakra-ui/react';
 import useSWR from 'swr';
 import { Layout } from '../../../components/layout';

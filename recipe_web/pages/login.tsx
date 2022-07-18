@@ -1,28 +1,16 @@
 import {
-  Flex,
-  Box,
-  FormControl,
-  FormLabel,
-  Input,
-  Stack,
-  Link,
-  Button,
-  Heading,
-  Text,
-  useColorModeValue,
-  FormErrorMessage,
-  Divider,
-  HStack,
+  Box, Button, Divider, FormControl, FormErrorMessage, FormLabel, Heading, HStack, Input, Link, Stack, Text,
+  useColorModeValue
 } from '@chakra-ui/react';
-import { useRouter } from 'next/router';
-import { intoFormBody } from '../utils/form';
-import { useAlreadyAuth } from '../utils/useAlreadyAuth';
 import { useFormik } from 'formik';
-import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import NextLink from 'next/link';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { AuthFormWrapper } from '../components/auth_form_wrapper';
 import { OAuthButtonGroup } from '../components/OAuthGroup';
+import { intoFormBody } from '../utils/form';
+import { useAlreadyAuth } from '../utils/useAlreadyAuth';
 
 function Login() {
   useAlreadyAuth();
