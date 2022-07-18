@@ -1,5 +1,6 @@
 use axum::async_trait;
 use error::ApiError;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use sqlx::PgExecutor;
 
@@ -13,10 +14,7 @@ pub mod session;
 pub mod startup;
 pub mod utils;
 
-lazy_static::lazy_static! {
-    static ref RE_USERNAME: Regex =
-        Regex::new(r#"^[a-z0-9](\.?[a-z0-9])*$"#).unwrap();
-}
+static RE_USERNAME: Lazy<Regex> = Lazy::new(|| Regex::new(r#"^[a-z0-9](\.?[a-z0-9])*$"#).unwrap());
 
 #[async_trait]
 pub trait Queryable: Sized {
