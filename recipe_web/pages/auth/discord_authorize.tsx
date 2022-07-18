@@ -1,5 +1,5 @@
 import { CloseIcon } from '@chakra-ui/icons';
-import { Box, Center, CircularProgress, Flex, Heading, Link, VStack } from '@chakra-ui/react';
+import { Box, Center, CircularProgress, Flex, Heading, VStack } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSWRConfig } from 'swr';

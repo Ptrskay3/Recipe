@@ -162,6 +162,7 @@ struct RecipeFull {
     meal_type: TypeByTime,
 }
 
+// TODO: This no longer works (or even necessary) due to our DB schema.
 async fn insert_barebone_recipe(
     DatabaseConnection(mut conn): DatabaseConnection,
     Form(recipe): Form<Recipe>,
