@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { InputField } from '../../../components/form/field';
 import { Layout } from '../../../components/layout';
-import { intoFormBody } from '../../../utils/form';
 import { useAuth } from '../../../utils/useAuth';
 
 const NewRecipe = () => {
@@ -23,20 +22,20 @@ const NewRecipe = () => {
           validate={({ name, description }) => {
             const errors: Record<string, string> = {};
 
-            if (name.length < 4) {
-              errors.name = 'name should be longer than 3 characters';
+            if (name.length < 3) {
+              errors.name = 'name should be longer than 2 characters';
             }
-            if (description.length < 4) {
-              errors.description = 'description should be longer than 3 characters';
+            if (description.length < 2) {
+              errors.description = 'description should be longer than 2 characters';
             }
             return errors;
           }}
           onSubmit={async (values, { setFieldError }) => {
             const { ok } = await fetch(`http://localhost:3000/r`, {
               method: 'POST',
-              body: intoFormBody(values),
+              body: JSON.stringify(values),
               credentials: 'include',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              headers: { 'Content-Type': 'application/json' },
             });
 
             if (ok) {

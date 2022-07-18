@@ -24,12 +24,11 @@ pub fn recipe_router() -> Router {
         .route("/popular", get(most_popular_recipes));
 
     Router::new()
-        .route("/", post(insert_barebone_recipe))
-        .route("/new-full", post(insert_full_recipe))
+        .route("/", post(insert_full_recipe))
         .route("/:name", get(get_recipe_with_ingredients))
         .route("/:name/favorite", post(toggle_favorite_recipe))
         .route(
-            "/:name/edit",
+            "/:name/ingredient",
             post(add_or_update_ingredient_to_recipe).delete(delete_ingredient_from_recipe),
         )
         .nest("/action", action_router)
@@ -160,28 +159,6 @@ struct RecipeFull {
     steps: Vec<String>,
     cuisine: String,
     meal_type: TypeByTime,
-}
-
-// TODO: This no longer works (or even necessary) due to our DB schema.
-async fn insert_barebone_recipe(
-    DatabaseConnection(mut conn): DatabaseConnection,
-    Form(recipe): Form<Recipe>,
-    auth_user: AuthUser,
-) -> Result<(), ApiError> {
-    sqlx::query!(
-        r#"
-        INSERT INTO recipes ("name", "description", "creator_id")
-        VALUES ($1, $2, $3)
-        "#,
-        recipe.name,
-        recipe.description,
-        *auth_user
-    )
-    .execute(&mut conn)
-    .await
-    .map_err(|_| ApiError::Conflict)?;
-
-    Ok(())
 }
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, validator::Validate)]
