@@ -1,9 +1,9 @@
-import '../styles/globals.css';
-import type { AppProps } from 'next/app';
 import { ChakraProvider } from '@chakra-ui/react';
-import theme from '../common/theme';
-import { useEffect, useState } from 'react';
+import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import { useEffect, useState } from 'react';
+import theme from '../common/theme';
+import '../styles/globals.css';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [mounted, setMounted] = useState(false);

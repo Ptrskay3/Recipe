@@ -1,28 +1,16 @@
-import {
-  Flex,
-  Box,
-  FormControl,
-  FormLabel,
-  Input,
-  InputGroup,
-  HStack,
-  InputRightElement,
-  Stack,
-  Button,
-  Heading,
-  Text,
-  useColorModeValue,
-  Link,
-  FormErrorMessage,
-} from '@chakra-ui/react';
-import { useState } from 'react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import NextLink from 'next/link';
+import {
+  Box, Button, FormControl, FormErrorMessage, FormLabel, Heading, HStack, Input,
+  InputGroup, InputRightElement, Link, Stack, Text,
+  useColorModeValue
+} from '@chakra-ui/react';
 import { useFormik } from 'formik';
+import NextLink from 'next/link';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { AuthFormWrapper } from '../components/auth_form_wrapper';
 import { intoFormBody } from '../utils/form';
 import { useAlreadyAuth } from '../utils/useAlreadyAuth';
-import { AuthFormWrapper } from '../components/auth_form_wrapper';
 
 export default function SignupCard() {
   const [showPassword, setShowPassword] = useState(false);

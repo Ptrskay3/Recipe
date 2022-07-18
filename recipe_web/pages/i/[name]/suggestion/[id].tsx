@@ -1,16 +1,10 @@
 import { ArrowRightIcon, CloseIcon } from '@chakra-ui/icons';
 import {
-  Box,
   Center,
-  CircularProgress,
-  Flex,
-  Heading,
+  CircularProgress, Heading,
   HStack,
-  IconButton,
-  Stack,
-  Text,
-  useToast,
-  VStack,
+  IconButton, Text,
+  useToast
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { FaCheck } from 'react-icons/fa';

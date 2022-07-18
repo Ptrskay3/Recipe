@@ -1,5 +1,3 @@
-import { useRouter } from 'next/router';
-import { Layout } from '../../components/layout';
 import {
   Center,
   CircularProgress,
@@ -7,12 +5,14 @@ import {
   ListItem,
   Stack,
   Text,
-  UnorderedList,
+  UnorderedList
 } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
 import useSWR from 'swr';
-import { fetcher } from '../../utils/fetcher';
 import Ingredient from '../../components/ingredient';
+import { Layout } from '../../components/layout';
 import { editableMapping } from '../../utils/constants';
+import { fetcher } from '../../utils/fetcher';
 
 export default function IngredientDetailed() {
   const router = useRouter();
