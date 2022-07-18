@@ -1,7 +1,10 @@
 use anyhow::Context;
 use async_session::Session;
 use axum::{extract::Query, Extension, Json};
-use oauth2::{reqwest::async_http_client, AuthorizationCode, CsrfToken, Scope, TokenResponse};
+use oauth2::{
+    reqwest::async_http_client, AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier,
+    Scope, TokenResponse,
+};
 use secrecy::{ExposeSecret, Secret};
 use sqlx::Acquire;
 
@@ -45,7 +48,7 @@ pub(super) async fn discord_authorize(
         .get::<CsrfToken>("oauth_csrf_token")
         .ok_or(ApiError::BadRequest)?;
 
-    // Protect Cross Site Request Forgery Attacks
+    // Protect Cross-site Request Forgery Attacks
     if csrf_token.secret() != CsrfToken::new(query.state).secret() {
         return Err(ApiError::BadRequest);
     }
@@ -152,11 +155,18 @@ pub(super) async fn google_auth(
     Extension(GoogleOAuthClient(client)): Extension<GoogleOAuthClient>,
     Extension(mut session): Extension<Session>,
 ) -> Result<Json<RedirectUri>, ApiError> {
+    let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
+
+    session
+        .insert("pkce_verifier", pkce_verifier)
+        .expect("pkce_verifier is serializable");
+
     let (auth_url, csrf_token) = client
         .authorize_url(CsrfToken::new_random)
         .add_scope(Scope::new("openid".to_string()))
         .add_scope(Scope::new("email".to_string()))
         .add_scope(Scope::new("profile".to_string()))
+        .set_pkce_challenge(pkce_challenge)
         .url();
 
     session
@@ -174,9 +184,14 @@ pub(super) async fn google_authorize(
     Extension(GoogleOAuthClient(oauth_client)): Extension<GoogleOAuthClient>,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<(), ApiError> {
+    let verifier = session
+        .get::<PkceCodeVerifier>("pkce_verifier")
+        .ok_or(ApiError::BadRequest)?;
+
     // Get an auth token
     let token = oauth_client
         .exchange_code(AuthorizationCode::new(query.code.clone()))
+        .set_pkce_verifier(verifier)
         .request_async(async_http_client)
         .await
         .map_err(|_| ApiError::BadRequest)?;
@@ -185,13 +200,14 @@ pub(super) async fn google_authorize(
         .get::<CsrfToken>("oauth_csrf_token")
         .ok_or(ApiError::BadRequest)?;
 
-    // Protect Cross Site Request Forgery Attacks
+    // Protect Cross-site Request Forgery Attacks
     if csrf_token.secret() != CsrfToken::new(query.state).secret() {
         return Err(ApiError::BadRequest);
     }
 
-    // Cleanup session, we don't need to store csrf_token anymore.
+    // Cleanup session, we don't need to store these anymore.
     session.remove("oauth_csrf_token");
+    session.remove("pkce_verifier");
 
     // Fetch user data from Google
     let client = reqwest::Client::new();
