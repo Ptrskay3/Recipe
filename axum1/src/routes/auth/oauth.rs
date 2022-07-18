@@ -100,7 +100,10 @@ pub(super) async fn discord_authorize(
         .fetch_one(&mut tx)
         .await
         .on_constraint("users_email_key", |_| {
-            ApiError::unprocessable_entity([("email", "email already exists")])
+            ApiError::unprocessable_entity([(
+                "email",
+                "email already exists as a regular (non-oauth) user",
+            )])
         })?;
         user.user_id
     };
@@ -237,7 +240,10 @@ pub(super) async fn google_authorize(
         .fetch_one(&mut tx)
         .await
         .on_constraint("users_email_key", |_| {
-            ApiError::unprocessable_entity([("email", "email already exists")])
+            ApiError::unprocessable_entity([(
+                "email",
+                "email already exists as a regular (non-oauth) user",
+            )])
         })?;
         user.user_id
     };
