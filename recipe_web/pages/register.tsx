@@ -13,8 +13,8 @@ import { intoFormBody } from '../utils/form';
 import { useAlreadyAuth } from '../utils/useAlreadyAuth';
 
 export default function SignupCard() {
-  const [showPassword, setShowPassword] = useState(false);
   useAlreadyAuth();
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; password?: string; email?: string }>({});
