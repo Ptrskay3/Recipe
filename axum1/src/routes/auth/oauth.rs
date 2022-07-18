@@ -3,7 +3,7 @@ use async_session::Session;
 use axum::{extract::Query, Extension, Json};
 use oauth2::{
     reqwest::async_http_client, AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier,
-    Scope, TokenResponse,
+    Scope, StandardRevocableToken, TokenResponse,
 };
 use secrecy::{ExposeSecret, Secret};
 use sqlx::Acquire;
@@ -264,6 +264,18 @@ pub(super) async fn google_authorize(
         user.user_id
     };
     tx.commit().await?;
+
+    let token_to_revoke: StandardRevocableToken = match token.refresh_token() {
+        Some(token) => token.into(),
+        None => token.access_token().into(),
+    };
+
+    oauth_client
+        .revoke_token(token_to_revoke)
+        .unwrap()
+        .request_async(async_http_client)
+        .await
+        .ok();
 
     session.regenerate();
     session

@@ -1,4 +1,6 @@
-use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
+use oauth2::{
+    basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, RevocationUrl, TokenUrl,
+};
 use tokio::task::{JoinError, JoinHandle};
 
 use std::fmt::{Debug, Display};
@@ -107,7 +109,11 @@ pub fn oauth_client_google(config: &Settings) -> GoogleOAuthClient {
             AuthUrl::new(auth_url).unwrap(),
             Some(TokenUrl::new(token_url).unwrap()),
         )
-        .set_redirect_uri(RedirectUrl::new(redirect_url).unwrap()),
+        .set_redirect_uri(RedirectUrl::new(redirect_url).unwrap())
+        .set_revocation_uri(
+            RevocationUrl::new("https://oauth2.googleapis.com/revoke".to_string())
+                .expect("Invalid revocation endpoint URL"),
+        ),
     )
 }
 
