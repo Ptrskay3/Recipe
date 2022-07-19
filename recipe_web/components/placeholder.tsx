@@ -13,6 +13,7 @@ import {
   Image,
   List,
   ListItem,
+  Divider,
 } from '@chakra-ui/react';
 import { MdLocalShipping } from 'react-icons/md';
 import { difficultyLevels, mealTypes } from '../utils/types';
@@ -22,7 +23,11 @@ import { DurationSlider } from './slider';
 export default function Placeholder() {
   return (
     <Container maxW={'7xl'}>
-      <EnumSelector options={mealTypes} defaultValue={'breakfast'} name={'alma'}></EnumSelector>
+      <Divider m="4" />
+      <EnumSelector options={mealTypes} defaultValue={'breakfast'} name={'mealtype'}></EnumSelector>
+      <Divider m="4" />
+      <EnumSelector options={difficultyLevels} defaultValue={'easy'} name={'diff'}></EnumSelector>
+      <Divider m="4" />
       <DurationSlider></DurationSlider>
       <SimpleGrid
         columns={{ base: 1, lg: 2 }}

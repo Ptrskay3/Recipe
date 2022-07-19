@@ -44,9 +44,9 @@ export function EnumSelector<T>({
   onChange?: (...args: any) => any;
 }) {
   const { getRootProps, getRadioProps } = useRadioGroup({
-    name: name,
+    name,
     defaultValue: defaultValue as any,
-    onChange: onChange,
+    onChange,
   });
 
   const group = getRootProps();
