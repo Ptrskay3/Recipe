@@ -29,8 +29,8 @@ pub async fn validate_credentials(
         Some(row) => (row.password_hash, row.user_id),
         None => {
             return Err(ApiError::unprocessable_entity([(
-                "username",
-                "no such user",
+                "email",
+                "this email does not exist",
             )]))
         }
     };
