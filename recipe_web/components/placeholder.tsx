@@ -15,10 +15,15 @@ import {
   ListItem,
 } from '@chakra-ui/react';
 import { MdLocalShipping } from 'react-icons/md';
+import { difficultyLevels, mealTypes } from '../utils/types';
+import { EnumSelector } from './EnumSelect';
+import { DurationSlider } from './slider';
 
 export default function Placeholder() {
   return (
     <Container maxW={'7xl'}>
+      <EnumSelector options={mealTypes} defaultValue={'breakfast'} name={'alma'}></EnumSelector>
+      <DurationSlider></DurationSlider>
       <SimpleGrid
         columns={{ base: 1, lg: 2 }}
         spacing={{ base: 8, md: 10 }}

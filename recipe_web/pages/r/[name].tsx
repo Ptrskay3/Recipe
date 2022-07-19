@@ -9,7 +9,7 @@ import {
   Text,
   VStack,
   Wrap,
-  WrapItem
+  WrapItem,
 } from '@chakra-ui/react';
 import { instantMeiliSearch } from '@meilisearch/instant-meilisearch';
 import { useRouter } from 'next/router';

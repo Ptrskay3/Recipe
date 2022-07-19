@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { InputField } from '../../../components/form/field';
 import { Layout } from '../../../components/layout';
+import { DurationSlider } from '../../../components/slider';
 import { DifficultyLevel, MealType } from '../../../utils/types';
 import { useAuth } from '../../../utils/useAuth';
 
@@ -12,6 +13,7 @@ const NewRecipe = () => {
   useAuth();
   return (
     <Layout>
+      <DurationSlider></DurationSlider>
       <Center mt="4">
         <Formik<{
           name: string;

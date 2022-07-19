@@ -46,7 +46,7 @@ export function DurationSlider() {
       </SliderTrack>
       <Tooltip
         hasArrow
-        bg="orange.500"
+        bg="orange.400"
         color="white"
         placement="top"
         isOpen={showTooltip}

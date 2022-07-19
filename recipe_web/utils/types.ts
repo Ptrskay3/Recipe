@@ -1,10 +1,15 @@
-export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'other';
+export const mealTypes = ['breakfast', 'lunch', 'dinner', 'other'] as const;
 
-export type DifficultyLevel =
-  | 'easy'
-  | 'moderate'
-  | 'medium'
-  | 'challenging'
-  | 'hard'
-  | 'extreme'
-  | 'do_not_attempt';
+export type MealType = typeof mealTypes[number];
+
+export const difficultyLevels = [
+  'easy',
+  'moderate',
+  'medium',
+  'challenging',
+  'hard',
+  'extreme',
+  'do_not_attempt',
+] as const;
+
+export type DifficultyLevel = typeof difficultyLevels[number];
