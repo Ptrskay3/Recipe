@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { InputField } from '../../../components/form/field';
 import { Layout } from '../../../components/layout';
+import { DifficultyLevel, MealType } from '../../../utils/types';
 import { useAuth } from '../../../utils/useAuth';
 
 const NewRecipe = () => {
@@ -15,8 +16,25 @@ const NewRecipe = () => {
         <Formik<{
           name: string;
           description: string;
+          prep_time: number;
+          cook_time: number;
+          difficulty: DifficultyLevel;
+          steps: string[];
+          cuisine: string;
+          meal_type: MealType;
+          ingredients: { name: string; quantity: string; quantity_unit: string }[];
         }>
-          initialValues={{ name: '', description: '' }}
+          initialValues={{
+            name: '',
+            description: '',
+            prep_time: 0,
+            cook_time: 0,
+            difficulty: 'easy',
+            steps: [],
+            cuisine: 'hungarian',
+            meal_type: 'breakfast',
+            ingredients: [],
+          }}
           validateOnChange={false}
           validateOnBlur={false}
           validate={({ name, description }) => {
