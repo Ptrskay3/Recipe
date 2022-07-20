@@ -19,12 +19,16 @@ import { MdLocalShipping } from 'react-icons/md';
 import { useAddRecipe } from '../stores/useAddRecipe';
 import { difficultyLevels, mealTypes } from '../utils/types';
 import { EnumSelector } from './EnumSelect';
+import { Listable } from './Listable';
 import { DurationSlider } from './slider';
 
 export default function Placeholder() {
-  const [setPrepTime, setDifficulty] = useAddRecipe((state) => [
+  const [setPrepTime, setDifficulty, steps, pushStep, removeStepByIndex] = useAddRecipe((state) => [
     state.setPrepTime,
     state.setDifficulty,
+    state.steps,
+    state.pushStep,
+    state.removeStepByIndex,
   ]);
 
   return (
@@ -40,6 +44,12 @@ export default function Placeholder() {
       ></EnumSelector>
       <Divider m="4" />
       <DurationSlider onChangeEnd={(value) => setPrepTime(value)}></DurationSlider>
+      <Divider m="4" />
+      <Listable
+        state={steps}
+        pushState={pushStep}
+        removeStateByIndex={removeStepByIndex}
+      ></Listable>
       <SimpleGrid
         columns={{ base: 1, lg: 2 }}
         spacing={{ base: 8, md: 10 }}
