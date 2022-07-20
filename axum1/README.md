@@ -4,7 +4,7 @@ Technical to-do list:
 
 - [x] guest session, more ergonomic handling
 - [x] keep session alive, probably make a middleware layer that resets to the default expire duration
-- [ ] validate user input from forms
+- [x] validate user input from forms
 - [x] refactor the giant code blob from main
 - [x] route paths should be less random
 - [ ] CI + CD, better local tooling, deploy
@@ -15,3 +15,6 @@ Technical to-do list:
 - [x] OAuth2 based on https://github.com/tokio-rs/axum/tree/main/examples/oauth ?
 - [ ] Static file server to allow uploading files ?
 - [ ] Validate `src/routes/recipe/mod.rs#InsertIngredient` quantity and quantity_unit fields
+- [ ] Sometimes errors are too specific: e.g. Sign in. We probably should mask the errors to
+      1, not allow for email fishing
+      2, prevent timing attacks
