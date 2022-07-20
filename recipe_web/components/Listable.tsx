@@ -12,7 +12,7 @@ export const Listable = ({ state, pushState, removeStateByIndex, removeState }: 
       <OrderedList>
         {state &&
           state.map((item: any, i: number) => (
-            <HStack key={i}>
+            <HStack key={i} mb="2">
               <ListItem>{item}</ListItem>
               <IconButton
                 size={'xs'}

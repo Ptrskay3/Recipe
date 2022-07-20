@@ -1,19 +1,60 @@
-import { Box, Button, Center } from '@chakra-ui/react';
+import { Box, Button, Center, Divider, Heading } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
+import { EnumSelector } from '../../../components/EnumSelect';
 import { InputField } from '../../../components/form/field';
 import { Layout } from '../../../components/layout';
+import { Listable } from '../../../components/Listable';
 import { DurationSlider } from '../../../components/slider';
-import { DifficultyLevel, MealType } from '../../../utils/types';
+import { useAddRecipe } from '../../../stores/useAddRecipe';
+import { DifficultyLevel, difficultyLevels, MealType, mealTypes } from '../../../utils/types';
 import { useAuth } from '../../../utils/useAuth';
 
 const NewRecipe = () => {
   const { push } = useRouter();
   useAuth();
+
+  const [
+    name,
+    description,
+    prep_time,
+    cook_time,
+    difficulty,
+    steps,
+    cuisine,
+    meal_type,
+    ingredients,
+    setPrepTime,
+    setDifficulty,
+    pushStep,
+    removeStepByIndex,
+    setCookTime,
+    setName,
+    setDescription,
+    setCuisine,
+  ] = useAddRecipe((state) => [
+    state.name,
+    state.description,
+    state.prep_time,
+    state.cook_time,
+    state.difficulty,
+    state.steps,
+    state.cuisine,
+    state.meal_type,
+    state.ingredients,
+    state.setPrepTime,
+    state.setDifficulty,
+    state.pushStep,
+    state.removeStepByIndex,
+    state.setCookTime,
+    state.setName,
+    state.setDescription,
+    state.setCuisine,
+  ]);
+
   return (
     <Layout>
-      <DurationSlider></DurationSlider>
       <Center mt="4">
         <Formik<{
           name: string;
@@ -27,15 +68,15 @@ const NewRecipe = () => {
           ingredients: { name: string; quantity: string; quantity_unit: string }[];
         }>
           initialValues={{
-            name: '',
-            description: '',
-            prep_time: 0,
-            cook_time: 0,
-            difficulty: 'easy',
-            steps: [],
-            cuisine: 'hungarian',
-            meal_type: 'breakfast',
-            ingredients: [],
+            name,
+            description,
+            prep_time,
+            cook_time,
+            difficulty,
+            steps,
+            cuisine,
+            meal_type,
+            ingredients,
           }}
           validateOnChange={false}
           validateOnBlur={false}
@@ -51,6 +92,7 @@ const NewRecipe = () => {
             return errors;
           }}
           onSubmit={async (values, { setFieldError }) => {
+            // TODO: we do not use Formik's values anyway..
             const { ok } = await fetch(`http://localhost:3000/r`, {
               method: 'POST',
               body: JSON.stringify(values),
@@ -72,15 +114,64 @@ const NewRecipe = () => {
                 label="Recipe name"
                 placeholder="recipe name"
                 autoFocus
-                errors={errors}
+                errors={errors as any}
+                onChange={(e) => setName(e.target.value)}
               />
               <Box mt="4" />
               <InputField
                 name="description"
                 label="Description"
                 placeholder="recipe description"
-                errors={errors}
+                errors={errors as any}
+                onChange={(e) => setDescription(e.target.value)}
               />
+              <Box mt="4" />
+              <InputField
+                name="cuisine"
+                label="Cuisine"
+                placeholder="cuisine"
+                autoFocus
+                errors={errors as any}
+                onChange={(e) => setCuisine(e.target.value)}
+              />
+              <Divider m="4"></Divider>
+              <Heading fontSize={'lg'} m="2">
+                {'Meal type'}
+              </Heading>
+              <EnumSelector
+                options={mealTypes}
+                defaultValue={'breakfast'}
+                name={'mealtype'}
+              ></EnumSelector>
+              <Divider m="4" />
+              <Heading fontSize={'lg'} m="2">
+                {'Difficulty'}
+              </Heading>
+              <EnumSelector
+                options={difficultyLevels}
+                defaultValue={'easy'}
+                name={'diff'}
+                onChange={(v) => setDifficulty(v)}
+              ></EnumSelector>
+              <Divider m="4" />
+              <Heading fontSize={'lg'} m="2">
+                {'Preparation time'}
+              </Heading>
+              <DurationSlider onChangeEnd={(value) => setPrepTime(value)}></DurationSlider>
+              <Divider m="4" />
+              <Heading fontSize={'lg'} m="2">
+                {'Cook time'}
+              </Heading>
+              <DurationSlider onChangeEnd={(value) => setCookTime(value)}></DurationSlider>
+              <Divider m="4" />
+              <Heading fontSize={'lg'} m="2">
+                {'Steps'}
+              </Heading>
+              <Listable
+                state={steps}
+                pushState={pushStep}
+                removeStateByIndex={removeStepByIndex}
+              ></Listable>
               <Center mt="4">
                 <Button
                   type="submit"

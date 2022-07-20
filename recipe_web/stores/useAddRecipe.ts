@@ -9,7 +9,7 @@ export const useAddRecipe = create(
       description: '',
       prep_time: 0,
       cook_time: 0,
-      difficulty: 'easy',
+      difficulty: 'easy' as DifficultyLevel,
       steps: [] as string[],
       cuisine: 'hungarian',
       meal_type: 'breakfast' as MealType,
