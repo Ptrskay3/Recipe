@@ -1,7 +1,12 @@
 import { DeleteIcon } from '@chakra-ui/icons';
 import { Button, HStack, IconButton, ListItem, OrderedList } from '@chakra-ui/react';
 
-export const Listable = ({ state, pushState, removeStateByIndex }: any) => {
+export const Listable = ({ state, pushState, removeStateByIndex, removeState }: any) => {
+  const removeFunction =
+    (removeStateByIndex && ((i: number, _: any) => removeStateByIndex(i))) ||
+    (removeState && ((_: number, v: any) => removeState(v))) ||
+    (() => {});
+
   return (
     <>
       <OrderedList>
@@ -13,7 +18,7 @@ export const Listable = ({ state, pushState, removeStateByIndex }: any) => {
                 size={'xs'}
                 aria-label={'delete'}
                 icon={<DeleteIcon />}
-                onClick={() => removeStateByIndex(i)}
+                onClick={() => removeFunction(i, item)}
               ></IconButton>
             </HStack>
           ))}
