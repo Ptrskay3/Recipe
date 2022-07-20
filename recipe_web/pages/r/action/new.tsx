@@ -33,6 +33,7 @@ const NewRecipe = () => {
     setName,
     setDescription,
     setCuisine,
+    setMealType,
   ] = useAddRecipe((state) => [
     state.name,
     state.description,
@@ -51,6 +52,7 @@ const NewRecipe = () => {
     state.setName,
     state.setDescription,
     state.setCuisine,
+    state.setMealType,
   ]);
 
   return (
@@ -93,15 +95,28 @@ const NewRecipe = () => {
           }}
           onSubmit={async (values, { setFieldError }) => {
             // TODO: we do not use Formik's values anyway..
-            const { ok } = await fetch(`http://localhost:3000/r`, {
+            const { ok, status } = await fetch(`http://localhost:3000/r`, {
               method: 'POST',
-              body: JSON.stringify(values),
+              body: JSON.stringify({
+                name,
+                description,
+                prep_time,
+                cook_time,
+                difficulty,
+                steps,
+                cuisine,
+                meal_type,
+                ingredients,
+              }),
               credentials: 'include',
               headers: { 'Content-Type': 'application/json' },
             });
 
             if (ok) {
               push(`/r/${values.name}`);
+            } else if (status === 422) {
+              // TODO: we ideally should just check the json response
+              setFieldError('cuisine', 'This cuisine does not exist');
             } else {
               setFieldError('name', 'A recipe with this name already exists');
             }
@@ -114,6 +129,7 @@ const NewRecipe = () => {
                 label="Recipe name"
                 placeholder="recipe name"
                 autoFocus
+                required
                 errors={errors as any}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -123,6 +139,7 @@ const NewRecipe = () => {
                 label="Description"
                 placeholder="recipe description"
                 errors={errors as any}
+                required
                 onChange={(e) => setDescription(e.target.value)}
               />
               <Box mt="4" />
@@ -130,7 +147,7 @@ const NewRecipe = () => {
                 name="cuisine"
                 label="Cuisine"
                 placeholder="cuisine"
-                autoFocus
+                required
                 errors={errors as any}
                 onChange={(e) => setCuisine(e.target.value)}
               />
@@ -142,6 +159,7 @@ const NewRecipe = () => {
                 options={mealTypes}
                 defaultValue={'breakfast'}
                 name={'mealtype'}
+                onChange={(v) => setMealType(v)}
               ></EnumSelector>
               <Divider m="4" />
               <Heading fontSize={'lg'} m="2">
