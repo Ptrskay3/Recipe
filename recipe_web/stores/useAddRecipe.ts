@@ -27,7 +27,7 @@ export const useAddRecipe = create(
       removeStep: (value: string) =>
         set(({ steps, ...rest }) => ({
           ...rest,
-          steps: steps.filter((step: any, i: number) => step !== value),
+          steps: steps.filter((step: any) => step !== value),
         })),
       removeStepByIndex: (value: number) =>
         set(({ steps, ...rest }) => ({
@@ -39,7 +39,7 @@ export const useAddRecipe = create(
       setIngredients: (value: AddIngredient[]) => set(() => ({ ingredients: value })),
       pushIngredient: (value: AddIngredient) =>
         set(({ ingredients, ...rest }) => ({ ...rest, ingredients: [...ingredients, value] })),
-      removeIngredient: (value: string) =>
+      removeIngredientByName: (value: string) =>
         set(({ ingredients, ...rest }) => ({
           ...rest,
           ingredients: ingredients.filter((i: AddIngredient) => i.name !== value),
