@@ -11,10 +11,10 @@ use crate::{
 #[must_use]
 pub fn admin_router() -> Router {
     Router::new()
-        .route("/health_check", get(|| async { StatusCode::OK }))
         .route("/pg", get(pg_health))
         .route("/redis", get(redis_health))
         .route_layer(from_extractor::<AdminUser>())
+        .route("/health_check", get(|| async { StatusCode::OK }))
 }
 
 async fn pg_health(DatabaseConnection(mut conn): DatabaseConnection) -> Result<(), ApiError> {

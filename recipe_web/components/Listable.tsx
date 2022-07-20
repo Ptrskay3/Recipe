@@ -1,7 +1,18 @@
-import { DeleteIcon } from '@chakra-ui/icons';
-import { Button, HStack, IconButton, ListItem, OrderedList } from '@chakra-ui/react';
+import { DeleteIcon, PlusSquareIcon } from '@chakra-ui/icons';
+import {
+  Button,
+  Flex,
+  HStack,
+  IconButton,
+  ListItem,
+  OrderedList,
+  Textarea,
+} from '@chakra-ui/react';
+import { useState } from 'react';
 
 export const Listable = ({ state, pushState, removeStateByIndex, removeState }: any) => {
+  const [inputFieldOpen, setInputFieldOpen] = useState(false);
+  const [content, setContent] = useState('');
   const removeFunction =
     (removeStateByIndex && ((i: number, _: any) => removeStateByIndex(i))) ||
     (removeState && ((_: number, v: any) => removeState(v))) ||
@@ -23,9 +34,33 @@ export const Listable = ({ state, pushState, removeStateByIndex, removeState }: 
             </HStack>
           ))}
       </OrderedList>
-      <Button onClick={() => pushState((Math.random() + 1).toString(36).substring(7))}>
-        Add a random string
-      </Button>
+      {inputFieldOpen ? (
+        <>
+          <Textarea
+            value={content}
+            onChange={(e) => {
+              setContent(e.target.value);
+            }}
+          ></Textarea>
+          <IconButton
+            aria-label={'add'}
+            icon={<PlusSquareIcon />}
+            onClick={() => {
+              // TODO: Do not permit empty strings
+              setContent('');
+              pushState(content);
+            }}
+          ></IconButton>
+        </>
+      ) : (
+        <Button
+          onClick={() => {
+            setInputFieldOpen(true);
+          }}
+        >
+          Add step
+        </Button>
+      )}
     </>
   );
 };
