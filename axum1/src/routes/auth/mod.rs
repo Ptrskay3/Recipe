@@ -105,7 +105,7 @@ pub struct Register {
         length(min = 2, max = 40, message = "must be between 2 and 40 characters"),
         regex(
             path = "RE_USERNAME",
-            message = "can only contain letters, digits and . (period), with non consecutive periods."
+            message = "can only contain letters, digits and . (period); periods cannot appear at start or end position, neither consecutively."
         )
     )]
     name: String,

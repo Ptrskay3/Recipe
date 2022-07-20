@@ -53,7 +53,7 @@ export function EnumSelector<T>({
 
   return (
     <HStack {...group}>
-      <Wrap>
+      <Wrap justify="center">
         {options.map((value) => {
           const radio = getRadioProps({ value } as any);
           return (
