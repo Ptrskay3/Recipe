@@ -1,6 +1,6 @@
 import create from 'zustand';
 import { combine } from 'zustand/middleware';
-import { DifficultyLevel, MealType } from '../utils/types';
+import { AddIngredient, DifficultyLevel, MealType } from '../utils/types';
 
 export const useAddIngredient = create(
   combine(
@@ -13,7 +13,7 @@ export const useAddIngredient = create(
       steps: [] as string[],
       cuisine: 'hungarian',
       meal_type: 'breakfast' as MealType,
-      ingredients: [] as any[], // TODO: type
+      ingredients: [] as AddIngredient[],
     },
     (set) => ({
       setName: (value: string) => set(() => ({ name: value })),
@@ -22,12 +22,13 @@ export const useAddIngredient = create(
       setCookTime: (value: number) => set(() => ({ cook_time: value })),
       setDifficulty: (value: DifficultyLevel) => set(() => ({ difficulty: value })),
       setSteps: (value: string[]) => set(() => ({ steps: value })),
-      pushStep: (value: string) => set(({ steps }) => ({ steps: [...steps, value] })),
+      pushStep: (value: string) =>
+        set(({ steps, ...rest }) => ({ ...rest, steps: [...steps, value] })),
       setCuisine: (value: string) => set(() => ({ cuisine: value })),
       setMealType: (value: MealType) => set(() => ({ meal_type: value })),
       setIngredients: (value: any[]) => set(() => ({ ingredients: value })),
       pushIngredient: (value: any) =>
-        set(({ ingredients }) => ({ ingredients: [...ingredients, value] })),
+        set(({ ingredients, ...rest }) => ({ ...rest, ingredients: [...ingredients, value] })),
     })
   )
 );
