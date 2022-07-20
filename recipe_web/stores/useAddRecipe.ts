@@ -27,7 +27,12 @@ export const useAddRecipe = create(
       removeStep: (value: string) =>
         set(({ steps, ...rest }) => ({
           ...rest,
-          steps: steps.filter((step: any) => step !== value),
+          steps: steps.filter((step: any, i: number) => step !== value),
+        })),
+      removeStepByIndex: (value: number) =>
+        set(({ steps, ...rest }) => ({
+          ...rest,
+          steps: steps.filter((step: any, i: number) => i !== value),
         })),
       setCuisine: (value: string) => set(() => ({ cuisine: value })),
       setMealType: (value: MealType) => set(() => ({ meal_type: value })),
