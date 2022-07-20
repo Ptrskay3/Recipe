@@ -22,14 +22,22 @@ import { EnumSelector } from './EnumSelect';
 import { DurationSlider } from './slider';
 
 export default function Placeholder() {
-  const [setPrepTime] = useAddRecipe((state) => [state.setPrepTime]);
+  const [setPrepTime, setDifficulty] = useAddRecipe((state) => [
+    state.setPrepTime,
+    state.setDifficulty,
+  ]);
 
   return (
     <Container maxW={'7xl'}>
       <Divider m="4" />
       <EnumSelector options={mealTypes} defaultValue={'breakfast'} name={'mealtype'}></EnumSelector>
       <Divider m="4" />
-      <EnumSelector options={difficultyLevels} defaultValue={'easy'} name={'diff'}></EnumSelector>
+      <EnumSelector
+        options={difficultyLevels}
+        defaultValue={'easy'}
+        name={'diff'}
+        onChange={(v) => setDifficulty(v)}
+      ></EnumSelector>
       <Divider m="4" />
       <DurationSlider onChangeEnd={(value) => setPrepTime(value)}></DurationSlider>
       <SimpleGrid

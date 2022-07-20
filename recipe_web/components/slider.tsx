@@ -14,7 +14,7 @@ export function DurationSlider({ onChangeEnd }: { onChangeEnd?: (...args: any) =
   return (
     <Slider
       id="slider"
-      defaultValue={5}
+      defaultValue={0}
       min={0}
       max={240}
       colorScheme="orange"
