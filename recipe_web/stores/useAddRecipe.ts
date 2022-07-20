@@ -24,11 +24,21 @@ export const useAddIngredient = create(
       setSteps: (value: string[]) => set(() => ({ steps: value })),
       pushStep: (value: string) =>
         set(({ steps, ...rest }) => ({ ...rest, steps: [...steps, value] })),
+      removeStep: (value: string) =>
+        set(({ steps, ...rest }) => ({
+          ...rest,
+          steps: steps.filter((step: any) => step !== value),
+        })),
       setCuisine: (value: string) => set(() => ({ cuisine: value })),
       setMealType: (value: MealType) => set(() => ({ meal_type: value })),
-      setIngredients: (value: any[]) => set(() => ({ ingredients: value })),
-      pushIngredient: (value: any) =>
+      setIngredients: (value: AddIngredient[]) => set(() => ({ ingredients: value })),
+      pushIngredient: (value: AddIngredient) =>
         set(({ ingredients, ...rest }) => ({ ...rest, ingredients: [...ingredients, value] })),
+      removeIngredient: (value: string) =>
+        set(({ ingredients, ...rest }) => ({
+          ...rest,
+          ingredients: ingredients.filter((i: AddIngredient) => i.name !== value),
+        })),
     })
   )
 );
