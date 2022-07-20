@@ -11,7 +11,7 @@ export const useAddRecipe = create(
       cook_time: 0,
       difficulty: 'easy' as DifficultyLevel,
       steps: [] as string[],
-      cuisine: 'hungarian',
+      cuisine: '',
       meal_type: 'breakfast' as MealType,
       ingredients: [] as AddIngredient[],
     },
