@@ -11,6 +11,7 @@ import {
 import { useState } from 'react';
 
 export const Listable = ({ state, pushState, removeStateByIndex, removeState }: any) => {
+  // TODO: Add variant attribute, to be usable with ingredient and steps as well.
   const [inputFieldOpen, setInputFieldOpen] = useState(false);
   const [content, setContent] = useState('');
   const removeFunction =
