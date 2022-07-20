@@ -16,11 +16,14 @@ import {
   Divider,
 } from '@chakra-ui/react';
 import { MdLocalShipping } from 'react-icons/md';
+import { useAddRecipe } from '../stores/useAddRecipe';
 import { difficultyLevels, mealTypes } from '../utils/types';
 import { EnumSelector } from './EnumSelect';
 import { DurationSlider } from './slider';
 
 export default function Placeholder() {
+  const [setPrepTime] = useAddRecipe((state) => [state.setPrepTime]);
+
   return (
     <Container maxW={'7xl'}>
       <Divider m="4" />
@@ -28,7 +31,7 @@ export default function Placeholder() {
       <Divider m="4" />
       <EnumSelector options={difficultyLevels} defaultValue={'easy'} name={'diff'}></EnumSelector>
       <Divider m="4" />
-      <DurationSlider></DurationSlider>
+      <DurationSlider onChangeEnd={(value) => setPrepTime(value)}></DurationSlider>
       <SimpleGrid
         columns={{ base: 1, lg: 2 }}
         spacing={{ base: 8, md: 10 }}
