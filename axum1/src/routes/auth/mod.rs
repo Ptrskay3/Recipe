@@ -119,11 +119,8 @@ async fn register(
     Form(form): Form<Register>,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<(), ApiError> {
-    if let Err(validation_errors) = form.validate() {
-        return Err(ApiError::unprocessable_entity_from_validation_errors(
-            validation_errors,
-        ));
-    }
+    form.validate()
+        .map_err(ApiError::unprocessable_entity_from_validation_errors)?;
 
     let Register {
         name,
