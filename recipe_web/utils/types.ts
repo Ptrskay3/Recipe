@@ -13,3 +13,9 @@ export const difficultyLevels = [
 ] as const;
 
 export type DifficultyLevel = typeof difficultyLevels[number];
+
+export interface AddIngredient {
+  name: string;
+  quantity: string;
+  quantity_unit: string;
+}
