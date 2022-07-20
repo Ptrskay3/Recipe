@@ -176,11 +176,10 @@ async fn add_or_update_ingredient_to_recipe(
     Path(name): Path<String>,
     Form(ingredient): Form<InsertIngredient>,
 ) -> Result<(), ApiError> {
-    if let Err(errors) = ingredient.validate() {
-        return Err(ApiError::unprocessable_entity_from_validation_errors(
-            errors,
-        ));
-    }
+    ingredient
+        .validate()
+        .map_err(ApiError::unprocessable_entity_from_validation_errors)?;
+
     sqlx::query!(
         r#"
         INSERT INTO ingredients_to_recipes (ingredient_id, recipe_id, quantity, quantity_unit)
