@@ -1,4 +1,4 @@
-import { Box, HStack, useRadio, useRadioGroup } from '@chakra-ui/react';
+import { Box, HStack, useRadio, useRadioGroup, Wrap, WrapItem } from '@chakra-ui/react';
 
 function RadioCard(props: any) {
   const { getInputProps, getCheckboxProps } = useRadio(props);
@@ -53,14 +53,16 @@ export function EnumSelector<T>({
 
   return (
     <HStack {...group}>
-      {options.map((value) => {
-        const radio = getRadioProps({ value } as any);
-        return (
-          <RadioCard key={value} {...radio}>
-            {toPretty(value as unknown as string)}
-          </RadioCard>
-        );
-      })}
+      <Wrap>
+        {options.map((value) => {
+          const radio = getRadioProps({ value } as any);
+          return (
+            <WrapItem key={value as any}>
+              <RadioCard {...radio}>{toPretty(value as unknown as string)}</RadioCard>
+            </WrapItem>
+          );
+        })}
+      </Wrap>
     </HStack>
   );
 }
