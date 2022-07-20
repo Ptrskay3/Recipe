@@ -2,7 +2,7 @@ import create from 'zustand';
 import { combine } from 'zustand/middleware';
 import { AddIngredient, DifficultyLevel, MealType } from '../utils/types';
 
-export const useAddIngredient = create(
+export const useAddRecipe = create(
   combine(
     {
       name: '',

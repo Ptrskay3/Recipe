@@ -8,7 +8,7 @@ import {
 } from '@chakra-ui/react';
 import { useState } from 'react';
 
-export function DurationSlider() {
+export function DurationSlider({ onChangeEnd }: { onChangeEnd?: (...args: any) => any }) {
   const [sliderValue, setSliderValue] = useState(5);
   const [showTooltip, setShowTooltip] = useState(false);
   return (
@@ -21,7 +21,7 @@ export function DurationSlider() {
       onChange={(v) => setSliderValue(v)}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
-      onChangeEnd={(val) => console.log(val)} // TODO
+      onChangeEnd={onChangeEnd}
     >
       <SliderMark value={10} mt="1" ml="-2.5" fontSize="sm">
         10 mins
