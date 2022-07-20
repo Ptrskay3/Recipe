@@ -131,7 +131,7 @@ const NewRecipe = () => {
                 autoFocus
                 required
                 errors={errors as any}
-                onChange={(e) => setName(e.target.value)}
+                onBlur={(e) => setName(e.target.value)}
               />
               <Box mt="4" />
               <InputField
@@ -140,7 +140,7 @@ const NewRecipe = () => {
                 placeholder="recipe description"
                 errors={errors as any}
                 required
-                onChange={(e) => setDescription(e.target.value)}
+                onBlur={(e) => setDescription(e.target.value)}
               />
               <Box mt="4" />
               <InputField
@@ -149,7 +149,7 @@ const NewRecipe = () => {
                 placeholder="cuisine"
                 required
                 errors={errors as any}
-                onChange={(e) => setCuisine(e.target.value)}
+                onBlur={(e) => setCuisine(e.target.value)}
               />
               <Divider m="4"></Divider>
               <Heading fontSize={'lg'} m="2">
