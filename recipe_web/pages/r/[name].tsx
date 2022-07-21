@@ -13,8 +13,15 @@ import {
 } from '@chakra-ui/react';
 import { instantMeiliSearch } from '@meilisearch/instant-meilisearch';
 import { useRouter } from 'next/router';
+import { useRef } from 'react';
 import { FaHeart, FaHeartBroken } from 'react-icons/fa';
-import { Highlight, Hits, InstantSearch, SearchBox } from 'react-instantsearch-hooks-web';
+import {
+  Configure,
+  Highlight,
+  Hits,
+  InstantSearch,
+  SearchBox,
+} from 'react-instantsearch-hooks-web';
 import useSWR, { useSWRConfig } from 'swr';
 import { AddIngredientForm } from '../../components/add_ingredient_form';
 import IncludedIngredient from '../../components/included_ingredient';
@@ -32,6 +39,7 @@ export default function RecipeDetailed() {
   const { name } = router.query;
   const addIngredientOpen = useAddIngredient((state) => state.addIngredientOpen);
   const setAddIngredientOpen = useAddIngredient((state) => state.setAddIngredientOpen);
+  const searchBoxInputRef = useRef(null);
 
   const { data, error } = useSWR(!!name ? `http://localhost:3000/r/${name}` : null, fetcher);
   const toggleFavorite = async () => {
@@ -45,7 +53,15 @@ export default function RecipeDetailed() {
       mutate(`http://localhost:3000/r/${name}`);
     }
   };
-  const Hit = ({ hit }: any) => <Highlight attribute="name" hit={hit} />;
+  const Hit = ({ hit }: any) => (
+    <Highlight
+      attribute="name"
+      hit={hit}
+      key={hit.id}
+      // @ts-ignore
+      onClick={() => (searchBoxInputRef!.current.value = hit.name)}
+    />
+  );
 
   if (error)
     return (
@@ -115,8 +131,11 @@ export default function RecipeDetailed() {
             {addIngredientOpen ? (
               <>
                 <InstantSearch indexName="ingredients" searchClient={searchClient}>
-                  <CustomSearchBox />
-                  <Hits results={1} hitComponent={Hit} />
+                  <VStack>
+                    <Configure hitsPerPage={10} analytics={false} distinct />
+                    <CustomSearchBox passRef={searchBoxInputRef} />
+                    <Hits results={1} hitComponent={Hit} />
+                  </VStack>
                 </InstantSearch>
                 <AddIngredientForm />
               </>
