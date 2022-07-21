@@ -12,6 +12,7 @@ use validator::Validate;
 use crate::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
+    RE_RECIPE,
 };
 
 mod helpers;
@@ -51,7 +52,13 @@ struct RecipeDetailedWithFav {
     Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow, validator::Validate,
 )]
 struct RecipeWithIngredients {
-    #[validate(length(min = 2))]
+    #[validate(
+        length(min = 2, message = "should be at least two characters"),
+        regex(
+            path = "RE_RECIPE",
+            message = "only letters, digits, commas, semicolons, and non-leading and non-trailing dashes are allowed"
+        )
+    )]
     name: String,
     description: String,
     prep_time: i32,
@@ -239,6 +246,10 @@ async fn insert_full_recipe(
     Json(recipe_with_ingredients): Json<RecipeWithIngredients>,
     auth_user: AuthUser,
 ) -> Result<(), ApiError> {
+    recipe_with_ingredients
+        .validate()
+        .map_err(ApiError::unprocessable_entity_from_validation_errors)?;
+
     let mut tx = conn.begin().await?;
 
     let RecipeWithIngredients {

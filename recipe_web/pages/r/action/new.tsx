@@ -95,7 +95,7 @@ const NewRecipe = () => {
           }}
           onSubmit={async (values, { setFieldError }) => {
             // TODO: we do not use Formik's values anyway..
-            const { ok, status } = await fetch(`http://localhost:3000/r`, {
+            const response = await fetch(`http://localhost:3000/r`, {
               method: 'POST',
               body: JSON.stringify({
                 name,
@@ -112,11 +112,13 @@ const NewRecipe = () => {
               headers: { 'Content-Type': 'application/json' },
             });
 
-            if (ok) {
+            if (response.ok) {
               push(`/r/${values.name}`);
-            } else if (status === 422) {
-              // TODO: we ideally should just check the json response
-              setFieldError('cuisine', 'This cuisine does not exist');
+            } else if (response.status === 422) {
+              const { errors } = await response.json();
+              Object.entries(errors).forEach(([name, value]: [string, any]) =>
+                setFieldError(name, value)
+              );
             } else {
               setFieldError('name', 'A recipe with this name already exists');
             }
