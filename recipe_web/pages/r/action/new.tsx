@@ -88,8 +88,9 @@ const NewRecipe = () => {
             if (name.length < 3) {
               errors.name = 'name should be longer than 2 characters';
             }
-            if (description.length < 2) {
-              errors.description = 'description should be longer than 2 characters';
+            if (description.length < 2 || description.length > 250) {
+              errors.description =
+                'description should be longer than 2 characters, but no more than 250';
             }
             return errors;
           }}
