@@ -12,6 +12,7 @@ export function CustomSearchBox(props: any) {
       onChange={(e) => {
         refine(e.target.value);
       }}
+      {...props}
     />
   );
 }
