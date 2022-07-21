@@ -1,7 +1,11 @@
 import { DeleteIcon, PlusSquareIcon } from '@chakra-ui/icons';
 import {
+  Box,
   Button,
+  Center,
   Flex,
+  FormControl,
+  FormErrorMessage,
   HStack,
   IconButton,
   ListItem,
@@ -36,31 +40,45 @@ export const Listable = ({ state, pushState, removeStateByIndex, removeState }: 
           ))}
       </OrderedList>
       {inputFieldOpen ? (
-        <>
+        <FormControl isInvalid={content.trim().length === 0}>
           <Textarea
             value={content}
             onChange={(e) => {
               setContent(e.target.value);
             }}
           ></Textarea>
+          <FormErrorMessage>{'This field cannot be empty!'}</FormErrorMessage>
+          <Box>
+            <Center>
+              <Button
+                m="1"
+                aria-label={'add'}
+                onClick={() => {
+                  if (content.trim().length === 0) {
+                    return;
+                  }
+                  setContent('');
+                  pushState(content);
+                }}
+              >
+                Add step
+              </Button>
+              <Button aria-label={'cancel'} onClick={() => setInputFieldOpen(false)}>
+                Cancel
+              </Button>
+            </Center>
+          </Box>
+        </FormControl>
+      ) : (
+        <Center>
           <IconButton
             aria-label={'add'}
             icon={<PlusSquareIcon />}
             onClick={() => {
-              // TODO: Do not permit empty strings
-              setContent('');
-              pushState(content);
+              setInputFieldOpen(true);
             }}
           ></IconButton>
-        </>
-      ) : (
-        <Button
-          onClick={() => {
-            setInputFieldOpen(true);
-          }}
-        >
-          Add step
-        </Button>
+        </Center>
       )}
     </>
   );
