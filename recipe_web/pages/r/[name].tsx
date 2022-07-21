@@ -16,13 +16,7 @@ import { instantMeiliSearch } from '@meilisearch/instant-meilisearch';
 import { useRouter } from 'next/router';
 import { useRef } from 'react';
 import { FaHeart, FaHeartBroken } from 'react-icons/fa';
-import {
-  Configure,
-  Highlight,
-  Hits,
-  InstantSearch,
-  SearchBox,
-} from 'react-instantsearch-hooks-web';
+import { Configure, Highlight, Hits, InstantSearch } from 'react-instantsearch-hooks-web';
 import useSWR, { useSWRConfig } from 'swr';
 import { AddIngredientForm } from '../../components/add_ingredient_form';
 import IncludedIngredient from '../../components/included_ingredient';
@@ -56,9 +50,6 @@ export default function RecipeDetailed() {
   };
   const Hit = ({ hit }: any) => (
     <Container
-      border={'1px'}
-      borderStyle="solid"
-      borderRadius="lg"
       _hover={{ cursor: 'pointer' }}
       // @ts-ignore
       onClick={() => (searchBoxInputRef.current.value = hit.name)}
