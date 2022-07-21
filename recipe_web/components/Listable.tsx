@@ -59,6 +59,7 @@ export const Listable = ({ state, pushState, removeStateByIndex, removeState }: 
                   }
                   setContent('');
                   pushState(content);
+                  setInputFieldOpen(false);
                 }}
               >
                 Add step

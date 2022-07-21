@@ -53,7 +53,11 @@ struct RecipeDetailedWithFav {
 )]
 struct RecipeWithIngredients {
     #[validate(
-        length(min = 2, message = "should be at least two characters"),
+        length(
+            min = 2,
+            max = 250,
+            message = "should be at least 2 characters, but no more than 250"
+        ),
         regex(
             path = "RE_RECIPE",
             message = "only letters, digits, and non-leading and non-trailing dashes are allowed"
