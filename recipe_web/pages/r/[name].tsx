@@ -19,6 +19,7 @@ import useSWR, { useSWRConfig } from 'swr';
 import { AddIngredientForm } from '../../components/add_ingredient_form';
 import IncludedIngredient from '../../components/included_ingredient';
 import { Layout } from '../../components/layout';
+import { CustomSearchBox, MySearchBox } from '../../components/search/SearchBox';
 import { useMe } from '../../hooks/me';
 import { useAddIngredient } from '../../stores/useAddIngredient';
 import { fetcher } from '../../utils/fetcher';
@@ -114,7 +115,7 @@ export default function RecipeDetailed() {
             {addIngredientOpen ? (
               <>
                 <InstantSearch indexName="ingredients" searchClient={searchClient}>
-                  <SearchBox />
+                  <CustomSearchBox />
                   <Hits results={1} hitComponent={Hit} />
                 </InstantSearch>
                 <AddIngredientForm />
