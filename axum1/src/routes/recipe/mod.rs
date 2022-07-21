@@ -64,6 +64,11 @@ struct RecipeWithIngredients {
         )
     )]
     name: String,
+    #[validate(length(
+        min = 2,
+        max = 250,
+        message = "should be at least 2 characters, but no more than 250"
+    ))]
     description: String,
     prep_time: i32,
     cook_time: i32,
