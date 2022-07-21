@@ -14,7 +14,11 @@ pub mod session;
 pub mod startup;
 pub mod utils;
 
-static RE_USERNAME: Lazy<Regex> = Lazy::new(|| Regex::new(r#"^[a-z0-9](\.?[a-z0-9])*$"#).unwrap());
+static RE_USERNAME: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r#"^[a-zA-Z0-9 áéúőóüöÁÉÚŐÓÜÖ](\.?[a-zA-Z0-9 áéúőóüöÁÉÚŐÓÜÖ])*$"#).unwrap());
+static RE_RECIPE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r#"^[a-zA-Z0-9-áéúőóüöÁÉÚŐÓÜÖ](\-?[a-zA-Z0-9 áéúőóüöÁÉÚŐÓÜÖ -,\s])*$"#).unwrap()
+});
 
 #[async_trait]
 pub trait Queryable: Sized {
