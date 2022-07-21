@@ -56,7 +56,7 @@ struct RecipeWithIngredients {
         length(min = 2, message = "should be at least two characters"),
         regex(
             path = "RE_RECIPE",
-            message = "only letters, digits, commas, semicolons, and non-leading and non-trailing dashes are allowed"
+            message = "only letters, digits, and non-leading and non-trailing dashes are allowed"
         )
     )]
     name: String,
