@@ -3,6 +3,7 @@ import {
   Box,
   Center,
   CircularProgress,
+  Container,
   Flex,
   Heading,
   IconButton,
@@ -54,13 +55,18 @@ export default function RecipeDetailed() {
     }
   };
   const Hit = ({ hit }: any) => (
-    <Highlight
-      attribute="name"
-      hit={hit}
-      key={hit.id}
+    <Container
+      border={'1px'}
+      borderStyle="solid"
+      borderRadius="lg"
+      _hover={{ cursor: 'pointer' }}
       // @ts-ignore
-      onClick={() => (searchBoxInputRef!.current.value = hit.name)}
-    />
+      onClick={() => (searchBoxInputRef.current.value = hit.name)}
+      key={hit.id}
+    >
+      <Highlight attribute="name" hit={hit} />
+      <Text>{'calories: ' + hit.calories_per_100g}</Text>
+    </Container>
   );
 
   if (error)
@@ -131,10 +137,10 @@ export default function RecipeDetailed() {
             {addIngredientOpen ? (
               <>
                 <InstantSearch indexName="ingredients" searchClient={searchClient}>
+                  <Configure hitsPerPage={10} analytics={false} distinct />
                   <VStack>
-                    <Configure hitsPerPage={10} analytics={false} distinct />
-                    <CustomSearchBox passRef={searchBoxInputRef} />
-                    <Hits results={1} hitComponent={Hit} />
+                    <CustomSearchBox passRef={searchBoxInputRef} label={'Name'} name={'name'} />
+                    <Hits hitComponent={Hit} />
                   </VStack>
                 </InstantSearch>
                 <AddIngredientForm />
