@@ -54,7 +54,7 @@ pub struct SessionLayer<Store> {
     session_ttl: Option<Duration>,
     save_unchanged: bool,
     same_site_policy: SameSite,
-    secure: bool,
+    secure: Option<bool>,
     key: Key,
 }
 
@@ -77,7 +77,7 @@ impl<Store: SessionStore> SessionLayer<Store> {
             cookie_domain: None,
             same_site_policy: SameSite::Strict,
             session_ttl: Some(Duration::from_secs(24 * 60 * 60)),
-            secure: false,
+            secure: None,
             key: Key::from(secret),
         }
     }
@@ -122,9 +122,9 @@ impl<Store: SessionStore> SessionLayer<Store> {
         self
     }
 
-    /// Sets a cookie secure attribute for the session. Defaults to `true`.
+    /// Sets a cookie secure attribute for the session. Defaults to `false`.
     pub fn with_secure(mut self, secure: bool) -> Self {
-        self.secure = secure;
+        self.secure = Some(secure);
         self
     }
 
@@ -245,16 +245,21 @@ where
         } else {
             None
         };
+        let secure = self
+            .layer
+            .secure
+            .unwrap_or_else(|| request.uri().scheme_str() == Some("https"));
 
         let mut inner = self.inner.clone();
         Box::pin(async move {
-            let mut session = session_layer.load_or_create(cookie_value).await;
+            let mut session = session_layer.load_or_create(cookie_value.clone()).await;
 
             if let Some(ttl) = session_layer.session_ttl {
                 session.expire_in(ttl);
             }
 
             request.extensions_mut().insert(session.clone());
+
             let mut response: Response = inner.call(request).await?;
 
             if session.is_destroyed() {
@@ -263,15 +268,22 @@ where
                     .destroy_session(session)
                     .await
                     .expect("Could not destroy session.");
+
+                if let Some(cookie_value) = cookie_value {
+                    let mut cookie = session_layer.build_cookie(secure, cookie_value);
+                    cookie.make_removal();
+                    response.headers_mut().insert(
+                        SET_COOKIE,
+                        HeaderValue::from_str(&cookie.to_string()).unwrap(),
+                    );
+                }
             } else if session_layer.save_unchanged || session.data_changed() {
                 let cookie = session_layer
                     .store
                     .store_session(session)
                     .await
                     .expect("Could not store session.")
-                    .map(|cookie_value| {
-                        session_layer.build_cookie(session_layer.secure, cookie_value)
-                    });
+                    .map(|cookie_value| session_layer.build_cookie(secure, cookie_value));
 
                 if let Some(cookie) = cookie {
                     response.headers_mut().insert(
