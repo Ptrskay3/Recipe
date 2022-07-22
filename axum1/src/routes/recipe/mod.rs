@@ -46,6 +46,7 @@ struct RecipeDetailedWithFav {
     cuisine: String,
     meal_type: TypeByTime,
     ingredients: Vec<DetailedIngredient>,
+    full_calories: f32,
     favorited: bool,
 }
 #[derive(
@@ -84,6 +85,7 @@ struct DetailedIngredient {
     name: String,
     quantity: String,
     quantity_unit: String,
+    calories_per_100g: f32,
 }
 
 #[tracing::instrument(skip(conn, maybe_auth_user))]
@@ -114,7 +116,7 @@ async fn get_recipe_with_ingredients(
     let ingredients: Vec<DetailedIngredient> = sqlx::query_as!(
         DetailedIngredient,
         r#"
-        SELECT i.name, ir.quantity, ir.quantity_unit FROM recipes r
+        SELECT i.name, i.calories_per_100g, ir.quantity, ir.quantity_unit FROM recipes r
         INNER JOIN ingredients_to_recipes ir
         ON r.id = ir.recipe_id
         INNER JOIN ingredients i
@@ -126,6 +128,11 @@ async fn get_recipe_with_ingredients(
     .fetch_all(&mut tx)
     .await
     .context("Failed to query recipe ingredients")?;
+
+    // TODO: We didn't take quantity_unit into account.
+    let full_calories = ingredients.iter().fold(0.0, |acc, ingredient| {
+        acc + (ingredient.calories_per_100g * ingredient.quantity.parse::<f32>().unwrap() / 100.0)
+    });
 
     let favorited = if let Some(user_id) = maybe_auth_user.into_inner() {
         sqlx::query!(
@@ -155,6 +162,7 @@ async fn get_recipe_with_ingredients(
         steps: recipe.steps,
         cuisine: recipe.cuisine,
         meal_type: recipe.meal_type,
+        full_calories,
         favorited,
     }))
 }
