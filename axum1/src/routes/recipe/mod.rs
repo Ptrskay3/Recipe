@@ -18,6 +18,8 @@ use crate::{
 mod helpers;
 use helpers::{DifficultyLevel, TypeByTime};
 
+use self::helpers::QuantityUnit;
+
 pub fn recipe_router() -> Router {
     let action_router = Router::new()
         .route("/my-recipes", get(my_recipes))
@@ -129,9 +131,12 @@ async fn get_recipe_with_ingredients(
     .await
     .context("Failed to query recipe ingredients")?;
 
-    // TODO: We didn't take quantity_unit into account.
     let full_calories = ingredients.iter().fold(0.0, |acc, ingredient| {
-        acc + (ingredient.calories_per_100g * ingredient.quantity.parse::<f32>().unwrap() / 100.0)
+        let multiplier = QuantityUnit::try_from(ingredient.quantity_unit.as_str())
+            .unwrap_or_default()
+            .get_multiplier_for_g();
+        acc + (ingredient.calories_per_100g * multiplier * ingredient.quantity.parse::<f32>().unwrap_or(0.0) // We ignore non-numeric quantities
+            / 100.0)
     });
 
     let favorited = if let Some(user_id) = maybe_auth_user.into_inner() {
