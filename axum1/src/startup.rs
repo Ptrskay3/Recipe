@@ -11,7 +11,6 @@ use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
 
-
 pub async fn application() -> Result<(), anyhow::Error> {
     dotenv::dotenv().ok();
 
@@ -56,17 +55,29 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .nest("/", auth_router())
         .nest("/admin", admin_router())
         .fallback(get_service(ServeDir::new("./static")).handle_error(handle_asset_error))
-        .layer(TraceLayer::new_for_http())
-        .layer(Extension(db_pool))
-        .layer(Extension(store.clone()))
-        .layer(SessionLayer::new(store, config.redis.secret_key.as_bytes()))
-        .layer(Extension(email_client.clone()))
-        .layer(Extension(discord_oauth_client))
-        .layer(Extension(google_oauth_client))
+        // It's a little better use the `tower::ServiceBuilder` to avoid unnecessary boxing,
+        // and maybe we can use
+        // https://docs.rs/tower-http/latest/tower_http/trait.ServiceBuilderExt.html
+        // in the future.
         .layer(
-            CorsLayer::very_permissive()
-                .allow_origin(config.frontend_url.parse::<HeaderValue>().unwrap())
-                .allow_credentials(true),
+            tower::ServiceBuilder::new()
+                .layer(TraceLayer::new_for_http())
+                .layer(Extension(db_pool))
+                .layer(Extension(store.clone()))
+                .layer(
+                    SessionLayer::new(store, config.redis.secret_key.as_bytes()).with_secure(
+                        std::env::var("APP_ENVIRONMENT").unwrap_or_else(|_| String::from("local"))
+                            == "production",
+                    ),
+                )
+                .layer(Extension(email_client.clone()))
+                .layer(Extension(discord_oauth_client))
+                .layer(Extension(google_oauth_client))
+                .layer(
+                    CorsLayer::very_permissive()
+                        .allow_origin(config.frontend_url.parse::<HeaderValue>().unwrap())
+                        .allow_credentials(true),
+                ),
         );
 
     axum::Server::bind(&addr)
