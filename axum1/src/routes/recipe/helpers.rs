@@ -54,7 +54,7 @@ impl<'a> TryFrom<&'a str> for QuantityUnit {
             "g" | "G" => Ok(Self::g),
             "kg" | "Kg" | "KG" | "kG" => Ok(Self::kg),
             "mg" | "Mg" | "MG" | "mG" => Ok(Self::mg),
-            "" => Ok(Self::Empty),
+            other if other.trim() == "" => Ok(Self::Empty),
             other => {
                 let mut err = validator::ValidationError::new("quantity_unit");
                 err.message = Some(std::borrow::Cow::from(
