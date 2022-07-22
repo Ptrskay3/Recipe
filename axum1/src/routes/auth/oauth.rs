@@ -37,9 +37,14 @@ pub(super) async fn discord_authorize(
     Extension(DiscordOAuthClient(oauth_client)): Extension<DiscordOAuthClient>,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<(), ApiError> {
+    let verifier = session
+        .get::<PkceCodeVerifier>("pkce_verifier")
+        .ok_or(ApiError::BadRequest)?;
+
     // Get an auth token
     let token = oauth_client
         .exchange_code(AuthorizationCode::new(query.code.clone()))
+        .set_pkce_verifier(verifier)
         .request_async(async_http_client)
         .await
         .map_err(|_| ApiError::BadRequest)?;
@@ -112,6 +117,18 @@ pub(super) async fn discord_authorize(
     };
     tx.commit().await?;
 
+    let token_to_revoke: StandardRevocableToken = match token.refresh_token() {
+        Some(token) => token.into(),
+        None => token.access_token().into(),
+    };
+
+    oauth_client
+        .revoke_token(token_to_revoke)
+        .unwrap()
+        .request_async(async_http_client)
+        .await
+        .ok();
+
     session.regenerate();
     session
         .insert("user_id", user_id)
@@ -129,10 +146,17 @@ pub(super) async fn discord_auth(
     Extension(DiscordOAuthClient(client)): Extension<DiscordOAuthClient>,
     Extension(mut session): Extension<Session>,
 ) -> Result<Json<RedirectUri>, ApiError> {
+    let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
+
+    session
+        .insert("pkce_verifier", pkce_verifier)
+        .expect("pkce_verifier is serializable");
+
     let (auth_url, csrf_token) = client
         .authorize_url(CsrfToken::new_random)
         .add_scope(Scope::new("identify".to_string()))
         .add_scope(Scope::new("email".to_string()))
+        .set_pkce_challenge(pkce_challenge)
         .url();
 
     session
