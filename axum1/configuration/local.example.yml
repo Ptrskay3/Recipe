@@ -24,6 +24,14 @@ oauth:
   discord:
     client_id: # Your Discord client ID
     client_secret: # Your Discord client secret
+    redirect_url: # Your redirect url for Discord
+    auth_url: https://discord.com/api/oauth2/authorize?response_type=code
+    token_url: https://discord.com/api/oauth2/token
+    revocation_url: https://discord.com/api/oauth2/token/revoke
   google:
     client_id: # Your Google client ID
     client_secret: # Your Google client secret
+    redirect_url: # Your redirect url for Google
+    auth_url: https://accounts.google.com/o/oauth2/v2/auth
+    token_url: https://www.googleapis.com/oauth2/v3/token
+    revocation_url: https://oauth2.googleapis.com/revoke
