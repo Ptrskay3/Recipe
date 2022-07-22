@@ -46,6 +46,10 @@ pub struct OAuth {
 pub struct OAuthCredentials {
     pub client_id: String,
     pub client_secret: String,
+    pub auth_url: String,
+    pub token_url: String,
+    pub redirect_url: String,
+    pub revocation_url: String,
 }
 
 impl EmailClientSettings {

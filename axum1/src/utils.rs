@@ -76,11 +76,10 @@ pub async fn shutdown_signal() {
 pub fn oauth_client_discord(config: &Settings) -> DiscordOAuthClient {
     let client_id = config.oauth.discord.client_id.clone();
     let client_secret = config.oauth.discord.client_secret.clone();
-
-    // TODO: do not hardcode these here
-    let redirect_url = "http://localhost:3001/auth/discord_authorize".to_owned();
-    let auth_url = "https://discord.com/api/oauth2/authorize?response_type=code".to_string();
-    let token_url = "https://discord.com/api/oauth2/token".to_string();
+    let redirect_url = config.oauth.discord.redirect_url.clone();
+    let auth_url = config.oauth.discord.auth_url.clone();
+    let token_url = config.oauth.discord.token_url.clone();
+    let revocation_url = config.oauth.discord.revocation_url.clone();
 
     DiscordOAuthClient(
         BasicClient::new(
@@ -91,8 +90,7 @@ pub fn oauth_client_discord(config: &Settings) -> DiscordOAuthClient {
         )
         .set_redirect_uri(RedirectUrl::new(redirect_url).unwrap())
         .set_revocation_uri(
-            RevocationUrl::new("https://discord.com/api/oauth2/token/revoke".to_string())
-                .expect("Invalid revocation endpoint URL"),
+            RevocationUrl::new(revocation_url).expect("Invalid revocation endpoint URL"),
         ),
     )
 }
@@ -100,11 +98,10 @@ pub fn oauth_client_discord(config: &Settings) -> DiscordOAuthClient {
 pub fn oauth_client_google(config: &Settings) -> GoogleOAuthClient {
     let client_id = config.oauth.google.client_id.clone();
     let client_secret = config.oauth.google.client_secret.clone();
-
-    // TODO: do not hardcode these here
-    let redirect_url = "http://localhost:3001/auth/google_authorize".to_owned();
-    let auth_url = "https://accounts.google.com/o/oauth2/v2/auth".to_string();
-    let token_url = "https://www.googleapis.com/oauth2/v3/token".to_string();
+    let redirect_url = config.oauth.google.redirect_url.clone();
+    let auth_url = config.oauth.google.auth_url.clone();
+    let token_url = config.oauth.google.token_url.clone();
+    let revocation_url = config.oauth.google.revocation_url.clone();
 
     GoogleOAuthClient(
         BasicClient::new(
@@ -115,8 +112,7 @@ pub fn oauth_client_google(config: &Settings) -> GoogleOAuthClient {
         )
         .set_redirect_uri(RedirectUrl::new(redirect_url).unwrap())
         .set_revocation_uri(
-            RevocationUrl::new("https://oauth2.googleapis.com/revoke".to_string())
-                .expect("Invalid revocation endpoint URL"),
+            RevocationUrl::new(revocation_url).expect("Invalid revocation endpoint URL"),
         ),
     )
 }

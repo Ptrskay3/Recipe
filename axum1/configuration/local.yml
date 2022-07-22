@@ -24,6 +24,14 @@ oauth:
   discord:
     client_id: 997545848957313054
     client_secret: JR9XG-8qR1D8JhuNEV-3-Df1p-013_ap
+    redirect_url: http://localhost:3001/auth/discord_authorize
+    auth_url: https://discord.com/api/oauth2/authorize?response_type=code
+    token_url: https://discord.com/api/oauth2/token
+    revocation_url: https://discord.com/api/oauth2/token/revoke
   google:
     client_id: 193420761201-v858oknq8mfaps3l262njru2j0o776qg.apps.googleusercontent.com
     client_secret: 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
+    redirect_url: http://localhost:3001/auth/google_authorize
+    auth_url: https://accounts.google.com/o/oauth2/v2/auth
+    token_url: https://www.googleapis.com/oauth2/v3/token
+    revocation_url: https://oauth2.googleapis.com/revoke
