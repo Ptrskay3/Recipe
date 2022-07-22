@@ -41,14 +41,6 @@ pub(super) async fn discord_authorize(
         .get::<PkceCodeVerifier>("pkce_verifier")
         .ok_or(ApiError::BadRequest)?;
 
-    // Get an auth token
-    let token = oauth_client
-        .exchange_code(AuthorizationCode::new(query.code.clone()))
-        .set_pkce_verifier(verifier)
-        .request_async(async_http_client)
-        .await
-        .map_err(|_| ApiError::BadRequest)?;
-
     let csrf_token = session
         .get::<CsrfToken>("oauth_csrf_token")
         .ok_or(ApiError::BadRequest)?;
@@ -60,6 +52,15 @@ pub(super) async fn discord_authorize(
 
     // Cleanup session, we don't need to store csrf_token anymore.
     session.remove("oauth_csrf_token");
+    session.remove("pkce_verifier");
+
+    // Get an auth token
+    let token = oauth_client
+        .exchange_code(AuthorizationCode::new(query.code.clone()))
+        .set_pkce_verifier(verifier)
+        .request_async(async_http_client)
+        .await
+        .map_err(|_| ApiError::BadRequest)?;
 
     // Fetch user data from discord
     let client = reqwest::Client::new();
@@ -212,14 +213,6 @@ pub(super) async fn google_authorize(
         .get::<PkceCodeVerifier>("pkce_verifier")
         .ok_or(ApiError::BadRequest)?;
 
-    // Get an auth token
-    let token = oauth_client
-        .exchange_code(AuthorizationCode::new(query.code.clone()))
-        .set_pkce_verifier(verifier)
-        .request_async(async_http_client)
-        .await
-        .map_err(|_| ApiError::BadRequest)?;
-
     let csrf_token = session
         .get::<CsrfToken>("oauth_csrf_token")
         .ok_or(ApiError::BadRequest)?;
@@ -232,6 +225,14 @@ pub(super) async fn google_authorize(
     // Cleanup session, we don't need to store these anymore.
     session.remove("oauth_csrf_token");
     session.remove("pkce_verifier");
+
+    // Get an auth token
+    let token = oauth_client
+        .exchange_code(AuthorizationCode::new(query.code.clone()))
+        .set_pkce_verifier(verifier)
+        .request_async(async_http_client)
+        .await
+        .map_err(|_| ApiError::BadRequest)?;
 
     // Fetch user data from Google
     let client = reqwest::Client::new();
