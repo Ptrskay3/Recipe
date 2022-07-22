@@ -94,6 +94,7 @@ export default function RecipeDetailed() {
                 <Text m={4}>{`Difficulty: ${data.difficulty}`}</Text>
                 <Text m={4}>{`Cuisine: ${data.cuisine}`}</Text>
                 <Text m={4}>{`Type: ${data.meal_type}`}</Text>
+                <Text m={4}>{`Calories: ${data.full_calories}`}</Text>
                 {data.steps && data.steps.length > 0 ? (
                   <>
                     <Heading>Steps:</Heading>
