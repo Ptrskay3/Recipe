@@ -89,7 +89,11 @@ pub fn oauth_client_discord(config: &Settings) -> DiscordOAuthClient {
             AuthUrl::new(auth_url).unwrap(),
             Some(TokenUrl::new(token_url).unwrap()),
         )
-        .set_redirect_uri(RedirectUrl::new(redirect_url).unwrap()),
+        .set_redirect_uri(RedirectUrl::new(redirect_url).unwrap())
+        .set_revocation_uri(
+            RevocationUrl::new("https://discord.com/api/oauth2/token/revoke".to_string())
+                .expect("Invalid revocation endpoint URL"),
+        ),
     )
 }
 
