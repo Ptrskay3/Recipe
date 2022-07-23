@@ -35,7 +35,7 @@ use axum::{
     body::Body,
     http::{
         header::{HeaderValue, COOKIE, SET_COOKIE},
-        Request,
+        Request, StatusCode,
     },
     response::Response,
 };
@@ -278,18 +278,19 @@ where
                     );
                 }
             } else if session_layer.save_unchanged || session.data_changed() {
-                let cookie = session_layer
-                    .store
-                    .store_session(session)
-                    .await
-                    .expect("Could not store session.")
-                    .map(|cookie_value| session_layer.build_cookie(secure, cookie_value));
-
-                if let Some(cookie) = cookie {
-                    response.headers_mut().insert(
-                        SET_COOKIE,
-                        HeaderValue::from_str(&cookie.to_string()).unwrap(),
-                    );
+                match session_layer.store.store_session(session).await {
+                    Ok(Some(cookie_value)) => {
+                        let cookie = session_layer.build_cookie(secure, cookie_value);
+                        response.headers_mut().insert(
+                            SET_COOKIE,
+                            HeaderValue::from_str(&cookie.to_string()).unwrap(),
+                        );
+                    }
+                    Ok(None) => {}
+                    Err(e) => {
+                        *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                        tracing::error!("Failed to reach session storage {:?}", e);
+                    }
                 }
             }
 
