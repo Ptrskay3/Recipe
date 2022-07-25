@@ -160,6 +160,20 @@ impl<Store: SessionStore> SessionLayer<Store> {
         cookie
     }
 
+    fn build_removal_cookie(&self, secure: bool) -> Cookie<'static> {
+        let mut cookie = Cookie::build(self.cookie_name.clone(), "")
+            .http_only(true)
+            .same_site(self.same_site_policy)
+            .secure(secure)
+            .finish();
+
+        cookie.make_removal();
+
+        self.sign_cookie(&mut cookie);
+
+        cookie
+    }
+
     // This is mostly based on:
     // https://github.com/SergioBenitez/cookie-rs/blob/master/src/secure/signed.rs#L33-L43
     /// Signs the cookie's value providing integrity and authenticity.
@@ -245,6 +259,7 @@ where
         } else {
             None
         };
+
         let secure = self
             .layer
             .secure
@@ -252,7 +267,7 @@ where
 
         let mut inner = self.inner.clone();
         Box::pin(async move {
-            let mut session = session_layer.load_or_create(cookie_value.clone()).await;
+            let mut session = session_layer.load_or_create(cookie_value).await;
 
             if let Some(ttl) = session_layer.session_ttl {
                 session.expire_in(ttl);
@@ -269,14 +284,12 @@ where
                     .await
                     .expect("Could not destroy session.");
 
-                if let Some(cookie_value) = cookie_value {
-                    let mut cookie = session_layer.build_cookie(secure, cookie_value);
-                    cookie.make_removal();
-                    response.headers_mut().insert(
-                        SET_COOKIE,
-                        HeaderValue::from_str(&cookie.to_string()).unwrap(),
-                    );
-                }
+                let removal_cookie = session_layer.build_removal_cookie(secure);
+
+                response.headers_mut().insert(
+                    SET_COOKIE,
+                    HeaderValue::from_str(&removal_cookie.to_string()).unwrap(),
+                );
             } else if session_layer.save_unchanged || session.data_changed() {
                 match session_layer.store.store_session(session).await {
                     Ok(Some(cookie_value)) => {
