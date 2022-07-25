@@ -278,11 +278,10 @@ where
             let mut response: Response = inner.call(request).await?;
 
             if session.is_destroyed() {
-                session_layer
-                    .store
-                    .destroy_session(session)
-                    .await
-                    .expect("Could not destroy session.");
+                if let Err(e) = session_layer.store.destroy_session(session).await {
+                    tracing::error!("Failed to destroy session: {:?}", e);
+                    *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                }
 
                 let removal_cookie = session_layer.build_removal_cookie(secure);
 
