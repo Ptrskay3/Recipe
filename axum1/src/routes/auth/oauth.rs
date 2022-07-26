@@ -11,7 +11,7 @@ use sqlx::Acquire;
 use crate::{
     error::{ApiError, ResultExt},
     extractors::DatabaseConnection,
-    session::SessionWorkaroundExt,
+    session::SessionExt,
     utils::{DiscordOAuthClient, GoogleOAuthClient},
 };
 
