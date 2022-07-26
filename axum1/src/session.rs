@@ -324,11 +324,17 @@ where
 // Primarily this is for preventing session-fixation attacks.
 // Shamelessly copied over from
 // https://github.com/http-rs/tide/issues/762#issuecomment-808829054
-pub trait SessionWorkaroundExt {
+/// An extension for [`async_session::Session`] for renewing sessions.
+pub trait SessionExt {
     /// Session key of regeneration flag.
     const REGENERATION_MARK_KEY: &'static str;
 
-    /// Marks the session for ID regeneration.
+    /// Marks the session for ID and cookie value regeneration.
+    /// _Use this_ instead of [`async_session::Session::regenerate`] when you need
+    /// to regenerate the session from a request handler.
+    ///
+    /// This is due to a limitation described here:
+    /// <https://github.com/http-rs/tide/issues/762>
     fn mark_for_regenerate(&mut self);
 
     /// Checks whether the session should regenerate the ID.
@@ -336,12 +342,12 @@ pub trait SessionWorkaroundExt {
     fn should_regenerate(&mut self) -> bool;
 }
 
-impl SessionWorkaroundExt for async_session::Session {
+impl SessionExt for async_session::Session {
     const REGENERATION_MARK_KEY: &'static str = "sid-regenerate";
 
     fn mark_for_regenerate(&mut self) {
         self.insert(Self::REGENERATION_MARK_KEY, true)
-            .expect("Boolean should be serialized");
+            .expect("bool is serializable");
     }
 
     fn should_regenerate(&mut self) -> bool {

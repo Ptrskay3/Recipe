@@ -18,7 +18,8 @@ static RE_USERNAME: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r#"^[a-zA-Z0-9 íáéúőóüöűÍÁÉÚŐÓÜÖŰ](\.?[a-zA-Z0-9 íáéúőóüöűÍÁÉÚŐÓÜÖŰ])*$"#).unwrap()
 });
 static RE_RECIPE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r#"^[a-zA-Z0-9-íáéúőóüöűÍÁÉÚŐÓÜÖŰ](\-?[a-zA-Z0-9 íáéúőóüöűÍÁÉÚŐÓÜÖŰ - \s])*$"#).unwrap()
+    Regex::new(r#"^[a-zA-Z0-9-íáéúőóüöűÍÁÉÚŐÓÜÖŰ](\-?[a-zA-Z0-9 íáéúőóüöűÍÁÉÚŐÓÜÖŰ - \s])*$"#)
+        .unwrap()
 });
 
 #[async_trait]

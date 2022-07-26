@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{convert::Infallible, ops::Deref};
 
 use crate::error::ApiError;
 use async_redis_session::RedisSessionStore;
@@ -6,7 +6,6 @@ use async_session::Session;
 use axum::{
     async_trait,
     extract::{FromRequest, RequestParts},
-    http::StatusCode,
     Extension,
 };
 use sqlx::{pool, PgPool, Postgres};
@@ -37,7 +36,7 @@ impl<B> FromRequest<B> for RedisConnection
 where
     B: Send,
 {
-    type Rejection = (StatusCode, &'static str);
+    type Rejection = Infallible;
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
@@ -97,7 +96,7 @@ impl<B> FromRequest<B> for MaybeAuthUser
 where
     B: Send,
 {
-    type Rejection = ApiError;
+    type Rejection = Infallible;
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let Extension(session) = Extension::<Session>::from_request(req)

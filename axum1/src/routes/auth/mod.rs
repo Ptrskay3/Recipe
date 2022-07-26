@@ -13,7 +13,7 @@ use crate::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
     queue::email::{Email, EmailClient},
-    session::SessionWorkaroundExt,
+    session::SessionExt,
     RE_USERNAME,
 };
 
