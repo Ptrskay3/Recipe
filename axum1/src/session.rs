@@ -290,6 +290,9 @@ where
                     HeaderValue::from_str(&removal_cookie.to_string()).unwrap(),
                 );
             } else if session_layer.save_unchanged || session.data_changed() {
+                if session.should_regenerate() {
+                    session.regenerate();
+                }
                 match session_layer.store.store_session(session).await {
                     Ok(Some(cookie_value)) => {
                         let cookie = session_layer.build_cookie(secure, cookie_value);
@@ -308,5 +311,42 @@ where
 
             Ok(response)
         })
+    }
+}
+
+// This is a workaround to regenerate session cookie when needed.
+// Primarily this is for preventing session-fixation attacks.
+// Shamelessly copied over from
+// https://github.com/http-rs/tide/issues/762#issuecomment-808829054
+pub trait SessionWorkaroundExt {
+    /// Session key of regeneration flag.
+    const REGENERATION_MARK_KEY: &'static str;
+
+    /// Marks the session for ID regeneration.
+    fn mark_for_regenerate(&mut self);
+
+    /// Checks whether the session should regenerate the ID.
+    /// The session key `REGENERATION_MARK` will be removed.
+    fn should_regenerate(&mut self) -> bool;
+}
+
+impl SessionWorkaroundExt for async_session::Session {
+    const REGENERATION_MARK_KEY: &'static str = "sid-regenerate";
+
+    fn mark_for_regenerate(&mut self) {
+        self.insert(Self::REGENERATION_MARK_KEY, true)
+            .expect("Boolean should be serialized");
+    }
+
+    fn should_regenerate(&mut self) -> bool {
+        let previously_changed = self.data_changed();
+        let regenerate = self.get(Self::REGENERATION_MARK_KEY).unwrap_or_default();
+
+        self.remove(Self::REGENERATION_MARK_KEY);
+        if !previously_changed {
+            self.reset_data_changed();
+        }
+
+        regenerate
     }
 }

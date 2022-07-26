@@ -11,10 +11,10 @@ description = "A backend for recipe app"
 anyhow = "1.0.57"
 thiserror = "1.0.31"
 # our choice as a web framework, and other related utilities
-axum = { version = "0.5.13", features = ["json", "headers"] }
+axum = { version = "0.5.14", features = ["json", "headers"] }
 tokio = { version = "1.18.0", features = ["full"] }
 uuid = { version = "1", features = ["v4", "serde"] }
-axum-extra = { version = "0.3.4", features = ["cookie", "cookie-signed", "form"] }
+axum-extra = { version = "0.3.6", features = ["cookie", "cookie-signed", "form"] }
 tower-http = { version = "=0.3.4", features = ["add-extension", "trace", "cors", "fs"] }
 # for handling dates
 chrono = { version = "0.4.19", features = ["serde"] }
