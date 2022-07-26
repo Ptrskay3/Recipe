@@ -13,6 +13,7 @@ use crate::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
     queue::email::{Email, EmailClient},
+    session::SessionWorkaroundExt,
     RE_USERNAME,
 };
 
@@ -79,7 +80,7 @@ async fn authorize(
     let user_id = validate_credentials(credentials, conn).await?;
     // Rotate the session cookie on privilege level change.
     // This is to prevent session-fixation attacks.
-    session.regenerate();
+    session.mark_for_regenerate();
     session
         .insert("user_id", user_id)
         .expect("user_id is serializable");

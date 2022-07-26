@@ -11,6 +11,7 @@ use sqlx::Acquire;
 use crate::{
     error::{ApiError, ResultExt},
     extractors::DatabaseConnection,
+    session::SessionWorkaroundExt,
     utils::{DiscordOAuthClient, GoogleOAuthClient},
 };
 
@@ -130,7 +131,7 @@ pub(super) async fn discord_authorize(
         .await
         .ok();
 
-    session.regenerate();
+    session.mark_for_regenerate();
     session
         .insert("user_id", user_id)
         .expect("user_id is serializable");
@@ -302,7 +303,7 @@ pub(super) async fn google_authorize(
         .await
         .ok();
 
-    session.regenerate();
+    session.mark_for_regenerate();
     session
         .insert("user_id", user_id)
         .expect("user_id is serializable");
