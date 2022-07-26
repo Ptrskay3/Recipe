@@ -315,6 +315,12 @@ where
 }
 
 // This is a workaround to regenerate session cookie when needed.
+// Calling `session.regenerate()` in a request handler doesn't work,
+// because we inject `session.clone()` in the `Service` trait. The
+// cloned session has the `cookie_value` field set to `None`, so
+// it won't take any effect when we check `session.data_changed()` later.
+// Instead, we set a `REGENERATION_MARK_KEY`, and use that piece of data to
+// determine when to refresh cookie values.
 // Primarily this is for preventing session-fixation attacks.
 // Shamelessly copied over from
 // https://github.com/http-rs/tide/issues/762#issuecomment-808829054
