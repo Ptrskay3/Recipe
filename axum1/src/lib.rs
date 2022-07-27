@@ -12,6 +12,7 @@ pub mod routes;
 pub mod search;
 pub mod session;
 pub mod startup;
+pub mod upload;
 pub mod utils;
 
 static RE_USERNAME: Lazy<Regex> = Lazy::new(|| {

@@ -325,6 +325,8 @@ where
 // Shamelessly copied over from
 // https://github.com/http-rs/tide/issues/762#issuecomment-808829054
 /// An extension for [`async_session::Session`] for renewing sessions.
+///
+/// __This trait is sealed and not meant to be implemented by consumers.__
 pub trait SessionExt: __private::Sealed {
     /// Session key of regeneration flag.
     const REGENERATION_MARK_KEY: &'static str;
