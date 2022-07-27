@@ -2,6 +2,7 @@ use crate::{
     queue::email::EmailClient,
     routes::{admin_router, auth_router, ingredient_router, recipe_router},
     session::SessionLayer,
+    upload::upload_router,
     utils::{oauth_client_discord, oauth_client_google, shutdown_signal},
 };
 use anyhow::Context;
@@ -54,6 +55,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .nest("/r", recipe_router())
         .nest("/", auth_router())
         .nest("/admin", admin_router())
+        .nest("/upload", upload_router())
         .fallback(get_service(ServeDir::new("./static")).handle_error(handle_asset_error))
         // It's a little better use the `tower::ServiceBuilder` to avoid unnecessary boxing,
         // and maybe we can use
