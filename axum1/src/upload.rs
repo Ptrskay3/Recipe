@@ -1,7 +1,7 @@
 use anyhow::Context;
 use axum::{
     body::Bytes,
-    extract::{BodyStream, Multipart, Path},
+    extract::{BodyStream, ContentLengthLimit, Multipart, Path},
     routing::post,
     BoxError, Router,
 };
@@ -29,7 +29,15 @@ pub async fn save_request_body(
 }
 
 // Handler that accepts a multipart form upload and streams each field to a file.
-pub async fn accept_form(mut multipart: Multipart, auth_user: AuthUser) -> Result<(), ApiError> {
+pub async fn accept_form(
+    ContentLengthLimit(mut multipart): ContentLengthLimit<
+        Multipart,
+        {
+            25 * 1024 * 1024 // 25mb
+        },
+    >,
+    auth_user: AuthUser,
+) -> Result<(), ApiError> {
     while let Some(field) = multipart
         .next_field()
         .await
