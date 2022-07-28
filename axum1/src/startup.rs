@@ -38,16 +38,6 @@ pub async fn application() -> Result<(), anyhow::Error> {
     let store =
         RedisSessionStore::new(redis_conn_str.as_ref()).context("failed to connect redis")?;
 
-    if let Some(sentry_dsn) = config.sentry_dsn {
-        let _guard = sentry::init((
-            sentry_dsn,
-            sentry::ClientOptions {
-                release: sentry::release_name!(),
-                ..Default::default()
-            },
-        ));
-    }
-
     let email_client = EmailClient::from_config(config.email_client);
 
     let app = Router::new()

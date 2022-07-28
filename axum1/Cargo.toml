@@ -30,6 +30,7 @@ serde = { version = "1.0.137", features = ["derive"] }
 sqlx = { version = "0.6.0", features = ["runtime-tokio-rustls", "any", "postgres", "json", "macros", "chrono", "uuid", "migrate", "offline", "bigdecimal"], default-features = false }
 # tracing and logging utilites
 sentry = "0.27.0"
+sentry-tracing = "0.27"
 tracing = "0.1.35"
 tracing-subscriber = { version = "0.3.11", features = ["env-filter"] }
 log = "0.4.14"
