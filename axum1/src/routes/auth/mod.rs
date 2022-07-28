@@ -149,9 +149,6 @@ async fn register(
     )
     .fetch_one(&mut tx)
     .await
-    .on_constraint("users_name_key", |_| {
-        ApiError::unprocessable_entity([("name", "name already taken")])
-    })
     .on_constraint("users_email_key", |_| {
         ApiError::unprocessable_entity([("email", "email already taken")])
     })?;
