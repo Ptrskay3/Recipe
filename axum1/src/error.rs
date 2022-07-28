@@ -167,19 +167,14 @@ impl IntoResponse for ApiError {
                 )
                     .into_response();
             }
-
             Self::Sqlx(ref e) => {
-                // TODO: Probably `tracing`should be used to link to the HTTP request by `TraceLayer`.
-                log::error!("SQLx error: {:?}", e);
+                tracing::error!("SQLx error: {:?}", e);
             }
-
             Self::Anyhow(ref e) => {
-                // TODO: Probably `tracing`should be used to link to the HTTP request by `TraceLayer`.
-                log::error!("Generic error: {:?}", e);
+                tracing::error!("Generic error: {:?}", e);
             }
             Self::Reqwest(ref e) => {
-                // TODO: Probably `tracing`should be used to link to the HTTP request by `TraceLayer`.
-                log::error!("Reqwest error: {:?}", e);
+                tracing::error!("Reqwest error: {:?}", e);
             }
 
             // Other errors get mapped normally.

@@ -47,7 +47,6 @@ pub async fn accept_form(mut multipart: Multipart, auth_user: AuthUser) -> Resul
     Ok(())
 }
 
-// Save a `Stream` to a file
 async fn stream_to_file<S, E>(path: &str, stream: S, user_id: uuid::Uuid) -> Result<(), ApiError>
 where
     S: Stream<Item = Result<Bytes, E>>,
