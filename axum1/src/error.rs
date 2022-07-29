@@ -160,7 +160,7 @@ impl IntoResponse for ApiError {
                     //
                     // Let's just try to adhere to web standards wherever possible,
                     // if nothing else than to try to act as a vanguard of sanity on the web.
-                    [(WWW_AUTHENTICATE, HeaderValue::from_static("Token"))]
+                    [(WWW_AUTHENTICATE, HeaderValue::from_static("cookie; cookie-name: axum_sid"))]
                         .into_iter()
                         .collect::<HeaderMap>(),
                     self.to_string(),
@@ -199,9 +199,9 @@ impl IntoResponse for ApiError {
 ///     .on_constraint("user_username_key", |_| Error::unprocessable_entity([("username", "already taken")]))?;
 /// ```
 ///
-/// To actually make this work in a generic context would make it quite a bit more complex,
-/// as you'd need an intermediate error type to represent either a mapped or an unmapped error,
-/// and even then it's not clear how to handle `?` in the unmapped case without more boilerplate.
+// To actually make this work in a generic context would make it quite a bit more complex,
+// as you'd need an intermediate error type to represent either a mapped or an unmapped error,
+// and even then it's not clear how to handle `?` in the unmapped case without more boilerplate.
 pub trait ResultExt<T> {
     /// If `self` contains a SQLx database constraint error with the given name,
     /// transform the error.
