@@ -126,7 +126,7 @@ pub(super) async fn discord_authorize(
 
     oauth_client
         .revoke_token(token_to_revoke)
-        .unwrap()
+        .expect("revocation_uri is set")
         .request_async(async_http_client)
         .await
         .ok();
@@ -298,7 +298,7 @@ pub(super) async fn google_authorize(
 
     oauth_client
         .revoke_token(token_to_revoke)
-        .unwrap()
+        .expect("revocation_uri is set")
         .request_async(async_http_client)
         .await
         .ok();
