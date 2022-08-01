@@ -32,6 +32,7 @@ pub(super) struct DiscordUser {
     email: String,
 }
 
+#[tracing::instrument(skip_all)]
 pub(super) async fn discord_authorize(
     Query(query): Query<AuthRequest>,
     Extension(mut session): Extension<Session>,
@@ -144,6 +145,7 @@ pub(super) struct RedirectUri {
     uri: String,
 }
 
+#[tracing::instrument(skip_all)]
 pub(super) async fn discord_auth(
     Extension(DiscordOAuthClient(client)): Extension<DiscordOAuthClient>,
     Extension(mut session): Extension<Session>,
@@ -177,6 +179,7 @@ pub(super) struct GoogleUser {
     name: String,
 }
 
+#[tracing::instrument(skip_all)]
 pub(super) async fn google_auth(
     Extension(GoogleOAuthClient(client)): Extension<GoogleOAuthClient>,
     Extension(mut session): Extension<Session>,
@@ -204,6 +207,7 @@ pub(super) async fn google_auth(
     }))
 }
 
+#[tracing::instrument(skip_all)]
 pub(super) async fn google_authorize(
     Query(query): Query<AuthRequest>,
     Extension(mut session): Extension<Session>,
