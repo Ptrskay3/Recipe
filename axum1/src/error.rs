@@ -77,7 +77,7 @@ pub enum ApiError {
     #[error("an internal server error occurred")]
     Anyhow(#[from] anyhow::Error),
 
-    #[error("an internal server error occured")]
+    #[error("an internal server error occurred")]
     Reqwest(#[from] reqwest::Error),
 }
 
