@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    branches:
+      - master
 
 env:
   CARGO_TERM_COLOR: always
@@ -154,4 +158,5 @@ jobs:
       - name: Run clippy
         uses: actions-rs/clippy-check@v1
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           args: --manifest-path axum1/Cargo.toml -- -D warnings
