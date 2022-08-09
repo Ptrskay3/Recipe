@@ -107,6 +107,7 @@ jobs:
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
+    permissions: read-all|write-all
     services:
       postgres:
         image: postgres:12
