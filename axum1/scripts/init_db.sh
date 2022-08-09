@@ -19,7 +19,7 @@ if ! [ -x "$(command -v sqlx)" ]; then
 fi
 
 DB_USER="${POSTGRES_USER:=postgres}"
-DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
+DB_PASSWORD="${POSTGRES_PASSWORD:=postgres}"
 DB_NAME="${POSTGRES_DB:=hummus}"
 DB_PORT="${POSTGRES_PORT:=5432}"
 DB_HOST="${POSTGRES_HOST:=localhost}"
