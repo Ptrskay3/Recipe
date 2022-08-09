@@ -15,6 +15,8 @@ impl Email {
         }
     }
 
+    /// # Safety
+    /// ...
     pub unsafe fn new_unchecked(s: String) -> Self {
         Self(s)
     }
