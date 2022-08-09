@@ -83,6 +83,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --manifest-path axum1/Cargo.toml
 
   fmt:
     name: Rustfmt
@@ -97,7 +98,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --all -- --check
+          args: --all -- --check --manifest-path axum1/Cargo.toml
 
   clippy:
     name: Clippy
@@ -148,9 +149,9 @@ jobs:
       - name: Migrate database
         run: |
           sudo apt-get install libpq-dev -y
-          SKIP_DOCKER=true ./scripts/init_db.sh
+          SKIP_DOCKER=true ./axum1/scripts/init_db.sh
       - name: Run clippy
         uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: -- -D warnings
+          args: -- -D warnings --manifest-path axum1/Cargo.toml
