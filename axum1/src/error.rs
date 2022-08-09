@@ -160,9 +160,12 @@ impl IntoResponse for ApiError {
                     //
                     // Let's just try to adhere to web standards wherever possible,
                     // if nothing else than to try to act as a vanguard of sanity on the web.
-                    [(WWW_AUTHENTICATE, HeaderValue::from_static("cookie; cookie-name: axum_sid"))]
-                        .into_iter()
-                        .collect::<HeaderMap>(),
+                    [(
+                        WWW_AUTHENTICATE,
+                        HeaderValue::from_static("cookie; cookie-name: axum_sid"),
+                    )]
+                    .into_iter()
+                    .collect::<HeaderMap>(),
                     self.to_string(),
                 )
                     .into_response();

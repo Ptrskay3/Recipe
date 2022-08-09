@@ -67,7 +67,7 @@ jobs:
             sqlx-cli
             --force
             --version=${{ env.SQLX_VERSION }}
-            --features=${{ env.SQLX_FEATURES }}
+            --features=${{ env.SQLX_FEATURES }},runtime-tokio-native-tls
             --no-default-features
             --locked
       - name: Migrate database
@@ -98,7 +98,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --all -- --check --manifest-path axum1/Cargo.toml
+          args: --all --manifest-path axum1/Cargo.toml -- --check
 
   clippy:
     name: Clippy
@@ -143,7 +143,7 @@ jobs:
             sqlx-cli
             --force
             --version=${{ env.SQLX_VERSION }}
-            --features=${{ env.SQLX_FEATURES }}
+            --features=${{ env.SQLX_FEATURES }},runtime-tokio-native-tls
             --no-default-features
             --locked
       - name: Migrate database
