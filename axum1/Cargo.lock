@@ -261,7 +261,7 @@ dependencies = [
  "serde_json",
  "sqlx",
  "thiserror",
- "time 0.3.10",
+ "time 0.3.12",
  "tokio",
  "tokio-util 0.7.3",
  "tower",
@@ -517,7 +517,7 @@ dependencies = [
  "rand",
  "sha2 0.10.2",
  "subtle",
- "time 0.3.10",
+ "time 0.3.12",
  "version_check",
 ]
 
@@ -1426,7 +1426,7 @@ dependencies = [
  "log",
  "serde",
  "serde_json",
- "time 0.3.10",
+ "time 0.3.12",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -2290,7 +2290,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "time 0.3.10",
+ "time 0.3.12",
  "url",
  "uuid",
 ]
@@ -2691,11 +2691,12 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.10"
+version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82501a4c1c0330d640a6e176a3d6a204f5ec5237aca029029d21864a902e27b0"
+checksum = "74b7cc93fc23ba97fde84f7eea56c55d1ba183f495c6715defdfc7b9cb8c870f"
 dependencies = [
  "itoa 1.0.2",
+ "js-sys",
  "libc",
  "num_threads",
  "serde",
