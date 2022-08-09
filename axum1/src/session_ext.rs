@@ -1,3 +1,4 @@
+#![allow(clippy::new_without_default, clippy::len_without_is_empty)]
 // A wrapper over async_session::Session.
 
 use std::sync::{
@@ -30,7 +31,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let session = Session::new();
     /// assert_eq!(None, session.expiry());
     /// assert!(session.into_cookie_value().is_some());
@@ -51,7 +54,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let session = Session::new();
     /// let id = session.id().to_string();
     /// let cookie_value = session.into_cookie_value().unwrap();
@@ -69,7 +74,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let mut session = Session::new();
     /// assert!(!session.is_destroyed());
     /// session.destroy();
@@ -85,7 +92,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let mut session = Session::new();
     /// assert!(!session.is_destroyed());
     /// session.destroy();
@@ -102,7 +111,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let session = Session::new();
     /// let id = session.id().to_owned();
     /// let cookie_value = session.into_cookie_value().unwrap();
@@ -214,7 +225,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let mut session = Session::new();
     /// let old_id = session.id().to_string();
     /// session.regenerate();
@@ -237,7 +250,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let mut session = Session::new();
     /// session.set_cookie_value("hello".to_owned());
     /// let cookie_value = session.into_cookie_value().unwrap();
@@ -254,7 +269,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let mut session = Session::new();
     /// assert_eq!(None, session.expiry());
     /// session.expire_in(std::time::Duration::from_secs(1));
@@ -271,7 +288,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let mut session = Session::new();
     /// assert_eq!(None, session.expiry());
     /// session.set_expiry(chrono::Utc::now());
@@ -288,7 +307,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let mut session = Session::new();
     /// assert_eq!(None, session.expiry());
     /// session.expire_in(std::time::Duration::from_secs(1));
@@ -308,14 +329,15 @@ impl Session {
     /// ```rust
     /// # use async_session::Session;
     /// # use std::time::Duration;
-    /// # use async_std::task;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let mut session = Session::new();
     /// assert_eq!(None, session.expiry());
     /// assert!(!session.is_expired());
     /// session.expire_in(Duration::from_secs(1));
     /// assert!(!session.is_expired());
-    /// task::sleep(Duration::from_secs(2)).await;
+    /// tokio::time::sleep(Duration::from_secs(2)).await;
     /// assert!(session.is_expired());
     /// # Ok(()) }) }
     /// ```
@@ -330,13 +352,14 @@ impl Session {
     /// ```rust
     /// # use async_session::Session;
     /// # use std::time::Duration;
-    /// # use async_std::task;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let session = Session::new();
     /// let mut session = session.validate().unwrap();
     /// session.expire_in(Duration::from_secs(1));
     /// let session = session.validate().unwrap();
-    /// task::sleep(Duration::from_secs(2)).await;
+    /// tokio::time::sleep(Duration::from_secs(2)).await;
     /// assert_eq!(None, session.validate());
     /// # Ok(()) }) }
     /// ```
@@ -358,7 +381,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let mut session = Session::new();
     /// assert!(!session.data_changed(), "new session is not changed");
     /// session.insert("key", 1);
@@ -382,7 +407,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let mut session = Session::new();
     /// assert!(!session.data_changed(), "new session is not changed");
     /// session.insert("key", 1);
@@ -405,8 +432,9 @@ impl Session {
     /// ```rust
     /// # use async_session::Session;
     /// # use std::time::Duration;
-    /// # use async_std::task;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let mut session = Session::new();
     /// session.expire_in(Duration::from_secs(123));
     /// let expires_in = session.expires_in().unwrap();
@@ -425,7 +453,9 @@ impl Session {
     ///
     /// ```rust
     /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { async_std::task::block_on(async {
+    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
+    /// let handle = rt.handle();
+    /// handle.block_on(async {
     /// let mut session = Session::new();
     /// session.set_cookie_value("hello".to_owned());
     /// let cookie_value = session.into_cookie_value().unwrap();
