@@ -1,4 +1,4 @@
-use async_session::{async_trait, Session};
+use async_session::async_trait;
 use axum::{
     extract::{FromRequest, RequestParts},
     Extension,
@@ -22,7 +22,7 @@ where
     type Rejection = ApiError;
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let Extension(session) = Extension::<Session>::from_request(req)
+        let Extension(session) = Extension::<crate::session_ext::Session>::from_request(req)
             .await
             .expect("`SessionLayer` should be added");
 

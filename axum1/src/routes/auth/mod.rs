@@ -1,5 +1,4 @@
 use anyhow::Context;
-use async_session::Session;
 use axum::{
     extract::Query,
     routing::{get, post, put},
@@ -13,7 +12,6 @@ use crate::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
     queue::email::{Email, EmailClient},
-    session::SessionExt,
     RE_USERNAME,
 };
 
@@ -74,13 +72,13 @@ pub struct Credentials {
 
 async fn authorize(
     Form(credentials): Form<Credentials>,
-    Extension(mut session): Extension<Session>,
+    Extension(mut session): Extension<crate::session_ext::Session>,
     conn: DatabaseConnection,
 ) -> Result<(), ApiError> {
     let user_id = validate_credentials(credentials, conn).await?;
     // Rotate the session cookie on privilege level change.
     // This is to prevent session-fixation attacks.
-    session.mark_for_regenerate();
+    session.regenerate();
     session
         .insert("user_id", user_id)
         .expect("user_id is serializable");
@@ -89,7 +87,7 @@ async fn authorize(
 
 async fn logout(
     _user: AuthUser,
-    Extension(mut session): Extension<Session>,
+    Extension(mut session): Extension<crate::session_ext::Session>,
 ) -> Result<(), ApiError> {
     session.destroy();
     Ok(())

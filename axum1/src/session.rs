@@ -128,15 +128,17 @@ impl<Store: SessionStore> SessionLayer<Store> {
         self
     }
 
-    async fn load_or_create(&self, cookie_value: Option<String>) -> async_session::Session {
+    async fn load_or_create(&self, cookie_value: Option<String>) -> crate::session_ext::Session {
         let session = match cookie_value {
             Some(cookie_value) => self.store.load_session(cookie_value).await.ok().flatten(),
             None => None,
         };
 
-        session
+        let inner = session
             .and_then(|session| session.validate())
-            .unwrap_or_default()
+            .unwrap_or_default();
+
+        crate::session_ext::Session::from_inner(inner)
     }
 
     fn build_cookie(&self, secure: bool, cookie_value: String) -> Cookie<'static> {
@@ -278,9 +280,13 @@ where
             let mut response: Response = inner.call(request).await?;
 
             if session.is_destroyed() {
-                if let Err(e) = session_layer.store.destroy_session(session).await {
-                    tracing::error!("Failed to destroy session: {:?}", e);
+                if let Err(e) = session_layer
+                    .store
+                    .destroy_session(session.into_inner())
+                    .await
+                {
                     *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                    tracing::error!("Failed to destroy session: {:?}", e);
                 }
 
                 let removal_cookie = session_layer.build_removal_cookie(secure);
@@ -291,9 +297,20 @@ where
                 );
             } else if session_layer.save_unchanged || session.data_changed() {
                 if session.should_regenerate() {
-                    session.regenerate();
+                    if let Err(e) = session_layer
+                        .store
+                        .destroy_session(session.clone().into_inner())
+                        .await
+                    {
+                        tracing::error!("Failed to destroy old session on regenerate: {:?}", e);
+                    }
+                    session.inner_regenerate();
                 }
-                match session_layer.store.store_session(session).await {
+                match session_layer
+                    .store
+                    .store_session(session.into_inner())
+                    .await
+                {
                     Ok(Some(cookie_value)) => {
                         let cookie = session_layer.build_cookie(secure, cookie_value);
                         response.headers_mut().insert(
@@ -311,62 +328,5 @@ where
 
             Ok(response)
         })
-    }
-}
-
-// This is a workaround to regenerate session cookie when needed.
-// Calling `session.regenerate()` in a request handler doesn't work,
-// because we inject `session.clone()` in the `Service` trait. The
-// cloned session has the `cookie_value` field set to `None`, so
-// it won't take any effect when we check `session.data_changed()` later.
-// Instead, we set a `REGENERATION_MARK_KEY`, and use that piece of data to
-// determine when to refresh cookie values.
-// Primarily this is for preventing session-fixation attacks.
-// Shamelessly copied over from
-// https://github.com/http-rs/tide/issues/762#issuecomment-808829054
-/// An extension for [`async_session::Session`] for renewing sessions.
-///
-/// __This trait is sealed and not meant to be implemented by consumers.__
-pub trait SessionExt: __private::Sealed {
-    /// Session key of regeneration flag.
-    const REGENERATION_MARK_KEY: &'static str;
-
-    /// Marks the session for ID and cookie value regeneration.
-    /// _Use this_ instead of [`async_session::Session::regenerate`] when you need
-    /// to regenerate the session from a request handler.
-    ///
-    /// This is due to a limitation described here:
-    /// <https://github.com/http-rs/tide/issues/762>
-    fn mark_for_regenerate(&mut self);
-
-    /// Checks whether the session should regenerate the ID.
-    /// The session key `REGENERATION_MARK` will be removed.
-    fn should_regenerate(&mut self) -> bool;
-}
-
-mod __private {
-    pub trait Sealed {}
-
-    impl Sealed for async_session::Session {}
-}
-
-impl SessionExt for async_session::Session {
-    const REGENERATION_MARK_KEY: &'static str = "sid-regenerate";
-
-    fn mark_for_regenerate(&mut self) {
-        self.insert(Self::REGENERATION_MARK_KEY, true)
-            .expect("bool is serializable");
-    }
-
-    fn should_regenerate(&mut self) -> bool {
-        let previously_changed = self.data_changed();
-        let regenerate = self.get(Self::REGENERATION_MARK_KEY).unwrap_or_default();
-
-        self.remove(Self::REGENERATION_MARK_KEY);
-        if !previously_changed {
-            self.reset_data_changed();
-        }
-
-        regenerate
     }
 }

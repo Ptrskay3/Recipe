@@ -11,6 +11,7 @@ pub mod queue;
 pub mod routes;
 pub mod search;
 pub mod session;
+pub mod session_ext;
 pub mod startup;
 pub mod upload;
 pub mod utils;
