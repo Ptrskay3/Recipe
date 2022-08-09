@@ -26,7 +26,7 @@ jobs:
         ports:
           - 6379:6379
     env:
-      SQLX_VERSION: 0.6.1
+      SQLX_VERSION: 0.5.7
       SQLX_FEATURES: postgres
     steps:
       - name: Checkout repository
@@ -67,7 +67,7 @@ jobs:
             sqlx-cli
             --force
             --version=${{ env.SQLX_VERSION }}
-            --features=${{ env.SQLX_FEATURES }},runtime-tokio-native-tls
+            --features=${{ env.SQLX_FEATURES }}
             --no-default-features
             --locked
       - name: Migrate database
@@ -143,7 +143,7 @@ jobs:
             sqlx-cli
             --force
             --version=${{ env.SQLX_VERSION }}
-            --features=${{ env.SQLX_FEATURES }},runtime-tokio-native-tls
+            --features=${{ env.SQLX_FEATURES }}
             --no-default-features
             --locked
       - name: Migrate database
