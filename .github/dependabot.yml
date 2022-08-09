@@ -1,6 +1,6 @@
 version: 2
 updates:
   - package-ecosystem: 'cargo'
-    directory: '/'
+    directory: '/axum1'
     schedule:
       interval: 'daily'
