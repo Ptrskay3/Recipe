@@ -1,5 +1,4 @@
 use anyhow::Context;
-use async_session::Session;
 use axum::{extract::Query, Extension, Json};
 use oauth2::{
     reqwest::async_http_client, AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier,
@@ -11,7 +10,6 @@ use sqlx::Acquire;
 use crate::{
     error::{ApiError, ResultExt},
     extractors::DatabaseConnection,
-    session::SessionExt,
     utils::{DiscordOAuthClient, GoogleOAuthClient},
 };
 
@@ -35,7 +33,7 @@ pub(super) struct DiscordUser {
 #[tracing::instrument(skip_all)]
 pub(super) async fn discord_authorize(
     Query(query): Query<AuthRequest>,
-    Extension(mut session): Extension<Session>,
+    Extension(mut session): Extension<crate::session_ext::Session>,
     Extension(DiscordOAuthClient(oauth_client)): Extension<DiscordOAuthClient>,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<(), ApiError> {
@@ -132,7 +130,7 @@ pub(super) async fn discord_authorize(
         .await
         .ok();
 
-    session.mark_for_regenerate();
+    session.regenerate();
     session
         .insert("user_id", user_id)
         .expect("user_id is serializable");
@@ -148,7 +146,7 @@ pub(super) struct RedirectUri {
 #[tracing::instrument(skip_all)]
 pub(super) async fn discord_auth(
     Extension(DiscordOAuthClient(client)): Extension<DiscordOAuthClient>,
-    Extension(mut session): Extension<Session>,
+    Extension(mut session): Extension<crate::session_ext::Session>,
 ) -> Result<Json<RedirectUri>, ApiError> {
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
@@ -182,7 +180,7 @@ pub(super) struct GoogleUser {
 #[tracing::instrument(skip_all)]
 pub(super) async fn google_auth(
     Extension(GoogleOAuthClient(client)): Extension<GoogleOAuthClient>,
-    Extension(mut session): Extension<Session>,
+    Extension(mut session): Extension<crate::session_ext::Session>,
 ) -> Result<Json<RedirectUri>, ApiError> {
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
@@ -210,7 +208,7 @@ pub(super) async fn google_auth(
 #[tracing::instrument(skip_all)]
 pub(super) async fn google_authorize(
     Query(query): Query<AuthRequest>,
-    Extension(mut session): Extension<Session>,
+    Extension(mut session): Extension<crate::session_ext::Session>,
     Extension(GoogleOAuthClient(oauth_client)): Extension<GoogleOAuthClient>,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<(), ApiError> {
@@ -307,7 +305,7 @@ pub(super) async fn google_authorize(
         .await
         .ok();
 
-    session.mark_for_regenerate();
+    session.regenerate();
     session
         .insert("user_id", user_id)
         .expect("user_id is serializable");
