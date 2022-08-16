@@ -11,7 +11,7 @@ if ! [ -x "$(command -v sqlx)" ]; then
 fi
 
 cd ./docker/
-docker-compose down
+docker-compose -f docker-compose.dev.yml down
 cd ..
 docker-compose -f docker/docker-compose.dev.yml up -d
 
