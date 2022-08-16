@@ -47,10 +47,6 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .nest("/admin", admin_router())
         .nest("/upload", upload_router())
         .fallback(get_service(ServeDir::new("./static")).handle_error(handle_asset_error))
-        // It's a little better use the `tower::ServiceBuilder` to avoid unnecessary boxing,
-        // and maybe we can use
-        // https://docs.rs/tower-http/latest/tower_http/trait.ServiceBuilderExt.html
-        // in the future.
         .layer(
             tower::ServiceBuilder::new()
                 .layer(TraceLayer::new_for_http())
