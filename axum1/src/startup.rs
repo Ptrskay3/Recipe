@@ -40,15 +40,19 @@ pub async fn application() -> Result<(), anyhow::Error> {
 
     let email_client = EmailClient::from_config(config.email_client);
 
+    // let (metric_layer, metric_handle) = axum_prometheus::PrometheusMetricLayer::pair();
+
     let app = Router::new()
         .nest("/i", ingredient_router())
         .nest("/r", recipe_router())
         .nest("/", auth_router())
         .nest("/admin", admin_router())
         .nest("/upload", upload_router())
-        .fallback(get_service(ServeDir::new("./static")).handle_error(handle_asset_error))
+        // .route("/metrics", get(|| async move { metric_handle.render() }))
+        .fallback_service(get_service(ServeDir::new("./static")).handle_error(handle_asset_error))
         .layer(
             tower::ServiceBuilder::new()
+                // .layer(metric_layer)
                 .layer(TraceLayer::new_for_http())
                 .layer(Extension(db_pool))
                 .layer(Extension(store.clone()))

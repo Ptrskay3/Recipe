@@ -1,5 +1,9 @@
 ## Axum backend - proof of concept
 
+TODO: Migrate to 0.6.0, `State` instead of `Extension`:
+
+https://github.com/tokio-rs/axum/releases
+
 Technical to-do list:
 
 - [x] guest session, more ergonomic handling

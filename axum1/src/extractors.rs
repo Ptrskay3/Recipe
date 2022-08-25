@@ -2,24 +2,20 @@ use std::{convert::Infallible, ops::Deref};
 
 use crate::error::ApiError;
 use async_redis_session::RedisSessionStore;
-use axum::{
-    async_trait,
-    extract::{FromRequest, RequestParts},
-    Extension,
-};
+use axum::{async_trait, extract::FromRequestParts, http::request::Parts, Extension};
 use sqlx::{pool, PgPool, Postgres};
 
 pub struct DatabaseConnection(pub pool::PoolConnection<Postgres>);
 
 #[async_trait]
-impl<B> FromRequest<B> for DatabaseConnection
+impl<S> FromRequestParts<S> for DatabaseConnection
 where
-    B: Send,
+    S: Send + Sync,
 {
     type Rejection = ApiError;
 
-    async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let Extension(pool) = Extension::<PgPool>::from_request(req)
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let Extension(pool) = Extension::<PgPool>::from_request_parts(parts, state)
             .await
             .expect("`Database` extension is missing");
 
@@ -31,14 +27,14 @@ where
 pub struct RedisConnection(pub RedisSessionStore);
 
 #[async_trait]
-impl<B> FromRequest<B> for RedisConnection
+impl<S> FromRequestParts<S> for RedisConnection
 where
-    B: Send,
+    S: Send + Sync,
 {
     type Rejection = Infallible;
 
-    async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let Extension(store) = Extension::<RedisSessionStore>::from_request_parts(parts, state)
             .await
             .expect("`RedisSessionStore` extension is missing");
 
@@ -64,16 +60,17 @@ impl Deref for AuthUser {
 }
 
 #[async_trait]
-impl<B> FromRequest<B> for AuthUser
+impl<S> FromRequestParts<S> for AuthUser
 where
-    B: Send,
+    S: Send + Sync,
 {
     type Rejection = ApiError;
 
-    async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let Extension(session) = Extension::<crate::session_ext::Session>::from_request(req)
-            .await
-            .expect("`SessionLayer` should be added");
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let Extension(session) =
+            Extension::<crate::session_ext::Session>::from_request_parts(parts, state)
+                .await
+                .expect("`SessionLayer` should be added");
 
         session
             .get::<uuid::Uuid>("user_id")
@@ -91,16 +88,17 @@ impl MaybeAuthUser {
 }
 
 #[async_trait]
-impl<B> FromRequest<B> for MaybeAuthUser
+impl<S> FromRequestParts<S> for MaybeAuthUser
 where
-    B: Send,
+    S: Send + Sync,
 {
     type Rejection = Infallible;
 
-    async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let Extension(session) = Extension::<crate::session_ext::Session>::from_request(req)
-            .await
-            .expect("`SessionLayer` should be added");
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let Extension(session) =
+            Extension::<crate::session_ext::Session>::from_request_parts(parts, state)
+                .await
+                .expect("`SessionLayer` should be added");
 
         let user_id = session.get::<uuid::Uuid>("user_id");
 
