@@ -22,21 +22,21 @@ pub fn upload_router() -> Router {
 
 pub async fn save_request_body(
     Path(file_name): Path<String>,
-    body: BodyStream,
     auth_user: AuthUser,
+    body: BodyStream,
 ) -> Result<(), ApiError> {
-    stream_to_file(&file_name, body, *auth_user).await
+    stream_to_file(&file_name, *auth_user, body).await
 }
 
 // Handler that accepts a multipart form upload and streams each field to a file.
 pub async fn accept_form(
+    auth_user: AuthUser,
     ContentLengthLimit(mut multipart): ContentLengthLimit<
         Multipart,
         {
             25 * 1024 * 1024 // 25mb
         },
     >,
-    auth_user: AuthUser,
 ) -> Result<(), ApiError> {
     while let Some(field) = multipart
         .next_field()
@@ -49,13 +49,13 @@ pub async fn accept_form(
             continue;
         };
 
-        stream_to_file(&file_name, field, *auth_user).await?;
+        stream_to_file(&file_name, *auth_user, field).await?;
     }
 
     Ok(())
 }
 
-async fn stream_to_file<S, E>(path: &str, stream: S, user_id: uuid::Uuid) -> Result<(), ApiError>
+async fn stream_to_file<S, E>(path: &str, user_id: uuid::Uuid, stream: S) -> Result<(), ApiError>
 where
     S: Stream<Item = Result<Bytes, E>>,
     E: Into<BoxError>,

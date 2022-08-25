@@ -23,9 +23,9 @@ impl IngredientSuggestion {
 
 pub async fn add_ingredient_suggestion(
     DatabaseConnection(mut conn): DatabaseConnection,
-    Json(ingredient_suggestion): Json<IngredientSuggestion>,
     Path(name): Path<String>,
     auth_user: AuthUser,
+    Json(ingredient_suggestion): Json<IngredientSuggestion>,
 ) -> Result<(), ApiError> {
     if ingredient_suggestion.is_irrelevant() {
         return Err(ApiError::BadRequest);

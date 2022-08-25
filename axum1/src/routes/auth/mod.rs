@@ -71,9 +71,9 @@ pub struct Credentials {
 }
 
 async fn authorize(
-    Form(credentials): Form<Credentials>,
     Extension(mut session): Extension<crate::session_ext::Session>,
     conn: DatabaseConnection,
+    Form(credentials): Form<Credentials>,
 ) -> Result<(), ApiError> {
     let user_id = validate_credentials(credentials, conn).await?;
     // Rotate the session cookie on privilege level change.
@@ -115,8 +115,8 @@ pub struct Register {
 
 #[tracing::instrument(name = "Registering a new user", skip(form, conn))]
 async fn register(
-    Form(form): Form<Register>,
     DatabaseConnection(mut conn): DatabaseConnection,
+    Form(form): Form<Register>,
 ) -> Result<(), ApiError> {
     form.validate()
         .map_err(ApiError::unprocessable_entity_from_validation_errors)?;
@@ -174,8 +174,8 @@ pub struct UpdatePassword {
 
 async fn update_password(
     user_id: AuthUser,
-    Form(form): Form<UpdatePassword>,
     DatabaseConnection(mut conn): DatabaseConnection,
+    Form(form): Form<UpdatePassword>,
 ) -> Result<(), ApiError> {
     let UpdatePassword { name, password } = form;
     let password_hash =
@@ -206,9 +206,9 @@ struct ForgetPassword {
 }
 
 async fn forget_password_gen(
-    Form(form): Form<ForgetPassword>,
     DatabaseConnection(mut conn): DatabaseConnection,
     Extension(client): Extension<EmailClient>,
+    Form(form): Form<ForgetPassword>,
 ) -> Result<(), ApiError> {
     let ForgetPassword { name, email } = form;
 

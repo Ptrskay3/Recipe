@@ -180,8 +180,8 @@ async fn ingredients_by_category(
 
 async fn add_ingredient(
     DatabaseConnection(mut conn): DatabaseConnection,
-    Form(ingredient): Form<Ingredient>,
     auth_user: Option<AuthUser>,
+    Form(ingredient): Form<Ingredient>,
 ) -> Result<(), ApiError> {
     let creator_id = auth_user.map(|u| *u);
     sqlx::query!(

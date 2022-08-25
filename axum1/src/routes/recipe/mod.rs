@@ -1,9 +1,9 @@
 use anyhow::Context;
 use axum::{
-    extract::Path,
+    extract::{Json, Path},
     http::StatusCode,
     routing::{get, post},
-    Json, Router,
+    Router,
 };
 use axum_extra::extract::Form;
 use sqlx::{types::BigDecimal, Acquire};
@@ -265,8 +265,8 @@ async fn insert_full_recipe(
     DatabaseConnection(mut conn): DatabaseConnection,
     // We want to accept Json input here instead of Form, because the structure
     // of `RecipeWithIngredients` is too complicated to handle with a form.
-    Json(recipe_with_ingredients): Json<RecipeWithIngredients>,
     auth_user: AuthUser,
+    Json(recipe_with_ingredients): Json<RecipeWithIngredients>,
 ) -> Result<(), ApiError> {
     recipe_with_ingredients
         .validate()
