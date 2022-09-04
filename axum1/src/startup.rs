@@ -10,7 +10,7 @@ use async_redis_session::RedisSessionStore;
 use axum::{
     http::HeaderValue,
     response::IntoResponse,
-    routing::{get, get_service},
+    routing::get_service,
     Extension, Router,
 };
 use sqlx::postgres::PgPoolOptions;
