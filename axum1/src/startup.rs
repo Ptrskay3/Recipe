@@ -7,12 +7,7 @@ use crate::{
 };
 use anyhow::Context;
 use async_redis_session::RedisSessionStore;
-use axum::{
-    http::HeaderValue,
-    response::IntoResponse,
-    routing::get_service,
-    Extension, Router,
-};
+use axum::{http::HeaderValue, response::IntoResponse, routing::get_service, Extension, Router};
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
@@ -44,7 +39,6 @@ pub async fn application() -> Result<(), anyhow::Error> {
         RedisSessionStore::new(redis_conn_str.as_ref()).context("failed to connect redis")?;
 
     let email_client = EmailClient::from_config(config.email_client);
-
 
     let app = Router::new()
         .nest("/i", ingredient_router())

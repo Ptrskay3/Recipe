@@ -6,3 +6,4 @@ data/
 /volumes/
 docker/volumes/
 uploads/
+configuration/local.yml

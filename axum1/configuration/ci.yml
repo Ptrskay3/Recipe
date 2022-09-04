@@ -1,0 +1,37 @@
+application_port: 3000
+database:
+  host: '127.0.0.1'
+  port: 5432
+  username: 'postgres'
+  password: 'postgres'
+  database_name: 'hummus'
+  require_ssl: false
+redis:
+  host: '127.0.0.1'
+  port: 6379
+  secret_key: HBi5G3kcPZK8au+XvbtuFQMO0+sWxx1a/gxM1SlT1uiExlRmjVVq2lExXUCancXXUZw7tBMx3NiVFE6vePGo4w==
+sentry_dsn:
+frontend_url: http://localhost:3001
+email_client:
+  base_url: https://api.postmarkapp.com
+  sender_email: peter@example.com
+  authorization_token: this-wont-be-used-in-ci
+  timeout_milliseconds: 10000
+meili:
+  url: http://localhost:7700
+  master_key: SUPER_SECRET_KEY
+oauth:
+  discord:
+    client_id: 9849898918198198191
+    client_secret: this-wont-be-used-in-ci
+    redirect_url: http://localhost:3001/auth/discord_authorize
+    auth_url: https://discord.com/api/oauth2/authorize?response_type=code
+    token_url: https://discord.com/api/oauth2/token
+    revocation_url: https://discord.com/api/oauth2/token/revoke
+  google:
+    client_id: 841891658169169819899189
+    client_secret: this-wont-be-used-in-ci
+    redirect_url: http://localhost:3001/auth/google_authorize
+    auth_url: https://accounts.google.com/o/oauth2/v2/auth
+    token_url: https://www.googleapis.com/oauth2/v3/token
+    revocation_url: https://oauth2.googleapis.com/revoke
