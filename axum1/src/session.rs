@@ -267,7 +267,9 @@ where
             .secure
             .unwrap_or_else(|| request.uri().scheme_str() == Some("https"));
 
-        let mut inner = self.inner.clone();
+        let not_ready_service = self.inner.clone();
+        let mut ready_service = std::mem::replace(&mut self.inner, not_ready_service);
+
         Box::pin(async move {
             let mut session = session_layer.load_or_create(cookie_value).await;
 
@@ -277,7 +279,7 @@ where
 
             request.extensions_mut().insert(session.clone());
 
-            let mut response: Response = inner.call(request).await?;
+            let mut response: Response = ready_service.call(request).await?;
 
             if session.is_destroyed() {
                 if let Err(e) = session_layer
