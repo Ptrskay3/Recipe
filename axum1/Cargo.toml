@@ -27,7 +27,7 @@ rand = "0.8.5"
 # (de)serialization
 serde = { version = "1.0.144", features = ["derive"] }
 # database interaction
-sqlx = { version = "0.6.1", features = ["runtime-tokio-rustls", "any", "postgres", "json", "macros", "chrono", "uuid", "migrate", "offline", "bigdecimal"], default-features = false }
+sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "any", "postgres", "json", "macros", "chrono", "uuid", "migrate", "offline", "bigdecimal"], default-features = false }
 # tracing and logging utilites
 sentry = "0.27.0"
 sentry-tracing = "0.27"
