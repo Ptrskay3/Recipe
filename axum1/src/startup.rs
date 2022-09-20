@@ -7,7 +7,13 @@ use crate::{
 };
 use anyhow::Context;
 use async_redis_session::RedisSessionStore;
-use axum::{http::HeaderValue, response::IntoResponse, routing::get_service, Extension, Router};
+use axum::{
+    http::HeaderValue,
+    response::IntoResponse,
+    routing::{get, get_service},
+    Extension, Router,
+};
+use axum_prometheus::PrometheusMetricLayer;
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
@@ -40,7 +46,10 @@ pub async fn application() -> Result<(), anyhow::Error> {
 
     let email_client = EmailClient::from_config(config.email_client);
 
+    let (metric_layer, metric_handle) = PrometheusMetricLayer::pair();
+
     let app = Router::new()
+        .route("/metrics", get(|| async move { metric_handle.render() }))
         .nest("/i", ingredient_router())
         .nest("/r", recipe_router())
         .nest("/", auth_router())
@@ -50,6 +59,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .layer(
             tower::ServiceBuilder::new()
                 .layer(TraceLayer::new_for_http())
+                .layer(metric_layer)
                 .layer(Extension(db_pool))
                 .layer(Extension(store.clone()))
                 .layer(
