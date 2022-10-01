@@ -40,15 +40,13 @@ where
             user_id
         )
         .fetch_optional(&mut db)
-        .await
-        .map_err(|_| ApiError::Unauthorized)?;
+        .await?
+        .ok_or(ApiError::Unauthorized)?;
 
-        if let Some(user) = user {
-            if user.is_admin {
-                return Ok(user);
-            }
-            return Err(ApiError::Forbidden);
+        if user.is_admin {
+            Ok(user)
+        } else {
+            Err(ApiError::Forbidden)
         }
-        Err(ApiError::Unauthorized)
     }
 }
