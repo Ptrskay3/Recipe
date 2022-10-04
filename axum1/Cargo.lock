@@ -1538,9 +1538,9 @@ dependencies = [
 
 [[package]]
 name = "meilisearch-sdk"
-version = "0.19.0"
+version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a35a2dc886000285d648a083623a202e6b331acb16df8ecdf38f299e7058183"
+checksum = "ba6a7e6d9e320cfea7c9a54063d0f0f1e969593b496d52b4213302b04c9656fd"
 dependencies = [
  "async-trait",
  "futures",

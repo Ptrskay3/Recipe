@@ -46,7 +46,7 @@ async-redis-session = { path = "./crates/async-redis-session" }
 # emails
 reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
 # searching
-meilisearch-sdk = "0.19"
+meilisearch-sdk = "0.20"
 serde_json = "1.0.85"
 # OAuth
 oauth2 = "4.2.3"
