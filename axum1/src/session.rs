@@ -297,7 +297,10 @@ where
                     SET_COOKIE,
                     HeaderValue::from_str(&removal_cookie.to_string()).unwrap(),
                 );
-            } else if session_layer.save_unchanged || session.data_changed() {
+            } else if session_layer.save_unchanged
+                || session.data_changed()
+                || cookie_value.is_none()
+            {
                 if session.should_regenerate() {
                     if let Err(e) = session_layer
                         .store
