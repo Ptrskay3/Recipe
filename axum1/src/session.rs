@@ -271,7 +271,7 @@ where
         let mut ready_service = std::mem::replace(&mut self.inner, not_ready_service);
 
         Box::pin(async move {
-            let mut session = session_layer.load_or_create(cookie_value).await;
+            let mut session = session_layer.load_or_create(cookie_value.clone()).await;
 
             if let Some(ttl) = session_layer.session_ttl {
                 session.expire_in(ttl);
