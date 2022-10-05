@@ -39,7 +39,7 @@ services:
       - axum_net
 
   meili:
-    image: getmeili/meilisearch:v0.27.2
+    image: getmeili/meilisearch:latest
     ports:
       - 7700:7700
     environment:
