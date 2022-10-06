@@ -1,6 +1,6 @@
 use anyhow::Context;
 use axum::{
-    extract::{Json, Path},
+    extract::{Json, Path, Query},
     http::StatusCode,
     routing::{get, post},
     Router,
@@ -416,7 +416,7 @@ async fn my_favorite_recipes(
                 COUNT(ir.recipe_id) OVER (PARTITION BY r.id) AS ingredient_count
         FROM recipes r
         LEFT JOIN ingredients_to_recipes ir ON ir.recipe_id = r.id
-        INNER JOIN favorite_recipe fr ON fr.recipe_id = r.id AND fr.user_id = $1; 
+        INNER JOIN favorite_recipe fr ON fr.recipe_id = r.id AND fr.user_id = $1;
         "#,
         *auth_user
     )
@@ -432,9 +432,19 @@ struct RecipeWithFavoriteCount {
     count: Option<i64>,
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+struct LimitedQuery {
+    limit: Option<i64>,
+}
+
 async fn most_popular_recipes(
     DatabaseConnection(mut conn): DatabaseConnection,
+    Query(query): Query<LimitedQuery>,
 ) -> Result<Json<Vec<RecipeWithFavoriteCount>>, ApiError> {
+    let limit = match query.limit {
+        Some(limit) if limit >= 0 => limit,
+        _ => 10,
+    };
     let results = sqlx::query_as!(
         RecipeWithFavoriteCount,
         r#"
@@ -442,9 +452,10 @@ async fn most_popular_recipes(
         INNER JOIN favorite_recipe fr ON r.id = fr.recipe_id
         GROUP BY r.name
         ORDER BY count DESC
-        LIMIT 10;
-        "#
-    ) // TODO: LIMIT might come from query with validation
+        LIMIT $1;
+        "#,
+        limit
+    )
     .fetch_all(&mut conn)
     .await?;
 
