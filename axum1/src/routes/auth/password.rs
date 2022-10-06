@@ -43,11 +43,7 @@ pub async fn validate_credentials(
         )
     })
     .await
-    .map_err(|_| {
-        ApiError::Anyhow(anyhow::anyhow!(
-            "unexpected error happened during password hashing"
-        ))
-    })?
+    .context("unexpected error happened during password hashing")?
     .map_err(|_| ApiError::unprocessable_entity([("password", "password is wrong")]))?;
     Ok(user_id)
 }
