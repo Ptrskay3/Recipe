@@ -16,6 +16,8 @@ then install `sqlx-cli`:
 cargo install --version=0.5.7 sqlx-cli --no-default-features --features postgres
 ```
 
+Create a `configuration/local.yml` based on the `local.example.yml`.
+
 Now you're ready to start with
 
 ```sh
