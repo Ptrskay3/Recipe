@@ -9,9 +9,9 @@ use sqlx::Acquire;
 use validator::Validate;
 
 use crate::{
+    email::{Email, EmailClient},
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
-    queue::email::{Email, EmailClient},
     RE_USERNAME,
 };
 

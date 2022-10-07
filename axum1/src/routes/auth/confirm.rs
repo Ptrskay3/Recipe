@@ -4,9 +4,9 @@ use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use sqlx::{Acquire, PgExecutor, Postgres, Transaction};
 
 use crate::{
+    email::{Email, EmailClient},
     error::ApiError,
     extractors::DatabaseConnection,
-    queue::email::{Email, EmailClient},
 };
 
 pub async fn _send_confirmation_email(

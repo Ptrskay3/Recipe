@@ -1,5 +1,5 @@
 use crate::{
-    queue::email::EmailClient,
+    email::EmailClient,
     routes::{admin_router, auth_router, ingredient_router, recipe_router},
     session::SessionLayer,
     upload::upload_router,

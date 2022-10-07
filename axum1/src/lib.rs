@@ -5,6 +5,7 @@ use regex::Regex;
 use sqlx::PgExecutor;
 
 pub mod config;
+pub mod email;
 pub mod error;
 pub mod extractors;
 pub mod queue;

@@ -7,7 +7,7 @@ use sqlx::{
 
 use crate::{
     error::ApiError,
-    queue::email::{Email, EmailClient},
+    email::{Email, EmailClient},
 };
 
 #[derive(Deserialize, Clone)]

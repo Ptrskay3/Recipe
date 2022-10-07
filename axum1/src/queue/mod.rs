@@ -5,9 +5,7 @@ use tracing::{field::display, Span};
 
 use crate::config::{DatabaseSettings, Settings};
 
-use self::email::{Email, EmailClient};
-
-pub mod email;
+use crate::email::{Email, EmailClient};
 
 pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
     PgPoolOptions::new()
