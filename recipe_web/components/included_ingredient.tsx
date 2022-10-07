@@ -31,7 +31,7 @@ export default function IncludedIngredient({
   const { name: rName } = router.query;
   const deleteIngredient = async (rName: string, iName: string) => {
     const body = intoFormBody({ name: iName });
-    const { ok } = await fetch(`http://localhost:3000/r/${rName}/ingredient`, {
+    const { ok } = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/r/${rName}/ingredient`, {
       method: 'DELETE',
       credentials: 'include',
       body,

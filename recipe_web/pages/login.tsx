@@ -1,6 +1,17 @@
 import {
-  Box, Button, Divider, FormControl, FormErrorMessage, FormLabel, Heading, HStack, Input, Link, Stack, Text,
-  useColorModeValue
+  Box,
+  Button,
+  Divider,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Heading,
+  HStack,
+  Input,
+  Link,
+  Stack,
+  Text,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import dynamic from 'next/dynamic';
@@ -28,7 +39,7 @@ function Login() {
       setErrors({});
       setLoading(true);
       const formBody = intoFormBody(values);
-      const response = await fetch('http://localhost:3000/auth', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth`, {
         method: 'POST',
         body: formBody,
         credentials: 'include',

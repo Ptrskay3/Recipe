@@ -34,7 +34,7 @@ function ForgetPasswordGen() {
     onSubmit: async (values) => {
       setLoading(true);
       const formBody = intoFormBody(values);
-      const response = await fetch('http://localhost:3000/forget_password_gen', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/forget_password_gen`, {
         method: 'POST',
         body: formBody,
         credentials: 'include',

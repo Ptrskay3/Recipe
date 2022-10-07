@@ -16,13 +16,16 @@ export default function DiscordAuthorize() {
       return;
     }
     if (!state || !code) return;
-    fetch(`http://localhost:3000/auth/discord_authorize?code=${code}&state=${state}`, {
-      credentials: 'include',
-    })
+    fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/auth/discord_authorize?code=${code}&state=${state}`,
+      {
+        credentials: 'include',
+      }
+    )
       .then((r) => r.ok)
       .then((ok) => {
         if (ok) {
-          mutate(`http://localhost:3000/me`);
+          mutate(`${process.env.NEXT_PUBLIC_BASE_URL}/me`);
           router.push('/');
         } else {
           setError(true);

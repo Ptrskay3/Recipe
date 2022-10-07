@@ -1,10 +1,12 @@
 import { ArrowRightIcon, CloseIcon } from '@chakra-ui/icons';
 import {
   Center,
-  CircularProgress, Heading,
+  CircularProgress,
+  Heading,
   HStack,
-  IconButton, Text,
-  useToast
+  IconButton,
+  Text,
+  useToast,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { FaCheck } from 'react-icons/fa';
@@ -24,15 +26,18 @@ export default function IngredientDetailed() {
   const { name, id } = router.query;
   const toast = useToast();
 
-  const { data, error } = useSWR(!!name ? `http://localhost:3000/i/${name}` : null, fetcher);
+  const { data, error } = useSWR(
+    !!name ? `${process.env.NEXT_PUBLIC_BASE_URL}/i/${name}` : null,
+    fetcher
+  );
   const { data: suggestion, error: suggestionError } = useSWR(
-    !!name && !!id ? `http://localhost:3000/i/${name}/suggestion/${id}` : null,
+    !!name && !!id ? `${process.env.NEXT_PUBLIC_BASE_URL}/i/${name}/suggestion/${id}` : null,
     fetcher
   );
 
   const suggestionAction = async (action: 'apply' | 'decline') => {
     const { ok, status } = await fetch(
-      `http://localhost:3000/i/${name}/suggestion/${id}/${action}`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/i/${name}/suggestion/${id}/${action}`,
       { credentials: 'include' }
     );
     if (ok) {

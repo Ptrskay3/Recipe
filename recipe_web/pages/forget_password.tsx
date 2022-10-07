@@ -47,14 +47,17 @@ function ForgetPasswordGen() {
       }
       setLoading(true);
       const formBody = intoFormBody({ password: values.password });
-      const response = await fetch(`http://localhost:3000/forget_password?token=${token}`, {
-        method: 'POST',
-        body: formBody,
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/forget_password?token=${token}`,
+        {
+          method: 'POST',
+          body: formBody,
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
 
       setLoading(false);
       if (response.ok) {

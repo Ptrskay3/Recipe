@@ -2,7 +2,9 @@ import { Button, ButtonGroup, VisuallyHidden } from '@chakra-ui/react';
 import { DiscordLogo, GoogleLogo } from './logos';
 
 const OAuthRedirect = async (provider: 'google' | 'discord') => {
-  const res = await fetch(`http://localhost:3000/auth/${provider}`, { credentials: 'include' });
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/${provider}`, {
+    credentials: 'include',
+  });
   const { uri } = await res.json();
   window.location.href = uri;
 };

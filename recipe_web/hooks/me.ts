@@ -2,7 +2,7 @@ import useSWR from 'swr';
 import { fetcher } from '../utils/fetcher';
 
 export function useMe() {
-  const { data, error } = useSWR(`http://localhost:3000/me`, fetcher);
+  const { data, error } = useSWR(`${process.env.NEXT_PUBLIC_BASE_URL}/me`, fetcher);
 
   return {
     me: data,

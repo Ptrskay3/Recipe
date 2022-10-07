@@ -7,7 +7,7 @@ import {
   ListItem,
   Text,
   UnorderedList,
-  VStack
+  VStack,
 } from '@chakra-ui/react';
 import useSWR from 'swr';
 import { Layout } from '../../../components/layout';
@@ -22,7 +22,7 @@ interface IRecipe {
 
 export default function MyRecipes() {
   useAuth();
-  const { data, error } = useSWR(`http://localhost:3000/r/action/favorites`, fetcher);
+  const { data, error } = useSWR(`${process.env.NEXT_PUBLIC_BASE_URL}/r/action/favorites`, fetcher);
 
   if (error)
     return (

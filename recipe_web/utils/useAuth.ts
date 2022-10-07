@@ -5,7 +5,7 @@ export const useAuth = () => {
   const router = useRouter();
 
   useEffect(() => {
-    fetch('http://localhost:3000/me', { credentials: 'include' })
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/me`, { credentials: 'include' })
       .then((r) => r.json())
       .then((data) => {
         if (!data?.name) {

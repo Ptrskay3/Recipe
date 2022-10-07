@@ -16,13 +16,13 @@ export default function GoogleAuthorize() {
       return;
     }
     if (!state || !code) return;
-    fetch(`http://localhost:3000/auth/google_authorize?code=${code}&state=${state}`, {
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/google_authorize?code=${code}&state=${state}`, {
       credentials: 'include',
     })
       .then((r) => r.ok)
       .then((ok) => {
         if (ok) {
-          mutate(`http://localhost:3000/me`);
+          mutate(`${process.env.NEXT_PUBLIC_BASE_URL}/me`);
           router.push('/');
         } else {
           setError(true);

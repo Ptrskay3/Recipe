@@ -5,7 +5,7 @@ import {
   ListItem,
   Stack,
   Text,
-  UnorderedList
+  UnorderedList,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
@@ -18,9 +18,12 @@ export default function IngredientDetailed() {
   const router = useRouter();
   const { name } = router.query;
 
-  const { data, error } = useSWR(!!name ? `http://localhost:3000/i/${name}` : null, fetcher);
+  const { data, error } = useSWR(
+    !!name ? `${process.env.NEXT_PUBLIC_BASE_URL}/i/${name}` : null,
+    fetcher
+  );
   const { data: suggestions, error: _ } = useSWR(
-    !!name ? `http://localhost:3000/i/${name}/suggestions` : null,
+    !!name ? `${process.env.NEXT_PUBLIC_BASE_URL}/i/${name}/suggestions` : null,
     fetcher
   );
 

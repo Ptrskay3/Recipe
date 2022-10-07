@@ -14,7 +14,7 @@ import { Layout } from '../components/layout';
 import { fetcher } from '../utils/fetcher';
 
 export default function PopularRecipes() {
-  const { data, error } = useSWR(`http://localhost:3000/r/action/popular`, fetcher);
+  const { data, error } = useSWR(`${process.env.NEXT_PUBLIC_BASE_URL}/r/action/popular`, fetcher);
 
   if (error)
     return (

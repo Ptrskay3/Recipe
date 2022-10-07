@@ -6,7 +6,7 @@ import {
   Heading,
   ListItem,
   Text,
-  UnorderedList
+  UnorderedList,
 } from '@chakra-ui/react';
 import useSWR from 'swr';
 import { Layout } from '../../../components/layout';
@@ -21,7 +21,10 @@ interface IRecipe {
 
 export default function MyRecipes() {
   useAuth();
-  const { data, error } = useSWR(`http://localhost:3000/r/action/my-recipes`, fetcher);
+  const { data, error } = useSWR(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/r/action/my-recipes`,
+    fetcher
+  );
 
   if (error)
     return (

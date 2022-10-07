@@ -96,7 +96,7 @@ const NewRecipe = () => {
           }}
           onSubmit={async (values, { setFieldError }) => {
             // TODO: we do not use Formik's values anyway..
-            const response = await fetch(`http://localhost:3000/r`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/r`, {
               method: 'POST',
               body: JSON.stringify({
                 name,

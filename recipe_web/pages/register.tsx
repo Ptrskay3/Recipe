@@ -1,8 +1,19 @@
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import {
-  Box, Button, FormControl, FormErrorMessage, FormLabel, Heading, HStack, Input,
-  InputGroup, InputRightElement, Link, Stack, Text,
-  useColorModeValue
+  Box,
+  Button,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Heading,
+  HStack,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Link,
+  Stack,
+  Text,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import NextLink from 'next/link';
@@ -29,7 +40,7 @@ export default function SignupCard() {
     onSubmit: async (values) => {
       setLoading(true);
       const formBody = intoFormBody(values);
-      const response = await fetch('http://localhost:3000/register', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/register`, {
         method: 'POST',
         body: formBody,
         credentials: 'include',

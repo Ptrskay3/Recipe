@@ -14,7 +14,7 @@ import { primaryButtonStyles } from '../common/ button_styles';
 export const UserMenu = ({ name }: { name: string }) => {
   const router = useRouter();
   const logoutAction = async () => {
-    const { ok } = await fetch('http://localhost:3000/logout', {
+    const { ok } = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/logout`, {
       credentials: 'include',
     });
     if (ok) {

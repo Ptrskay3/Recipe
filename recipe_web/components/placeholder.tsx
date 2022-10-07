@@ -145,7 +145,7 @@ export default function Placeholder() {
           <Image
             rounded={'md'}
             alt={'product image'}
-            src={'http://localhost:3000/assets/apple.jpeg'}
+            src={`${process.env.NEXT_PUBLIC_BASE_URL}/assets/apple.jpeg`}
             fit={'cover'}
             align={'center'}
             w={'100%'}

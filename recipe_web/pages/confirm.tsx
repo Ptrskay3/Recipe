@@ -13,7 +13,7 @@ export default function Confirm() {
   const { token } = router.query;
 
   const { data, error } = useSWR(
-    !!token ? `http://localhost:3000/confirm?token=${token}` : null,
+    !!token ? `${process.env.NEXT_PUBLIC_BASE_URL}/confirm?token=${token}` : null,
     fetcherOk
   );
 

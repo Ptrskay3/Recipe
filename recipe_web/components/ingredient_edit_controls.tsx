@@ -31,7 +31,7 @@ export const IngredientEditControls = ({
       });
       return;
     }
-    const { ok, status } = await fetch(`http://localhost:3000/i/${name}/suggestion`, {
+    const { ok, status } = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/i/${name}/suggestion`, {
       method: 'POST',
       credentials: 'include',
       body: JSON.stringify(data),
@@ -60,7 +60,7 @@ export const IngredientEditControls = ({
   };
 
   const handleSubmitDelete = async () => {
-    const { ok, status } = await fetch(`http://localhost:3000/i/${name}/suggestion`, {
+    const { ok, status } = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/i/${name}/suggestion`, {
       method: 'POST',
       credentials: 'include',
       body: JSON.stringify({ is_delete_vote: true }),

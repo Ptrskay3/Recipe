@@ -38,7 +38,7 @@ export function AddIngredientForm() {
     onSubmit: async (values) => {
       setErrors({});
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/r/${name}/ingredient`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/r/${name}/ingredient`, {
         method: 'POST',
         body: intoFormBody(values),
         credentials: 'include',
@@ -53,7 +53,7 @@ export function AddIngredientForm() {
         return;
       }
       setAddIngredientOpen(false);
-      mutate(`http://localhost:3000/r/${name}`, true);
+      mutate(`${process.env.NEXT_PUBLIC_BASE_URL}/r/${name}`, true);
     },
   });
   return (

@@ -36,16 +36,19 @@ export default function RecipeDetailed() {
   const setAddIngredientOpen = useAddIngredient((state) => state.setAddIngredientOpen);
   const searchBoxInputRef = useRef(null);
 
-  const { data, error } = useSWR(!!name ? `http://localhost:3000/r/${name}` : null, fetcher);
+  const { data, error } = useSWR(
+    !!name ? `${process.env.NEXT_PUBLIC_BASE_URL}/r/${name}` : null,
+    fetcher
+  );
   const toggleFavorite = async () => {
-    const { ok } = await fetch(`http://localhost:3000/r/${name}/favorite`, {
+    const { ok } = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/r/${name}/favorite`, {
       method: 'POST',
       credentials: 'include',
     });
     if (ok) {
       // Let's just refetch on favorite change, we can always optimize later
       // if this proves to be a slow logic.
-      mutate(`http://localhost:3000/r/${name}`);
+      mutate(`${process.env.NEXT_PUBLIC_BASE_URL}/r/${name}`);
     }
   };
   const Hit = ({ hit }: any) => (
