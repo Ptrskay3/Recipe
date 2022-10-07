@@ -6,8 +6,8 @@ use sqlx::{
 };
 
 use crate::{
-    error::ApiError,
     email::{Email, EmailClient},
+    error::ApiError,
 };
 
 #[derive(Deserialize, Clone)]
