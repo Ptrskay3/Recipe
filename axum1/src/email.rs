@@ -3,7 +3,7 @@ use secrecy::{ExposeSecret, Secret};
 
 use crate::{config::EmailClientSettings, error::ApiError};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Email(String);
 
 impl Email {

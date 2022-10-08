@@ -6,6 +6,7 @@ use tracing::{field::display, Span};
 use crate::config::{DatabaseSettings, Settings};
 
 use crate::email::{Email, EmailClient};
+use crate::error::ApiError;
 
 pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
     PgPoolOptions::new()
@@ -46,7 +47,7 @@ pub async fn try_execute_task(
     if task.is_none() {
         return Ok(ExecutionOutcome::EmptyQueue);
     }
-    let (transaction, confirmation_id, email) = task.unwrap();
+    let (mut transaction, confirmation_id, email) = task.unwrap();
     Span::current()
         .record("confirmation_id", &display(confirmation_id.clone()))
         .record("user_email", &display(&email));
@@ -54,7 +55,7 @@ pub async fn try_execute_task(
         Ok(email) => {
             if let Err(e) = email_client
                 .send_mail(
-                    email,
+                    email.clone(),
                     "Recipe App confirm registration",
                     &format!(
                         "Visit http://localhost:3001/confirm?token={} to confirm your registration.",
@@ -67,6 +68,7 @@ pub async fn try_execute_task(
                 )
                 .await
             {
+                insert_failed_task(&mut transaction, confirmation_id.clone(), email.as_ref(), &e).await?;
                 tracing::error!(
                     error.cause_chain = ?e,
                     error.message = %e,
@@ -76,6 +78,7 @@ pub async fn try_execute_task(
             }
         }
         Err(e) => {
+            insert_failed_task(&mut transaction, confirmation_id.clone(), &email, &e).await?;
             tracing::error!(
                 error.cause_chain = ?e,
                 error.message = %e,
@@ -132,5 +135,30 @@ async fn delete_task(
     .execute(&mut tx)
     .await?;
     tx.commit().await?;
+    Ok(())
+}
+
+#[tracing::instrument(skip_all)]
+async fn insert_failed_task<E>(
+    tx: &mut PgTransaction,
+    confirmation_id: String,
+    email: &str,
+    e: &E,
+) -> Result<(), anyhow::Error>
+where
+    E: Into<ApiError> + std::fmt::Display,
+{
+    sqlx::query!(
+        r#"
+        INSERT INTO failed_jobs
+        (job_id, job_type, context)
+        VALUES
+        ($1, 'email_delivery', $2)
+        "#,
+        confirmation_id,
+        serde_json::json!({ "email": email, "error": e.to_string() })
+    )
+    .execute(tx)
+    .await?;
     Ok(())
 }

@@ -70,7 +70,7 @@ pub async fn shutdown_signal() {
         _ = terminate => {},
     }
 
-    println!("signal received, starting graceful shutdown");
+    tracing::warn!("signal received, starting graceful shutdown");
 }
 
 pub fn oauth_client_discord(config: &Settings) -> DiscordOAuthClient {
