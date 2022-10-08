@@ -1,3 +1,4 @@
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -8,6 +9,8 @@ import {
   Heading,
   HStack,
   Input,
+  InputGroup,
+  InputRightElement,
   Link,
   Stack,
   Text,
@@ -26,6 +29,7 @@ import { useAlreadyAuth } from '../utils/useAlreadyAuth';
 function Login() {
   useAlreadyAuth();
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
@@ -85,15 +89,25 @@ function Login() {
             </FormControl>
             <FormControl id="password" mt={4} isInvalid={!!errors.password}>
               <FormLabel htmlFor="password">Password</FormLabel>
-              <Input
-                type="password"
-                id="password"
-                name="password"
-                required
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                value={formik.values.password}
-              />
+              <InputGroup>
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  required
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.password}
+                />
+                <InputRightElement h={'full'}>
+                  <Button
+                    variant={'ghost'}
+                    onClick={() => setShowPassword((showPassword) => !showPassword)}
+                  >
+                    {showPassword ? <ViewIcon /> : <ViewOffIcon />}
+                  </Button>
+                </InputRightElement>
+              </InputGroup>
               <FormErrorMessage>{errors.password}</FormErrorMessage>
             </FormControl>
             <Stack spacing={10}>

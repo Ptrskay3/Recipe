@@ -9,6 +9,7 @@ use crate::{
     extractors::DatabaseConnection,
 };
 
+// TODO: This is done through a queue, we might delete this
 pub async fn _send_confirmation_email(
     email_client: &EmailClient,
     subscriber_email: &str,
