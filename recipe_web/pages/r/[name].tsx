@@ -9,9 +9,8 @@ import {
   Text,
   VStack,
   Wrap,
-  WrapItem
+  WrapItem,
 } from '@chakra-ui/react';
-import { instantMeiliSearch } from '@meilisearch/instant-meilisearch';
 import { useRouter } from 'next/router';
 import { FaHeart, FaHeartBroken } from 'react-icons/fa';
 import useSWR, { useSWRConfig } from 'swr';
@@ -23,7 +22,6 @@ import { useAddIngredient } from '../../stores/useAddIngredient';
 import { fetcher } from '../../utils/fetcher';
 
 export default function RecipeDetailed() {
-  const searchClient = instantMeiliSearch('http://localhost:7700');
   const { me } = useMe();
   const { mutate } = useSWRConfig();
   const router = useRouter();
