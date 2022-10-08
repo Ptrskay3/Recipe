@@ -154,6 +154,7 @@ where
         (job_id, job_type, context)
         VALUES
         ($1, 'email_delivery', $2)
+        ON CONFLICT DO NOTHING
         "#,
         confirmation_id,
         serde_json::json!({ "email": email, "error": e.to_string() })

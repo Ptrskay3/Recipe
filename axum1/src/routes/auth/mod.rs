@@ -157,7 +157,7 @@ async fn register(
         .await
         .context("Failed to store the confirmation token for a new subscriber.")?;
 
-    enqueue_delivery_task(&mut tx, token)
+    enqueue_delivery_task(&mut tx, token, email)
         .await
         .context("Failed to enqueue confirmation delivery task")?;
 

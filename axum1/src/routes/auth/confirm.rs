@@ -66,18 +66,17 @@ pub async fn store_token(
 pub async fn enqueue_delivery_task(
     tx: &mut Transaction<'_, Postgres>,
     confirmation_id: String,
+    user_email: String,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         r#"
         INSERT INTO confirmation_delivery_queue (
             confirmation_id, 
             user_email
-        )
-        SELECT $1, email
-        FROM users
-        WHERE confirmed = 'FALSE';
+        ) VALUES ($1, $2)
         "#,
         confirmation_id,
+        user_email,
     )
     .execute(tx)
     .await?;
