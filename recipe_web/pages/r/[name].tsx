@@ -74,12 +74,12 @@ export default function RecipeDetailed() {
                 <Text fontSize={'sm'} m={4}>
                   {data.description}
                 </Text>
-                <Text m={4}>{`Preparation time: ${data.prep_time} minues`}</Text>
-                <Text m={4}>{`Cook time: ${data.cook_time} minues`}</Text>
-                <Text m={4}>{`Difficulty: ${data.difficulty}`}</Text>
-                <Text m={4}>{`Cuisine: ${data.cuisine}`}</Text>
-                <Text m={4}>{`Type: ${data.meal_type}`}</Text>
-                <Text m={4}>{`Calories: ${data.full_calories}`}</Text>
+                <Text m={4} fontSize="xl">{`⏱️ Preparation time: ${data.prep_time} minues`}</Text>
+                <Text m={4} fontSize="xl">{`🧑‍🍳 Cook time: ${data.cook_time} minues`}</Text>
+                <Text m={4} fontSize="xl">{`📈 Difficulty: ${data.difficulty}`}</Text>
+                <Text m={4} fontSize="xl">{`🏳️ Cuisine: ${data.cuisine}`}</Text>
+                <Text m={4} fontSize="xl">{`🍳 Type: ${data.meal_type}`}</Text>
+                <Text m={4} fontSize="xl">{`⚖️ Calories: ${data.full_calories}`}</Text>
                 {data.steps && data.steps.length > 0 ? (
                   <>
                     <Heading>Steps:</Heading>
