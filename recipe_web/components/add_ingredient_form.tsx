@@ -7,6 +7,7 @@ import {
   FormLabel,
   Input,
   Stack,
+  useToast,
 } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import { useRouter } from 'next/router';
@@ -14,33 +15,45 @@ import { useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { useAddIngredient } from '../stores/useAddIngredient';
 import { intoFormBody } from '../utils/form';
+import IngredientSearch from './search/IngredientSearch';
 
 export function AddIngredientForm() {
   const { mutate } = useSWRConfig();
   const setAddIngredientOpen = useAddIngredient((state) => state.setAddIngredientOpen);
+  const selected = useAddIngredient((state) => state.selected);
+
+  const toast = useToast();
 
   const router = useRouter();
   const { name } = router.query;
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{
-    name?: string;
     quantity?: string;
     quantity_unit?: string;
   }>({});
 
   const formik = useFormik({
     initialValues: {
-      name: '',
       quantity: '100',
       quantity_unit: 'g',
     },
     validate: () => {},
     onSubmit: async (values) => {
       setErrors({});
+      if (!selected) {
+        // TODO: make this focus the search element instead and highlight invalidity
+        toast({
+          title: 'Select an ingredient',
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+        });
+        return;
+      }
       setLoading(true);
       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/r/${name}/ingredient`, {
         method: 'POST',
-        body: intoFormBody(values),
+        body: intoFormBody({ ...values, name: selected! }),
         credentials: 'include',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -49,7 +62,12 @@ export function AddIngredientForm() {
 
       setLoading(false);
       if (!response.ok) {
-        setErrors({ name: 'This ingredient does not exist' });
+        toast({
+          title: 'This ingredient does not exist',
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+        });
         return;
       }
       setAddIngredientOpen(false);
@@ -59,21 +77,8 @@ export function AddIngredientForm() {
   return (
     <Box>
       <Center>
+        <IngredientSearch />
         <form onSubmit={formik.handleSubmit}>
-          <FormControl id="name" isInvalid={!!errors.name}>
-            <FormLabel htmlFor="name">Name</FormLabel>
-            <Input
-              type="text"
-              id="name"
-              name="name"
-              required
-              autoFocus
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              value={formik.values.name}
-            />
-            <FormErrorMessage>{errors.name}</FormErrorMessage>
-          </FormControl>
           <FormControl id="quantity" mt={4} isInvalid={!!errors.quantity}>
             <FormLabel htmlFor="quantity">Quantity</FormLabel>
             <Input

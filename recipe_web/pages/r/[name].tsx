@@ -3,25 +3,21 @@ import {
   Box,
   Center,
   CircularProgress,
-  Container,
   Flex,
   Heading,
   IconButton,
   Text,
   VStack,
   Wrap,
-  WrapItem,
+  WrapItem
 } from '@chakra-ui/react';
 import { instantMeiliSearch } from '@meilisearch/instant-meilisearch';
 import { useRouter } from 'next/router';
-import { useRef } from 'react';
 import { FaHeart, FaHeartBroken } from 'react-icons/fa';
-import { Configure, Highlight, Hits, InstantSearch } from 'react-instantsearch-hooks-web';
 import useSWR, { useSWRConfig } from 'swr';
 import { AddIngredientForm } from '../../components/add_ingredient_form';
 import IncludedIngredient from '../../components/included_ingredient';
 import { Layout } from '../../components/layout';
-import { CustomSearchBox } from '../../components/search/SearchBox';
 import { useMe } from '../../hooks/me';
 import { useAddIngredient } from '../../stores/useAddIngredient';
 import { fetcher } from '../../utils/fetcher';
@@ -34,7 +30,6 @@ export default function RecipeDetailed() {
   const { name } = router.query;
   const addIngredientOpen = useAddIngredient((state) => state.addIngredientOpen);
   const setAddIngredientOpen = useAddIngredient((state) => state.setAddIngredientOpen);
-  const searchBoxInputRef = useRef(null);
 
   const { data, error } = useSWR(
     !!name ? `${process.env.NEXT_PUBLIC_BASE_URL}/r/${name}` : null,
@@ -51,17 +46,6 @@ export default function RecipeDetailed() {
       mutate(`${process.env.NEXT_PUBLIC_BASE_URL}/r/${name}`);
     }
   };
-  const Hit = ({ hit }: any) => (
-    <Container
-      _hover={{ cursor: 'pointer' }}
-      // @ts-ignore
-      onClick={() => (searchBoxInputRef.current.value = hit.name)}
-      key={hit.id}
-    >
-      <Highlight attribute="name" hit={hit} />
-      <Text>{'calories: ' + hit.calories_per_100g}</Text>
-    </Container>
-  );
 
   if (error)
     return (
@@ -130,16 +114,7 @@ export default function RecipeDetailed() {
           </Center>
           <Center>
             {addIngredientOpen ? (
-              <>
-                <InstantSearch indexName="ingredients" searchClient={searchClient}>
-                  <Configure hitsPerPage={10} analytics={false} distinct />
-                  <VStack>
-                    <CustomSearchBox passRef={searchBoxInputRef} label={'Name'} name={'name'} />
-                    <Hits hitComponent={Hit} />
-                  </VStack>
-                </InstantSearch>
-                <AddIngredientForm />
-              </>
+              <AddIngredientForm />
             ) : (
               <IconButton
                 aria-label="delete ingredient"

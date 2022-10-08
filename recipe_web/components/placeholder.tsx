@@ -25,6 +25,7 @@ import { EnumSelector } from './EnumSelect';
 import { first, PreviewImage, second, third } from './form/upload';
 
 import { Listable } from './Listable';
+import IngredientSearch from './search/IngredientSearch';
 import { DurationSlider } from './slider';
 
 export default function Placeholder() {
