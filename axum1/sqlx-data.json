@@ -1,49 +1,38 @@
 {
   "db": "PostgreSQL",
-  "00e0b536b273c88944d12910b8a3a0aaad49b54dc9c3f07f786ac55a8d073434": {
-    "query": "\n        SELECT user_id FROM users\n        WHERE oauth_provider = 'discord' AND oauth_id = $1\n        ",
+  "018bfae0432690c66169b816362b0f0b29c3c6ea0ab0d9aba3c895144b814f32": {
     "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Uuid"
-        }
-      ],
+      "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
-          "Text"
+          "Json"
         ]
-      },
-      "nullable": [
-        false
-      ]
-    }
+      }
+    },
+    "query": "\n        INSERT INTO failed_jobs (job_type, context)\n        VALUES ('email_delivery', $1)\n        "
   },
   "023fecb5c33fb017d324f9ec9101bbc68fdc644d23d1e94564d0d812e0527815": {
-    "query": "\n            SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n            protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n            FROM ingredients\n            WHERE id = $1;\n            ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "name",
+          "ordinal": 0,
           "type_info": "Text"
         },
         {
-          "ordinal": 1,
           "name": "calories_per_100g",
+          "ordinal": 1,
           "type_info": "Float4"
         },
         {
-          "ordinal": 2,
           "name": "category: Vec<FoodCategory>",
+          "ordinal": 2,
           "type_info": {
             "Custom": {
-              "name": "_food_category",
               "kind": {
                 "Array": {
                   "Custom": {
-                    "name": "food_category",
                     "kind": {
                       "Enum": [
                         "vegetable",
@@ -63,64 +52,61 @@
                         "beverages",
                         "uncategorized"
                       ]
-                    }
+                    },
+                    "name": "food_category"
                   }
                 }
-              }
+              },
+              "name": "_food_category"
             }
           }
         },
         {
-          "ordinal": 3,
           "name": "g_per_piece",
+          "ordinal": 3,
           "type_info": "Float4"
         },
         {
-          "ordinal": 4,
           "name": "protein",
+          "ordinal": 4,
           "type_info": "Float4"
         },
         {
-          "ordinal": 5,
           "name": "water",
+          "ordinal": 5,
           "type_info": "Float4"
         },
         {
-          "ordinal": 6,
           "name": "fat",
+          "ordinal": 6,
           "type_info": "Float4"
         },
         {
-          "ordinal": 7,
           "name": "sugar",
+          "ordinal": 7,
           "type_info": "Float4"
         },
         {
-          "ordinal": 8,
           "name": "carbohydrate",
+          "ordinal": 8,
           "type_info": "Float4"
         },
         {
-          "ordinal": 9,
           "name": "fiber",
+          "ordinal": 9,
           "type_info": "Float4"
         },
         {
-          "ordinal": 10,
           "name": "caffeine",
+          "ordinal": 10,
           "type_info": "Float4"
         },
         {
-          "ordinal": 11,
           "name": "contains_alcohol",
+          "ordinal": 11,
           "type_info": "Bool"
         }
       ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
       "nullable": [
         false,
         false,
@@ -134,45 +120,48 @@
         false,
         false,
         false
-      ]
-    }
-  },
-  "061caac252990eaf1dadcdd96b6c8447cd13a942596ca8316ab37929fdbc6bcd": {
-    "query": "\n            DELETE FROM ingredient_suggestions\n            WHERE id = $1\n            ",
-    "describe": {
-      "columns": [],
+      ],
       "parameters": {
         "Left": [
           "Uuid"
         ]
-      },
-      "nullable": []
-    }
+      }
+    },
+    "query": "\n            SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n            protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n            FROM ingredients\n            WHERE id = $1;\n            "
+  },
+  "061caac252990eaf1dadcdd96b6c8447cd13a942596ca8316ab37929fdbc6bcd": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            DELETE FROM ingredient_suggestions\n            WHERE id = $1\n            "
   },
   "11ac830439dc9854f212b0b629e5b9d426af6b4e90153d73407bc1053a4ccd84": {
-    "query": "\n        SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n        protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n        FROM ingredients;\n        ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "name",
+          "ordinal": 0,
           "type_info": "Text"
         },
         {
-          "ordinal": 1,
           "name": "calories_per_100g",
+          "ordinal": 1,
           "type_info": "Float4"
         },
         {
-          "ordinal": 2,
           "name": "category: Vec<FoodCategory>",
+          "ordinal": 2,
           "type_info": {
             "Custom": {
-              "name": "_food_category",
               "kind": {
                 "Array": {
                   "Custom": {
-                    "name": "food_category",
                     "kind": {
                       "Enum": [
                         "vegetable",
@@ -192,97 +181,97 @@
                         "beverages",
                         "uncategorized"
                       ]
-                    }
+                    },
+                    "name": "food_category"
                   }
                 }
-              }
+              },
+              "name": "_food_category"
             }
           }
         },
         {
-          "ordinal": 3,
           "name": "g_per_piece",
+          "ordinal": 3,
           "type_info": "Float4"
         },
         {
-          "ordinal": 4,
           "name": "protein",
+          "ordinal": 4,
           "type_info": "Float4"
         },
         {
-          "ordinal": 5,
           "name": "water",
+          "ordinal": 5,
           "type_info": "Float4"
         },
         {
-          "ordinal": 6,
           "name": "fat",
+          "ordinal": 6,
           "type_info": "Float4"
         },
         {
-          "ordinal": 7,
           "name": "sugar",
+          "ordinal": 7,
           "type_info": "Float4"
         },
         {
-          "ordinal": 8,
           "name": "carbohydrate",
+          "ordinal": 8,
           "type_info": "Float4"
         },
         {
-          "ordinal": 9,
           "name": "fiber",
+          "ordinal": 9,
           "type_info": "Float4"
         },
         {
-          "ordinal": 10,
           "name": "caffeine",
+          "ordinal": 10,
           "type_info": "Float4"
         },
         {
-          "ordinal": 11,
           "name": "contains_alcohol",
+          "ordinal": 11,
           "type_info": "Bool"
         }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
       ],
       "parameters": {
         "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
+      }
+    },
+    "query": "\n        SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n        protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n        FROM ingredients;\n        "
   },
   "2e5a2b956a4b461174914264af9f42b987e4d4b2ff18f8fc7c231449a60a3181": {
-    "query": "\n        DELETE FROM ingredients\n        WHERE name = $1\n        RETURNING name, category as \"category!: Vec<FoodCategory>\", calories_per_100g, g_per_piece,\n                  protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol;\n        ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "name",
+          "ordinal": 0,
           "type_info": "Text"
         },
         {
-          "ordinal": 1,
           "name": "category!: Vec<FoodCategory>",
+          "ordinal": 1,
           "type_info": {
             "Custom": {
-              "name": "_food_category",
               "kind": {
                 "Array": {
                   "Custom": {
-                    "name": "food_category",
                     "kind": {
                       "Enum": [
                         "vegetable",
@@ -302,69 +291,66 @@
                         "beverages",
                         "uncategorized"
                       ]
-                    }
+                    },
+                    "name": "food_category"
                   }
                 }
-              }
+              },
+              "name": "_food_category"
             }
           }
         },
         {
-          "ordinal": 2,
           "name": "calories_per_100g",
+          "ordinal": 2,
           "type_info": "Float4"
         },
         {
-          "ordinal": 3,
           "name": "g_per_piece",
+          "ordinal": 3,
           "type_info": "Float4"
         },
         {
-          "ordinal": 4,
           "name": "protein",
+          "ordinal": 4,
           "type_info": "Float4"
         },
         {
-          "ordinal": 5,
           "name": "water",
+          "ordinal": 5,
           "type_info": "Float4"
         },
         {
-          "ordinal": 6,
           "name": "fat",
+          "ordinal": 6,
           "type_info": "Float4"
         },
         {
-          "ordinal": 7,
           "name": "sugar",
+          "ordinal": 7,
           "type_info": "Float4"
         },
         {
-          "ordinal": 8,
           "name": "carbohydrate",
+          "ordinal": 8,
           "type_info": "Float4"
         },
         {
-          "ordinal": 9,
           "name": "fiber",
+          "ordinal": 9,
           "type_info": "Float4"
         },
         {
-          "ordinal": 10,
           "name": "caffeine",
+          "ordinal": 10,
           "type_info": "Float4"
         },
         {
-          "ordinal": 11,
           "name": "contains_alcohol",
+          "ordinal": 11,
           "type_info": "Bool"
         }
       ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
       "nullable": [
         false,
         false,
@@ -378,54 +364,70 @@
         false,
         false,
         false
-      ]
-    }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        DELETE FROM ingredients\n        WHERE name = $1\n        RETURNING name, category as \"category!: Vec<FoodCategory>\", calories_per_100g, g_per_piece,\n                  protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol;\n        "
   },
   "2f24f116a1a0b17af6f305b6394813e3ec96e12a864e7c6d0c79368002c4d273": {
-    "query": "SELECT toggle_favorite_recipe($1, (SELECT id FROM recipes WHERE name = $2))",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "toggle_favorite_recipe",
+          "ordinal": 0,
           "type_info": "Numeric"
         }
+      ],
+      "nullable": [
+        null
       ],
       "parameters": {
         "Left": [
           "Uuid",
           "Text"
         ]
-      },
-      "nullable": [
-        null
-      ]
-    }
+      }
+    },
+    "query": "SELECT toggle_favorite_recipe($1, (SELECT id FROM recipes WHERE name = $2))"
+  },
+  "2f5377b055c8ea2dd5d5acc83a5230de918441770efc56f31e47c0cb802354d0": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO confirmation_delivery_queue (\n            confirmation_id, \n            user_email\n        ) VALUES ($1, $2)\n        "
   },
   "3eb33bfb259bdb31e34cda8447ebd09e84e5637bc494529836e98251d4dd58c3": {
-    "query": "\n        SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n        protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n        FROM ingredients\n        WHERE $1 = ANY (category);\n        ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "name",
+          "ordinal": 0,
           "type_info": "Text"
         },
         {
-          "ordinal": 1,
           "name": "calories_per_100g",
+          "ordinal": 1,
           "type_info": "Float4"
         },
         {
-          "ordinal": 2,
           "name": "category: Vec<FoodCategory>",
+          "ordinal": 2,
           "type_info": {
             "Custom": {
-              "name": "_food_category",
               "kind": {
                 "Array": {
                   "Custom": {
-                    "name": "food_category",
                     "kind": {
                       "Enum": [
                         "vegetable",
@@ -445,64 +447,79 @@
                         "beverages",
                         "uncategorized"
                       ]
-                    }
+                    },
+                    "name": "food_category"
                   }
                 }
-              }
+              },
+              "name": "_food_category"
             }
           }
         },
         {
-          "ordinal": 3,
           "name": "g_per_piece",
+          "ordinal": 3,
           "type_info": "Float4"
         },
         {
-          "ordinal": 4,
           "name": "protein",
+          "ordinal": 4,
           "type_info": "Float4"
         },
         {
-          "ordinal": 5,
           "name": "water",
+          "ordinal": 5,
           "type_info": "Float4"
         },
         {
-          "ordinal": 6,
           "name": "fat",
+          "ordinal": 6,
           "type_info": "Float4"
         },
         {
-          "ordinal": 7,
           "name": "sugar",
+          "ordinal": 7,
           "type_info": "Float4"
         },
         {
-          "ordinal": 8,
           "name": "carbohydrate",
+          "ordinal": 8,
           "type_info": "Float4"
         },
         {
-          "ordinal": 9,
           "name": "fiber",
+          "ordinal": 9,
           "type_info": "Float4"
         },
         {
-          "ordinal": 10,
           "name": "caffeine",
+          "ordinal": 10,
           "type_info": "Float4"
         },
         {
-          "ordinal": 11,
           "name": "contains_alcohol",
+          "ordinal": 11,
           "type_info": "Bool"
         }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
       ],
       "parameters": {
         "Left": [
           {
             "Custom": {
-              "name": "food_category",
               "kind": {
                 "Enum": [
                   "vegetable",
@@ -522,11 +539,160 @@
                   "beverages",
                   "uncategorized"
                 ]
-              }
+              },
+              "name": "food_category"
             }
           }
         ]
-      },
+      }
+    },
+    "query": "\n        SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n        protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n        FROM ingredients\n        WHERE $1 = ANY (category);\n        "
+  },
+  "43c537e43d80b3a1952f9cef5301d34307b1dc5f54f41f7fc9d825917cfacfb4": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        DELETE FROM confirmation_delivery_queue\n        WHERE \n            confirmation_id = $1 AND\n            user_email = $2 \n        "
+  },
+  "44f3e5ddf2b00333aaf007c1c3b7f4d6a5cb429e877bd29ed4c6f99669da2862": {
+    "describe": {
+      "columns": [
+        {
+          "name": "confirmation_id",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "user_email",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        SELECT confirmation_id, user_email\n        FROM confirmation_delivery_queue\n        FOR UPDATE\n        SKIP LOCKED\n        LIMIT 1\n        "
+  },
+  "4a4d9e45f67969e546fceab63df71a7a523b91f80860d4b9aafb17caacdb518e": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "INSERT INTO favorite_ingredient(ingredient_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING"
+  },
+  "4b7b6f513dcacf2badb80b2e9da0ac012006b15ee99edb467918826693dcaacf": {
+    "describe": {
+      "columns": [
+        {
+          "name": "name",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "category!: Vec<FoodCategory>",
+          "ordinal": 1,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Array": {
+                  "Custom": {
+                    "kind": {
+                      "Enum": [
+                        "vegetable",
+                        "fruit",
+                        "meat",
+                        "dairy",
+                        "grains",
+                        "legumes",
+                        "baked",
+                        "eggs",
+                        "seafood",
+                        "nuts_and_seeds",
+                        "herbs_and_spices",
+                        "garnishes",
+                        "deserts_and_sweets",
+                        "supplements",
+                        "beverages",
+                        "uncategorized"
+                      ]
+                    },
+                    "name": "food_category"
+                  }
+                }
+              },
+              "name": "_food_category"
+            }
+          }
+        },
+        {
+          "name": "calories_per_100g",
+          "ordinal": 2,
+          "type_info": "Float4"
+        },
+        {
+          "name": "g_per_piece",
+          "ordinal": 3,
+          "type_info": "Float4"
+        },
+        {
+          "name": "protein",
+          "ordinal": 4,
+          "type_info": "Float4"
+        },
+        {
+          "name": "water",
+          "ordinal": 5,
+          "type_info": "Float4"
+        },
+        {
+          "name": "fat",
+          "ordinal": 6,
+          "type_info": "Float4"
+        },
+        {
+          "name": "sugar",
+          "ordinal": 7,
+          "type_info": "Float4"
+        },
+        {
+          "name": "carbohydrate",
+          "ordinal": 8,
+          "type_info": "Float4"
+        },
+        {
+          "name": "fiber",
+          "ordinal": 9,
+          "type_info": "Float4"
+        },
+        {
+          "name": "caffeine",
+          "ordinal": 10,
+          "type_info": "Float4"
+        },
+        {
+          "name": "contains_alcohol",
+          "ordinal": 11,
+          "type_info": "Bool"
+        }
+      ],
       "nullable": [
         false,
         false,
@@ -540,154 +706,6 @@
         false,
         false,
         false
-      ]
-    }
-  },
-  "43c537e43d80b3a1952f9cef5301d34307b1dc5f54f41f7fc9d825917cfacfb4": {
-    "query": "\n        DELETE FROM confirmation_delivery_queue\n        WHERE \n            confirmation_id = $1 AND\n            user_email = $2 \n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "44f3e5ddf2b00333aaf007c1c3b7f4d6a5cb429e877bd29ed4c6f99669da2862": {
-    "query": "\n        SELECT confirmation_id, user_email\n        FROM confirmation_delivery_queue\n        FOR UPDATE\n        SKIP LOCKED\n        LIMIT 1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "confirmation_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "user_email",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false
-      ]
-    }
-  },
-  "4a4d9e45f67969e546fceab63df71a7a523b91f80860d4b9aafb17caacdb518e": {
-    "query": "INSERT INTO favorite_ingredient(ingredient_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "4b7b6f513dcacf2badb80b2e9da0ac012006b15ee99edb467918826693dcaacf": {
-    "query": "\n        UPDATE ingredients\n        SET name = $1,\n            calories_per_100g = $2,\n            category = $3,\n            g_per_piece = $4,\n            protein = $5,\n            water = $6,\n            fat = $7,\n            sugar = $8,\n            carbohydrate = $9,\n            fiber = $10,\n            caffeine = $11,\n            contains_alcohol = $12\n        WHERE name = $13\n        RETURNING name, category as \"category!: Vec<FoodCategory>\", calories_per_100g, g_per_piece,\n                  protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol;\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "category!: Vec<FoodCategory>",
-          "type_info": {
-            "Custom": {
-              "name": "_food_category",
-              "kind": {
-                "Array": {
-                  "Custom": {
-                    "name": "food_category",
-                    "kind": {
-                      "Enum": [
-                        "vegetable",
-                        "fruit",
-                        "meat",
-                        "dairy",
-                        "grains",
-                        "legumes",
-                        "baked",
-                        "eggs",
-                        "seafood",
-                        "nuts_and_seeds",
-                        "herbs_and_spices",
-                        "garnishes",
-                        "deserts_and_sweets",
-                        "supplements",
-                        "beverages",
-                        "uncategorized"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "ordinal": 2,
-          "name": "calories_per_100g",
-          "type_info": "Float4"
-        },
-        {
-          "ordinal": 3,
-          "name": "g_per_piece",
-          "type_info": "Float4"
-        },
-        {
-          "ordinal": 4,
-          "name": "protein",
-          "type_info": "Float4"
-        },
-        {
-          "ordinal": 5,
-          "name": "water",
-          "type_info": "Float4"
-        },
-        {
-          "ordinal": 6,
-          "name": "fat",
-          "type_info": "Float4"
-        },
-        {
-          "ordinal": 7,
-          "name": "sugar",
-          "type_info": "Float4"
-        },
-        {
-          "ordinal": 8,
-          "name": "carbohydrate",
-          "type_info": "Float4"
-        },
-        {
-          "ordinal": 9,
-          "name": "fiber",
-          "type_info": "Float4"
-        },
-        {
-          "ordinal": 10,
-          "name": "caffeine",
-          "type_info": "Float4"
-        },
-        {
-          "ordinal": 11,
-          "name": "contains_alcohol",
-          "type_info": "Bool"
-        }
       ],
       "parameters": {
         "Left": [
@@ -695,11 +713,9 @@
           "Float4",
           {
             "Custom": {
-              "name": "_food_category",
               "kind": {
                 "Array": {
                   "Custom": {
-                    "name": "food_category",
                     "kind": {
                       "Enum": [
                         "vegetable",
@@ -719,10 +735,12 @@
                         "beverages",
                         "uncategorized"
                       ]
-                    }
+                    },
+                    "name": "food_category"
                   }
                 }
-              }
+              },
+              "name": "_food_category"
             }
           },
           "Float4",
@@ -736,32 +754,21 @@
           "Bool",
           "Text"
         ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
+      }
+    },
+    "query": "\n        UPDATE ingredients\n        SET name = $1,\n            calories_per_100g = $2,\n            category = $3,\n            g_per_piece = $4,\n            protein = $5,\n            water = $6,\n            fat = $7,\n            sugar = $8,\n            carbohydrate = $9,\n            fiber = $10,\n            caffeine = $11,\n            contains_alcohol = $12\n        WHERE name = $13\n        RETURNING name, category as \"category!: Vec<FoodCategory>\", calories_per_100g, g_per_piece,\n                  protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol;\n        "
   },
   "4b8874fa6616f438e04bdb8f7ee660f2d4fad1bee88bc5b4ff3fec86bc79e08d": {
-    "query": "\n        INSERT INTO recipes (\n            \"name\",\n            \"description\",\n            \"creator_id\",\n            \"prep_time\",\n            \"cook_time\",\n            \"difficulty\",\n            \"steps\",\n            \"cuisine_id\",\n            \"meal_type\"\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, (SELECT id FROM cuisines WHERE name = $8), $9)\n        RETURNING id;\n        ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "id",
+          "ordinal": 0,
           "type_info": "Uuid"
         }
+      ],
+      "nullable": [
+        false
       ],
       "parameters": {
         "Left": [
@@ -772,7 +779,6 @@
           "Int4",
           {
             "Custom": {
-              "name": "difficulty_level",
               "kind": {
                 "Enum": [
                   "easy",
@@ -783,14 +789,14 @@
                   "extreme",
                   "do_not_attempt"
                 ]
-              }
+              },
+              "name": "difficulty_level"
             }
           },
           "TextArray",
           "Text",
           {
             "Custom": {
-              "name": "type_by_time",
               "kind": {
                 "Enum": [
                   "breakfast",
@@ -798,154 +804,127 @@
                   "dinner",
                   "other"
                 ]
-              }
+              },
+              "name": "type_by_time"
             }
           }
         ]
-      },
-      "nullable": [
-        false
-      ]
-    }
+      }
+    },
+    "query": "\n        INSERT INTO recipes (\n            \"name\",\n            \"description\",\n            \"creator_id\",\n            \"prep_time\",\n            \"cook_time\",\n            \"difficulty\",\n            \"steps\",\n            \"cuisine_id\",\n            \"meal_type\"\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, (SELECT id FROM cuisines WHERE name = $8), $9)\n        RETURNING id;\n        "
   },
   "4c2465926c417b0e88cb3800ae2809659dae56befa6c4eb50b43614c729880c3": {
-    "query": "SELECT name FROM users WHERE user_id = $1",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "name",
+          "ordinal": 0,
           "type_info": "Text"
         }
+      ],
+      "nullable": [
+        false
       ],
       "parameters": {
         "Left": [
           "Uuid"
         ]
-      },
-      "nullable": [
-        false
-      ]
-    }
+      }
+    },
+    "query": "SELECT name FROM users WHERE user_id = $1"
   },
   "4e3ffa01cd6a727476a9080aff84d2c5f9e891551df666e353497e5898f2a0fa": {
-    "query": "SELECT user_id FROM confirmation_tokens WHERE confirmation_token = $1",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "user_id",
+          "ordinal": 0,
           "type_info": "Uuid"
         }
+      ],
+      "nullable": [
+        false
       ],
       "parameters": {
         "Left": [
           "Text"
         ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
-  "519a7684e042be7a5aaffd004d476af09db1a929ba793e2b6f9d6b1ce78d01af": {
-    "query": "\n            INSERT INTO users (name, email, confirmed, password_hash, oauth_provider, oauth_id)\n            VALUES ($1, $2, 'TRUE', $3, 'discord', $4)\n            RETURNING user_id;\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
+      }
+    },
+    "query": "SELECT user_id FROM confirmation_tokens WHERE confirmation_token = $1"
   },
   "5292c8a8cc78280265a8720bec2fca935cba5e27783482b4408e4e0ac707ef0e": {
-    "query": "\n        SELECT user_id, password_hash\n        FROM users\n        WHERE email = $1\n        ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "user_id",
+          "ordinal": 0,
           "type_info": "Uuid"
         },
         {
-          "ordinal": 1,
           "name": "password_hash",
+          "ordinal": 1,
           "type_info": "Text"
         }
       ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
       "nullable": [
         false,
         false
-      ]
-    }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        SELECT user_id, password_hash\n        FROM users\n        WHERE email = $1\n        "
   },
   "5c7841db0a2035c5b5603841fd274a8cab93edb88ef3f6846681da8730e74894": {
-    "query": "SELECT is_delete_vote FROM ingredient_suggestions WHERE id = $1",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "is_delete_vote",
+          "ordinal": 0,
           "type_info": "Bool"
         }
+      ],
+      "nullable": [
+        true
       ],
       "parameters": {
         "Left": [
           "Uuid"
         ]
-      },
-      "nullable": [
-        true
-      ]
-    }
+      }
+    },
+    "query": "SELECT is_delete_vote FROM ingredient_suggestions WHERE id = $1"
   },
   "5eaf9bd780608de1bcce0027a0cea899f1225123287f9b3d30da5c3f9ce61246": {
-    "query": "\n        SELECT id, name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n         protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n        FROM ingredients\n        ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "id",
+          "ordinal": 0,
           "type_info": "Uuid"
         },
         {
-          "ordinal": 1,
           "name": "name",
+          "ordinal": 1,
           "type_info": "Text"
         },
         {
-          "ordinal": 2,
           "name": "calories_per_100g",
+          "ordinal": 2,
           "type_info": "Float4"
         },
         {
-          "ordinal": 3,
           "name": "category: Vec<FoodCategory>",
+          "ordinal": 3,
           "type_info": {
             "Custom": {
-              "name": "_food_category",
               "kind": {
                 "Array": {
                   "Custom": {
-                    "name": "food_category",
                     "kind": {
                       "Enum": [
                         "vegetable",
@@ -965,62 +944,61 @@
                         "beverages",
                         "uncategorized"
                       ]
-                    }
+                    },
+                    "name": "food_category"
                   }
                 }
-              }
+              },
+              "name": "_food_category"
             }
           }
         },
         {
-          "ordinal": 4,
           "name": "g_per_piece",
+          "ordinal": 4,
           "type_info": "Float4"
         },
         {
-          "ordinal": 5,
           "name": "protein",
+          "ordinal": 5,
           "type_info": "Float4"
         },
         {
-          "ordinal": 6,
           "name": "water",
+          "ordinal": 6,
           "type_info": "Float4"
         },
         {
-          "ordinal": 7,
           "name": "fat",
+          "ordinal": 7,
           "type_info": "Float4"
         },
         {
-          "ordinal": 8,
           "name": "sugar",
+          "ordinal": 8,
           "type_info": "Float4"
         },
         {
-          "ordinal": 9,
           "name": "carbohydrate",
+          "ordinal": 9,
           "type_info": "Float4"
         },
         {
-          "ordinal": 10,
           "name": "fiber",
+          "ordinal": 10,
           "type_info": "Float4"
         },
         {
-          "ordinal": 11,
           "name": "caffeine",
+          "ordinal": 11,
           "type_info": "Float4"
         },
         {
-          "ordinal": 12,
           "name": "contains_alcohol",
+          "ordinal": 12,
           "type_info": "Bool"
         }
       ],
-      "parameters": {
-        "Left": []
-      },
       "nullable": [
         false,
         false,
@@ -1035,116 +1013,142 @@
         false,
         false,
         false
-      ]
-    }
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        SELECT id, name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n         protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n        FROM ingredients\n        "
   },
   "620ae68320cd4368324c8bfb195c3e05d86d98026f01a054d96d572a8389db72": {
-    "query": "\n        SELECT i.name, i.calories_per_100g, ir.quantity, ir.quantity_unit FROM recipes r\n        INNER JOIN ingredients_to_recipes ir\n        ON r.id = ir.recipe_id\n        INNER JOIN ingredients i\n        ON i.id = ir.ingredient_id\n        WHERE r.name = $1;\n        ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "name",
+          "ordinal": 0,
           "type_info": "Text"
         },
         {
-          "ordinal": 1,
           "name": "calories_per_100g",
+          "ordinal": 1,
           "type_info": "Float4"
         },
         {
-          "ordinal": 2,
           "name": "quantity",
+          "ordinal": 2,
           "type_info": "Text"
         },
         {
-          "ordinal": 3,
           "name": "quantity_unit",
+          "ordinal": 3,
           "type_info": "Text"
         }
       ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
       "nullable": [
         false,
         false,
         false,
         false
-      ]
-    }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        SELECT i.name, i.calories_per_100g, ir.quantity, ir.quantity_unit FROM recipes r\n        INNER JOIN ingredients_to_recipes ir\n        ON r.id = ir.recipe_id\n        INNER JOIN ingredients i\n        ON i.id = ir.ingredient_id\n        WHERE r.name = $1;\n        "
   },
-  "673677e35640439c4d05055d79a3c7a970440c05cff1571dd5388d8dfc236589": {
-    "query": "\n        SELECT 1 as _e FROM favorite_recipe\n        WHERE user_id = $1 AND recipe_id = (SELECT id FROM recipes WHERE name = $2)",
+  "64318522eb845b41c74a7b35145c8a362e2e403f055159feaa9e782e9a396b3b": {
     "describe": {
       "columns": [
         {
+          "name": "user_id",
           "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                        INSERT INTO users (name, email, confirmed, password_hash, oauth_provider, oauth_id)\n                        VALUES ($1, $2, 'TRUE', $3, $5, $4)\n                        RETURNING user_id;\n                        "
+  },
+  "673677e35640439c4d05055d79a3c7a970440c05cff1571dd5388d8dfc236589": {
+    "describe": {
+      "columns": [
+        {
           "name": "_e",
+          "ordinal": 0,
           "type_info": "Int4"
         }
+      ],
+      "nullable": [
+        null
       ],
       "parameters": {
         "Left": [
           "Uuid",
           "Text"
         ]
-      },
-      "nullable": [
-        null
-      ]
-    }
+      }
+    },
+    "query": "\n        SELECT 1 as _e FROM favorite_recipe\n        WHERE user_id = $1 AND recipe_id = (SELECT id FROM recipes WHERE name = $2)"
   },
   "67fd7521b1bb9606f703196fef178774ca37a8caff169d36d1407da736c0b34b": {
-    "query": "\n        UPDATE ingredients i \n            SET\n                name = COALESCE(igs.name, i.name),\n                category = COALESCE(igs.category, i.category),\n                calories_per_100g = COALESCE(igs.calories_per_100g, i.calories_per_100g),\n                g_per_piece = COALESCE(igs.g_per_piece, i.g_per_piece),\n                protein = COALESCE(igs.protein, i.protein),\n                water = COALESCE(igs.water, i.water),\n                fat = COALESCE(igs.fat, i.fat),\n                sugar = COALESCE(igs.sugar, i.sugar),\n                carbohydrate = COALESCE(igs.carbohydrate, i.carbohydrate),\n                fiber = COALESCE(igs.fiber, i.fiber),\n                caffeine = COALESCE(igs.caffeine, i.caffeine),\n                contains_alcohol = COALESCE(igs.contains_alcohol, i.contains_alcohol)\n        FROM ingredient_suggestions igs\n        WHERE i.name = $1 AND igs.id = $2\n        ",
     "describe": {
       "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
           "Text",
           "Uuid"
         ]
-      },
-      "nullable": []
-    }
+      }
+    },
+    "query": "\n        UPDATE ingredients i \n            SET\n                name = COALESCE(igs.name, i.name),\n                category = COALESCE(igs.category, i.category),\n                calories_per_100g = COALESCE(igs.calories_per_100g, i.calories_per_100g),\n                g_per_piece = COALESCE(igs.g_per_piece, i.g_per_piece),\n                protein = COALESCE(igs.protein, i.protein),\n                water = COALESCE(igs.water, i.water),\n                fat = COALESCE(igs.fat, i.fat),\n                sugar = COALESCE(igs.sugar, i.sugar),\n                carbohydrate = COALESCE(igs.carbohydrate, i.carbohydrate),\n                fiber = COALESCE(igs.fiber, i.fiber),\n                caffeine = COALESCE(igs.caffeine, i.caffeine),\n                contains_alcohol = COALESCE(igs.contains_alcohol, i.contains_alcohol)\n        FROM ingredient_suggestions igs\n        WHERE i.name = $1 AND igs.id = $2\n        "
   },
   "6a5dee8455ad5afd5ab011e25989ae1e975cb27e67c71d7f763e7fab05b3ab19": {
-    "query": "\n        SELECT user_id\n        FROM users\n        WHERE name = $1 AND email = $2\n        ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "user_id",
+          "ordinal": 0,
           "type_info": "Uuid"
         }
+      ],
+      "nullable": [
+        false
       ],
       "parameters": {
         "Left": [
           "Text",
           "Text"
         ]
-      },
-      "nullable": [
-        false
-      ]
-    }
+      }
+    },
+    "query": "\n        SELECT user_id\n        FROM users\n        WHERE name = $1 AND email = $2\n        "
   },
   "6c25b000f40d0971fbec0c767495d797058062b0f942d558806d44120e6d79f0": {
-    "query": "\n        INSERT INTO ingredients (\n            name,\n            category,\n            calories_per_100g,\n            g_per_piece,\n            protein,\n            water,\n            fat,\n            sugar,\n            carbohydrate,\n            fiber,\n            caffeine,\n            contains_alcohol,\n            creator_id\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);\n        ",
     "describe": {
       "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
           "Text",
           {
             "Custom": {
-              "name": "_food_category",
               "kind": {
                 "Array": {
                   "Custom": {
-                    "name": "food_category",
                     "kind": {
                       "Enum": [
                         "vegetable",
@@ -1164,10 +1168,12 @@
                         "beverages",
                         "uncategorized"
                       ]
-                    }
+                    },
+                    "name": "food_category"
                   }
                 }
-              }
+              },
+              "name": "_food_category"
             }
           },
           "Float4",
@@ -1182,57 +1188,43 @@
           "Bool",
           "Uuid"
         ]
-      },
-      "nullable": []
-    }
+      }
+    },
+    "query": "\n        INSERT INTO ingredients (\n            name,\n            category,\n            calories_per_100g,\n            g_per_piece,\n            protein,\n            water,\n            fat,\n            sugar,\n            carbohydrate,\n            fiber,\n            caffeine,\n            contains_alcohol,\n            creator_id\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);\n        "
   },
   "6dd6575374c98a583db8fe723863e23327128eb22b46bc6ef19b4b54f7a6502c": {
-    "query": "\n        SELECT id\n        FROM ingredients\n        WHERE name = $1\n        ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "id",
+          "ordinal": 0,
           "type_info": "Uuid"
         }
+      ],
+      "nullable": [
+        false
       ],
       "parameters": {
         "Left": [
           "Text"
         ]
-      },
-      "nullable": [
-        false
-      ]
-    }
-  },
-  "757b675b17b29a6194ee97b348023995e94e3b493d69117158c0880267ba54f9": {
-    "query": "\n        INSERT INTO confirmation_delivery_queue (\n            confirmation_id, \n            user_email\n        )\n        SELECT $1, email\n        FROM users\n        WHERE confirmed = 'FALSE';\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
+      }
+    },
+    "query": "\n        SELECT id\n        FROM ingredients\n        WHERE name = $1\n        "
   },
   "77c073ee850e092a0fe86a780d0b134783ee1699d2f062a8b05005f67f0dcc04": {
-    "query": "\n        INSERT INTO ingredient_suggestions (\n            ingredient_id,\n            name,\n            category,\n            calories_per_100g,\n            g_per_piece,\n            protein,\n            water,\n            fat,\n            sugar,\n            carbohydrate,\n            fiber,\n            caffeine,\n            contains_alcohol,\n            user_id,\n            is_delete_vote\n        )\n        VALUES ((SELECT id FROM ingredients WHERE name = $1), $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);\n        ",
     "describe": {
       "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
           "Text",
           "Text",
           {
             "Custom": {
-              "name": "_food_category",
               "kind": {
                 "Array": {
                   "Custom": {
-                    "name": "food_category",
                     "kind": {
                       "Enum": [
                         "vegetable",
@@ -1252,10 +1244,12 @@
                         "beverages",
                         "uncategorized"
                       ]
-                    }
+                    },
+                    "name": "food_category"
                   }
                 }
-              }
+              },
+              "name": "_food_category"
             }
           },
           "Float4",
@@ -1271,135 +1265,129 @@
           "Uuid",
           "Bool"
         ]
-      },
-      "nullable": []
-    }
+      }
+    },
+    "query": "\n        INSERT INTO ingredient_suggestions (\n            ingredient_id,\n            name,\n            category,\n            calories_per_100g,\n            g_per_piece,\n            protein,\n            water,\n            fat,\n            sugar,\n            carbohydrate,\n            fiber,\n            caffeine,\n            contains_alcohol,\n            user_id,\n            is_delete_vote\n        )\n        VALUES ((SELECT id FROM ingredients WHERE name = $1), $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);\n        "
   },
-  "7f35f12262b89b30bbf8f27e813d16aa8d36d69abf54a86bec4b32e6b3a19a1e": {
-    "query": "\n        SELECT DISTINCT r.name,\n                r.description,\n                COUNT(ir.recipe_id) OVER (PARTITION BY r.id) AS ingredient_count\n        FROM recipes r\n        LEFT JOIN ingredients_to_recipes ir ON ir.recipe_id = r.id\n        INNER JOIN favorite_recipe fr ON fr.recipe_id = r.id AND fr.user_id = $1; \n        ",
+  "84ebb1c1c21a5cb401ac9b37aef57e3743d458d4898252c39896a3264fb96325": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO ingredients_to_recipes (ingredient_id, recipe_id, quantity, quantity_unit)\n        VALUES (\n            (SELECT id FROM ingredients WHERE name = $1),\n            $2,\n            $3,\n            $4\n        ) ON CONFLICT (ingredient_id, recipe_id) DO\n        UPDATE SET\n            quantity = EXCLUDED.quantity,\n            quantity_unit = EXCLUDED.quantity_unit;\n        "
+  },
+  "851fd5c2eaa996de45d59418ec04bd38f65f20d71b1df90e95b6768d800e137a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "DELETE FROM ingredients WHERE name = $1"
+  },
+  "854d11f28c84c4bb2035e8117a8d470d386fcec2c58a42dfdf01143f33d17ab2": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        DELETE FROM ingredient_suggestions\n        WHERE id = $1\n        "
+  },
+  "8714e5c9453c53a7151cf73f8703cb326ba4f3ba80488c568763d265a96230c4": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "DELETE FROM confirmation_tokens WHERE user_id = $1"
+  },
+  "9358523d57a248817d2c891ac804fdf93b885efa3fd1912f5a6277d9e96a52ac": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        DELETE FROM ingredients_to_recipes\n        WHERE recipe_id = (SELECT id FROM recipes WHERE name = $1)\n        AND ingredient_id = (SELECT id from ingredients WHERE name = $2)\n        "
+  },
+  "9e864279d8d5eaf9f3ca0d508776c6ae970ee90e0ff316dc81541c217435c732": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "UPDATE users SET confirmed = 'TRUE' WHERE user_id = $1"
+  },
+  "a3079beab659e9b446915f6636f3c17642c3e8f3aac1806f75dd3df60b128754": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            DELETE FROM forget_password_tokens\n            WHERE user_id = $1 AND token = $2\n            "
+  },
+  "aa67f3a81c2e43b1dd0349c8b40669bbf03b1305a8203d7b1849ab221c823817": {
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "name",
+          "ordinal": 0,
           "type_info": "Text"
         },
         {
+          "name": "count",
           "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "ingredient_count",
           "type_info": "Int8"
         }
       ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
       "nullable": [
         false,
-        false,
         null
-      ]
-    }
-  },
-  "84ebb1c1c21a5cb401ac9b37aef57e3743d458d4898252c39896a3264fb96325": {
-    "query": "\n        INSERT INTO ingredients_to_recipes (ingredient_id, recipe_id, quantity, quantity_unit)\n        VALUES (\n            (SELECT id FROM ingredients WHERE name = $1),\n            $2,\n            $3,\n            $4\n        ) ON CONFLICT (ingredient_id, recipe_id) DO\n        UPDATE SET\n            quantity = EXCLUDED.quantity,\n            quantity_unit = EXCLUDED.quantity_unit;\n        ",
-    "describe": {
-      "columns": [],
+      ],
       "parameters": {
         "Left": [
-          "Text",
-          "Uuid",
-          "Text",
-          "Text"
+          "Int8"
         ]
-      },
-      "nullable": []
-    }
-  },
-  "851fd5c2eaa996de45d59418ec04bd38f65f20d71b1df90e95b6768d800e137a": {
-    "query": "DELETE FROM ingredients WHERE name = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "854d11f28c84c4bb2035e8117a8d470d386fcec2c58a42dfdf01143f33d17ab2": {
-    "query": "\n        DELETE FROM ingredient_suggestions\n        WHERE id = $1\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "8714e5c9453c53a7151cf73f8703cb326ba4f3ba80488c568763d265a96230c4": {
-    "query": "DELETE FROM confirmation_tokens WHERE user_id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "9358523d57a248817d2c891ac804fdf93b885efa3fd1912f5a6277d9e96a52ac": {
-    "query": "\n        DELETE FROM ingredients_to_recipes\n        WHERE recipe_id = (SELECT id FROM recipes WHERE name = $1)\n        AND ingredient_id = (SELECT id from ingredients WHERE name = $2)\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "9e864279d8d5eaf9f3ca0d508776c6ae970ee90e0ff316dc81541c217435c732": {
-    "query": "UPDATE users SET confirmed = 'TRUE' WHERE user_id = $1",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "a3079beab659e9b446915f6636f3c17642c3e8f3aac1806f75dd3df60b128754": {
-    "query": "\n            DELETE FROM forget_password_tokens\n            WHERE user_id = $1 AND token = $2\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid"
-        ]
-      },
-      "nullable": []
-    }
+      }
+    },
+    "query": "\n        SELECT r.name, COUNT(fr.recipe_id) FROM recipes r\n        INNER JOIN favorite_recipe fr ON r.id = fr.recipe_id\n        GROUP BY r.name\n        ORDER BY count DESC\n        LIMIT $1;\n        "
   },
   "aa836f3a0eb714009125b0838a2ae44c866bfff3c1b2babc94e2986b2d543057": {
-    "query": "\n        INSERT INTO ingredients_to_recipes (ingredient_id, recipe_id, quantity, quantity_unit)\n        VALUES (\n            (SELECT id FROM ingredients WHERE name = $1),\n            (SELECT id FROM recipes WHERE name = $2),\n            $3,\n            $4\n        ) ON CONFLICT (ingredient_id, recipe_id) DO\n        UPDATE SET\n            quantity = EXCLUDED.quantity,\n            quantity_unit = EXCLUDED.quantity_unit;\n        ",
     "describe": {
       "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
           "Text",
@@ -1407,34 +1395,31 @@
           "Text",
           "Text"
         ]
-      },
-      "nullable": []
-    }
+      }
+    },
+    "query": "\n        INSERT INTO ingredients_to_recipes (ingredient_id, recipe_id, quantity, quantity_unit)\n        VALUES (\n            (SELECT id FROM ingredients WHERE name = $1),\n            (SELECT id FROM recipes WHERE name = $2),\n            $3,\n            $4\n        ) ON CONFLICT (ingredient_id, recipe_id) DO\n        UPDATE SET\n            quantity = EXCLUDED.quantity,\n            quantity_unit = EXCLUDED.quantity_unit;\n        "
   },
   "ab904a910a80e47623db6af1470bdafa5dad10683ee7ac2c511b5ce56ca0e3b8": {
-    "query": "\n        SELECT\n            igs.id,\n            COALESCE(igs.name, i.name) AS name,\n            COALESCE(igs.category, i.category) AS \"category: Vec<FoodCategory>\",\n            COALESCE(igs.calories_per_100g, i.calories_per_100g) AS calories_per_100g,\n            COALESCE(igs.g_per_piece, i.g_per_piece) AS g_per_piece,\n            COALESCE(igs.protein, i.protein) AS protein,\n            COALESCE(igs.water, i.water) AS water,\n            COALESCE(igs.fat, i.fat) AS fat,\n            COALESCE(igs.sugar, i.sugar) AS sugar,\n            COALESCE(igs.carbohydrate, i.carbohydrate) AS carbohydrate,\n            COALESCE(igs.fiber, i.fiber) AS fiber,\n            COALESCE(igs.caffeine, i.caffeine) AS caffeine,\n            COALESCE(igs.contains_alcohol, i.contains_alcohol) AS contains_alcohol,\n            u.name as suggester,\n            is_delete_vote\n            FROM ingredient_suggestions igs \n        INNER JOIN ingredients i ON igs.ingredient_id = i.id\n        INNER JOIN users u ON u.user_id = igs.user_id\n        WHERE ingredient_id = (SELECT id FROM ingredients WHERE name = $1)\n        ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "id",
+          "ordinal": 0,
           "type_info": "Uuid"
         },
         {
-          "ordinal": 1,
           "name": "name",
+          "ordinal": 1,
           "type_info": "Text"
         },
         {
-          "ordinal": 2,
           "name": "category: Vec<FoodCategory>",
+          "ordinal": 2,
           "type_info": {
             "Custom": {
-              "name": "_food_category",
               "kind": {
                 "Array": {
                   "Custom": {
-                    "name": "food_category",
                     "kind": {
                       "Enum": [
                         "vegetable",
@@ -1454,79 +1439,76 @@
                         "beverages",
                         "uncategorized"
                       ]
-                    }
+                    },
+                    "name": "food_category"
                   }
                 }
-              }
+              },
+              "name": "_food_category"
             }
           }
         },
         {
-          "ordinal": 3,
           "name": "calories_per_100g",
+          "ordinal": 3,
           "type_info": "Float4"
         },
         {
-          "ordinal": 4,
           "name": "g_per_piece",
+          "ordinal": 4,
           "type_info": "Float4"
         },
         {
-          "ordinal": 5,
           "name": "protein",
+          "ordinal": 5,
           "type_info": "Float4"
         },
         {
-          "ordinal": 6,
           "name": "water",
+          "ordinal": 6,
           "type_info": "Float4"
         },
         {
-          "ordinal": 7,
           "name": "fat",
+          "ordinal": 7,
           "type_info": "Float4"
         },
         {
-          "ordinal": 8,
           "name": "sugar",
+          "ordinal": 8,
           "type_info": "Float4"
         },
         {
-          "ordinal": 9,
           "name": "carbohydrate",
+          "ordinal": 9,
           "type_info": "Float4"
         },
         {
-          "ordinal": 10,
           "name": "fiber",
+          "ordinal": 10,
           "type_info": "Float4"
         },
         {
-          "ordinal": 11,
           "name": "caffeine",
+          "ordinal": 11,
           "type_info": "Float4"
         },
         {
-          "ordinal": 12,
           "name": "contains_alcohol",
+          "ordinal": 12,
           "type_info": "Bool"
         },
         {
-          "ordinal": 13,
           "name": "suggester",
+          "ordinal": 13,
           "type_info": "Text"
         },
         {
-          "ordinal": 14,
           "name": "is_delete_vote",
+          "ordinal": 14,
           "type_info": "Bool"
         }
       ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
       "nullable": [
         false,
         null,
@@ -1543,122 +1525,115 @@
         null,
         false,
         true
-      ]
-    }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        SELECT\n            igs.id,\n            COALESCE(igs.name, i.name) AS name,\n            COALESCE(igs.category, i.category) AS \"category: Vec<FoodCategory>\",\n            COALESCE(igs.calories_per_100g, i.calories_per_100g) AS calories_per_100g,\n            COALESCE(igs.g_per_piece, i.g_per_piece) AS g_per_piece,\n            COALESCE(igs.protein, i.protein) AS protein,\n            COALESCE(igs.water, i.water) AS water,\n            COALESCE(igs.fat, i.fat) AS fat,\n            COALESCE(igs.sugar, i.sugar) AS sugar,\n            COALESCE(igs.carbohydrate, i.carbohydrate) AS carbohydrate,\n            COALESCE(igs.fiber, i.fiber) AS fiber,\n            COALESCE(igs.caffeine, i.caffeine) AS caffeine,\n            COALESCE(igs.contains_alcohol, i.contains_alcohol) AS contains_alcohol,\n            u.name as suggester,\n            is_delete_vote\n            FROM ingredient_suggestions igs \n        INNER JOIN ingredients i ON igs.ingredient_id = i.id\n        INNER JOIN users u ON u.user_id = igs.user_id\n        WHERE ingredient_id = (SELECT id FROM ingredients WHERE name = $1)\n        "
   },
   "af71e4fecfb0eb2882b06d97b38796fc0215723cc4950381ab561a54acbda376": {
-    "query": "\n        UPDATE users\n        SET password_hash = $1\n        WHERE name = $2 AND user_id = $3\n        ",
     "describe": {
       "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
           "Text",
           "Text",
           "Uuid"
         ]
-      },
-      "nullable": []
-    }
+      }
+    },
+    "query": "\n        UPDATE users\n        SET password_hash = $1\n        WHERE name = $2 AND user_id = $3\n        "
   },
   "b022f596e4bea6cb3c748640025b895ea90d3ad3803f57fefc8cb307060ba716": {
-    "query": "\n        INSERT INTO confirmation_tokens (confirmation_token, user_id)\n        VALUES ($1, $2)\n        ",
     "describe": {
       "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
           "Text",
           "Uuid"
         ]
-      },
-      "nullable": []
-    }
+      }
+    },
+    "query": "\n        INSERT INTO confirmation_tokens (confirmation_token, user_id)\n        VALUES ($1, $2)\n        "
   },
-  "bb7dfd7898fe9dfc434ac0625d4fd6d7f1603a399e0033658b46c494b0763b80": {
-    "query": "\n            INSERT INTO users (name, email, confirmed, password_hash, oauth_provider, oauth_id)\n            VALUES ($1, $2, 'TRUE', $3, 'google', $4)\n            RETURNING user_id;\n            ",
+  "b13f6ae52ab78dff5a801aaf56f392d49d0bd027bfd0fe5e24dee6ba1d0ea4b6": {
     "describe": {
       "columns": [
         {
+          "name": "name",
           "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Uuid"
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "ingredient_count",
+          "ordinal": 2,
+          "type_info": "Int8"
         }
+      ],
+      "nullable": [
+        false,
+        false,
+        null
       ],
       "parameters": {
         "Left": [
-          "Text",
-          "Text",
-          "Text",
-          "Text"
+          "Uuid"
         ]
-      },
-      "nullable": [
-        false
-      ]
-    }
+      }
+    },
+    "query": "\n        SELECT DISTINCT r.name,\n                r.description,\n                COUNT(ir.recipe_id) OVER (PARTITION BY r.id) AS ingredient_count\n        FROM recipes r\n        LEFT JOIN ingredients_to_recipes ir ON ir.recipe_id = r.id\n        INNER JOIN favorite_recipe fr ON fr.recipe_id = r.id AND fr.user_id = $1;\n        "
   },
   "c2c78f9f38623728cc5f11fb8ff6efb781079ec7fcc77bf8b350858cbc88e771": {
-    "query": "\n            UPDATE users\n            SET password_hash = $1\n            WHERE user_id = $2\n            ",
     "describe": {
       "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
           "Text",
           "Uuid"
         ]
-      },
-      "nullable": []
-    }
-  },
-  "c5810323f3a51ba1ecc35f8c8c184193f1288b34da76b764ecfcb690eb1f02a3": {
-    "query": "\n        SELECT user_id FROM users\n        WHERE oauth_provider = 'google' AND oauth_id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Uuid"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
-        false
-      ]
-    }
+      }
+    },
+    "query": "\n            UPDATE users\n            SET password_hash = $1\n            WHERE user_id = $2\n            "
   },
   "ca260f281f5f097ce5f5fefb06690045073dd849782e8a38a6de61cefc39c67b": {
-    "query": "\n        SELECT r.name, description, prep_time, cook_time, difficulty as \"difficulty: DifficultyLevel\",\n        steps, c.name as cuisine, meal_type as \"meal_type: TypeByTime\"\n        FROM recipes r\n        INNER JOIN cuisines c ON c.id = r.cuisine_id\n        WHERE r.name = $1\n        ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "name",
+          "ordinal": 0,
           "type_info": "Text"
         },
         {
-          "ordinal": 1,
           "name": "description",
+          "ordinal": 1,
           "type_info": "Text"
         },
         {
-          "ordinal": 2,
           "name": "prep_time",
+          "ordinal": 2,
           "type_info": "Int4"
         },
         {
-          "ordinal": 3,
           "name": "cook_time",
+          "ordinal": 3,
           "type_info": "Int4"
         },
         {
-          "ordinal": 4,
           "name": "difficulty: DifficultyLevel",
+          "ordinal": 4,
           "type_info": {
             "Custom": {
-              "name": "difficulty_level",
               "kind": {
                 "Enum": [
                   "easy",
@@ -1669,26 +1644,26 @@
                   "extreme",
                   "do_not_attempt"
                 ]
-              }
+              },
+              "name": "difficulty_level"
             }
           }
         },
         {
-          "ordinal": 5,
           "name": "steps",
+          "ordinal": 5,
           "type_info": "TextArray"
         },
         {
-          "ordinal": 6,
           "name": "cuisine",
+          "ordinal": 6,
           "type_info": "Text"
         },
         {
-          "ordinal": 7,
           "name": "meal_type: TypeByTime",
+          "ordinal": 7,
           "type_info": {
             "Custom": {
-              "name": "type_by_time",
               "kind": {
                 "Enum": [
                   "breakfast",
@@ -1696,16 +1671,12 @@
                   "dinner",
                   "other"
                 ]
-              }
+              },
+              "name": "type_by_time"
             }
           }
         }
       ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
       "nullable": [
         false,
         false,
@@ -1715,57 +1686,57 @@
         false,
         false,
         false
-      ]
-    }
-  },
-  "cc3885920dcebbe7f9915669ef1f2b0927e459211a8ff5dac4d4df59d9051324": {
-    "query": "\n        SELECT r.name, COUNT(fr.recipe_id) FROM recipes r\n        INNER JOIN favorite_recipe fr ON r.id = fr.recipe_id\n        GROUP BY r.name\n        ORDER BY count DESC\n        LIMIT 10;\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "count",
-          "type_info": "Int8"
-        }
       ],
       "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        null
-      ]
-    }
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        SELECT r.name, description, prep_time, cook_time, difficulty as \"difficulty: DifficultyLevel\",\n        steps, c.name as cuisine, meal_type as \"meal_type: TypeByTime\"\n        FROM recipes r\n        INNER JOIN cuisines c ON c.id = r.cuisine_id\n        WHERE r.name = $1\n        "
   },
-  "f1d9568facb0a52c26ad57aab7a01b48d55f734ac7cba900fa669336fc7bc6ba": {
-    "query": "\n            SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n            protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n            FROM ingredients\n            WHERE name = $1;\n            ",
+  "cbf106af4bd4cad9c25ef3b2265ca9167bf5807209a251ac9e04609772dfe434": {
     "describe": {
       "columns": [
         {
+          "name": "user_id",
           "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n                    SELECT user_id FROM users\n                    WHERE oauth_provider = $2 AND oauth_id = $1\n                    "
+  },
+  "f1d9568facb0a52c26ad57aab7a01b48d55f734ac7cba900fa669336fc7bc6ba": {
+    "describe": {
+      "columns": [
+        {
           "name": "name",
+          "ordinal": 0,
           "type_info": "Text"
         },
         {
-          "ordinal": 1,
           "name": "calories_per_100g",
+          "ordinal": 1,
           "type_info": "Float4"
         },
         {
-          "ordinal": 2,
           "name": "category: Vec<FoodCategory>",
+          "ordinal": 2,
           "type_info": {
             "Custom": {
-              "name": "_food_category",
               "kind": {
                 "Array": {
                   "Custom": {
-                    "name": "food_category",
                     "kind": {
                       "Enum": [
                         "vegetable",
@@ -1785,64 +1756,61 @@
                         "beverages",
                         "uncategorized"
                       ]
-                    }
+                    },
+                    "name": "food_category"
                   }
                 }
-              }
+              },
+              "name": "_food_category"
             }
           }
         },
         {
-          "ordinal": 3,
           "name": "g_per_piece",
+          "ordinal": 3,
           "type_info": "Float4"
         },
         {
-          "ordinal": 4,
           "name": "protein",
+          "ordinal": 4,
           "type_info": "Float4"
         },
         {
-          "ordinal": 5,
           "name": "water",
+          "ordinal": 5,
           "type_info": "Float4"
         },
         {
-          "ordinal": 6,
           "name": "fat",
+          "ordinal": 6,
           "type_info": "Float4"
         },
         {
-          "ordinal": 7,
           "name": "sugar",
+          "ordinal": 7,
           "type_info": "Float4"
         },
         {
-          "ordinal": 8,
           "name": "carbohydrate",
+          "ordinal": 8,
           "type_info": "Float4"
         },
         {
-          "ordinal": 9,
           "name": "fiber",
+          "ordinal": 9,
           "type_info": "Float4"
         },
         {
-          "ordinal": 10,
           "name": "caffeine",
+          "ordinal": 10,
           "type_info": "Float4"
         },
         {
-          "ordinal": 11,
           "name": "contains_alcohol",
+          "ordinal": 11,
           "type_info": "Bool"
         }
       ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
       "nullable": [
         false,
         false,
@@ -1856,28 +1824,31 @@
         false,
         false,
         false
-      ]
-    }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n            protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n            FROM ingredients\n            WHERE name = $1;\n            "
   },
   "f72519e6ce5c473f92538bc5873027dba2c3e6226e49a41ee9dde99ee2c1a5c7": {
-    "query": "\n        SELECT\n            COALESCE(igs.name, i.name) AS name,\n            COALESCE(igs.category, i.category) AS \"category: Vec<FoodCategory>\",\n            COALESCE(igs.calories_per_100g, i.calories_per_100g) AS calories_per_100g,\n            COALESCE(igs.g_per_piece, i.g_per_piece) AS g_per_piece,\n            COALESCE(igs.protein, i.protein) AS protein,\n            COALESCE(igs.water, i.water) AS water,\n            COALESCE(igs.fat, i.fat) AS fat,\n            COALESCE(igs.sugar, i.sugar) AS sugar,\n            COALESCE(igs.carbohydrate, i.carbohydrate) AS carbohydrate,\n            COALESCE(igs.fiber, i.fiber) AS fiber,\n            COALESCE(igs.caffeine, i.caffeine) AS caffeine,\n            COALESCE(igs.contains_alcohol, i.contains_alcohol) AS contains_alcohol,\n            is_delete_vote\n        FROM ingredient_suggestions igs\n        INNER JOIN ingredients i ON igs.ingredient_id = i.id\n        WHERE i.name = $1 AND igs.id = $2;\n        ",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "name",
+          "ordinal": 0,
           "type_info": "Text"
         },
         {
-          "ordinal": 1,
           "name": "category: Vec<FoodCategory>",
+          "ordinal": 1,
           "type_info": {
             "Custom": {
-              "name": "_food_category",
               "kind": {
                 "Array": {
                   "Custom": {
-                    "name": "food_category",
                     "kind": {
                       "Enum": [
                         "vegetable",
@@ -1897,75 +1868,71 @@
                         "beverages",
                         "uncategorized"
                       ]
-                    }
+                    },
+                    "name": "food_category"
                   }
                 }
-              }
+              },
+              "name": "_food_category"
             }
           }
         },
         {
-          "ordinal": 2,
           "name": "calories_per_100g",
+          "ordinal": 2,
           "type_info": "Float4"
         },
         {
-          "ordinal": 3,
           "name": "g_per_piece",
+          "ordinal": 3,
           "type_info": "Float4"
         },
         {
-          "ordinal": 4,
           "name": "protein",
+          "ordinal": 4,
           "type_info": "Float4"
         },
         {
-          "ordinal": 5,
           "name": "water",
+          "ordinal": 5,
           "type_info": "Float4"
         },
         {
-          "ordinal": 6,
           "name": "fat",
+          "ordinal": 6,
           "type_info": "Float4"
         },
         {
-          "ordinal": 7,
           "name": "sugar",
+          "ordinal": 7,
           "type_info": "Float4"
         },
         {
-          "ordinal": 8,
           "name": "carbohydrate",
+          "ordinal": 8,
           "type_info": "Float4"
         },
         {
-          "ordinal": 9,
           "name": "fiber",
+          "ordinal": 9,
           "type_info": "Float4"
         },
         {
-          "ordinal": 10,
           "name": "caffeine",
+          "ordinal": 10,
           "type_info": "Float4"
         },
         {
-          "ordinal": 11,
           "name": "contains_alcohol",
+          "ordinal": 11,
           "type_info": "Bool"
         },
         {
-          "ordinal": 12,
           "name": "is_delete_vote",
+          "ordinal": 12,
           "type_info": "Bool"
         }
       ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Uuid"
-        ]
-      },
       "nullable": [
         null,
         null,
@@ -1980,133 +1947,142 @@
         null,
         null,
         true
-      ]
-    }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT\n            COALESCE(igs.name, i.name) AS name,\n            COALESCE(igs.category, i.category) AS \"category: Vec<FoodCategory>\",\n            COALESCE(igs.calories_per_100g, i.calories_per_100g) AS calories_per_100g,\n            COALESCE(igs.g_per_piece, i.g_per_piece) AS g_per_piece,\n            COALESCE(igs.protein, i.protein) AS protein,\n            COALESCE(igs.water, i.water) AS water,\n            COALESCE(igs.fat, i.fat) AS fat,\n            COALESCE(igs.sugar, i.sugar) AS sugar,\n            COALESCE(igs.carbohydrate, i.carbohydrate) AS carbohydrate,\n            COALESCE(igs.fiber, i.fiber) AS fiber,\n            COALESCE(igs.caffeine, i.caffeine) AS caffeine,\n            COALESCE(igs.contains_alcohol, i.contains_alcohol) AS contains_alcohol,\n            is_delete_vote\n        FROM ingredient_suggestions igs\n        INNER JOIN ingredients i ON igs.ingredient_id = i.id\n        WHERE i.name = $1 AND igs.id = $2;\n        "
   },
   "f96013025be0d345c63440de9a5b327cab64a4bdbe497814c23c7e11a5d01bc4": {
-    "query": "SELECT 1 + 1",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "?column?",
+          "ordinal": 0,
           "type_info": "Int4"
         }
       ],
-      "parameters": {
-        "Left": []
-      },
       "nullable": [
         null
-      ]
-    }
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT 1 + 1"
   },
   "f965ddfaea1c637f5b7af104d4d4943d8cfe79a2626fdce6c05bba9a946cd044": {
-    "query": "\n            INSERT INTO forget_password_tokens (token, user_id)\n            VALUES ($1, $2)\n            ",
     "describe": {
       "columns": [],
+      "nullable": [],
       "parameters": {
         "Left": [
           "Uuid",
           "Uuid"
         ]
-      },
-      "nullable": []
-    }
+      }
+    },
+    "query": "\n            INSERT INTO forget_password_tokens (token, user_id)\n            VALUES ($1, $2)\n            "
   },
   "f9f6f942d5a35cef1750eec4a74c47195e8091981404eb2619ad9ef2446abd54": {
-    "query": "SELECT name, is_admin FROM users WHERE user_id = $1",
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "name",
+          "ordinal": 0,
           "type_info": "Text"
         },
         {
-          "ordinal": 1,
           "name": "is_admin",
+          "ordinal": 1,
           "type_info": "Bool"
         }
       ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
       "nullable": [
         false,
         false
-      ]
-    }
-  },
-  "fa436b188991374e915b3efd5b263b259141e04dbaf1c2ad40639ea527dee256": {
-    "query": "\n        SELECT DISTINCT r.name,\n                r.description,\n                COUNT(ir.recipe_id) OVER (PARTITION BY r.id) AS ingredient_count\n        FROM recipes r\n        LEFT JOIN ingredients_to_recipes ir ON ir.recipe_id = r.id\n        WHERE creator_id = $1;\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "ingredient_count",
-          "type_info": "Int8"
-        }
       ],
       "parameters": {
         "Left": [
           "Uuid"
         ]
-      },
+      }
+    },
+    "query": "SELECT name, is_admin FROM users WHERE user_id = $1"
+  },
+  "fa436b188991374e915b3efd5b263b259141e04dbaf1c2ad40639ea527dee256": {
+    "describe": {
+      "columns": [
+        {
+          "name": "name",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "ingredient_count",
+          "ordinal": 2,
+          "type_info": "Int8"
+        }
+      ],
       "nullable": [
         false,
         false,
         null
-      ]
-    }
-  },
-  "faa79e04c5a468b4ee41ea7e1a9ac167ce940c4e54debdb36081c5bd5d5f3587": {
-    "query": "\n        SELECT user_id, token\n        FROM forget_password_tokens\n        WHERE created_at > current_timestamp - INTERVAL '2 days' AND token = $1\n        ORDER BY created_at DESC\n        LIMIT 1;\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "token",
-          "type_info": "Uuid"
-        }
       ],
       "parameters": {
         "Left": [
           "Uuid"
         ]
-      },
-      "nullable": [
-        false,
-        false
-      ]
-    }
+      }
+    },
+    "query": "\n        SELECT DISTINCT r.name,\n                r.description,\n                COUNT(ir.recipe_id) OVER (PARTITION BY r.id) AS ingredient_count\n        FROM recipes r\n        LEFT JOIN ingredients_to_recipes ir ON ir.recipe_id = r.id\n        WHERE creator_id = $1;\n        "
   },
-  "fbdf25efc8c9caf97d2b59f90e4ad9ed4d8a24255ebbde56b11e7d12b7095b16": {
-    "query": "\n        INSERT INTO users (name, email, password_hash)\n        VALUES ($1, $2, $3)\n        RETURNING user_id;\n        ",
+  "faa79e04c5a468b4ee41ea7e1a9ac167ce940c4e54debdb36081c5bd5d5f3587": {
     "describe": {
       "columns": [
         {
-          "ordinal": 0,
           "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "token",
+          "ordinal": 1,
           "type_info": "Uuid"
         }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT user_id, token\n        FROM forget_password_tokens\n        WHERE created_at > current_timestamp - INTERVAL '2 days' AND token = $1\n        ORDER BY created_at DESC\n        LIMIT 1;\n        "
+  },
+  "fbdf25efc8c9caf97d2b59f90e4ad9ed4d8a24255ebbde56b11e7d12b7095b16": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
       ],
       "parameters": {
         "Left": [
@@ -2114,10 +2090,8 @@
           "Text",
           "Text"
         ]
-      },
-      "nullable": [
-        false
-      ]
-    }
+      }
+    },
+    "query": "\n        INSERT INTO users (name, email, password_hash)\n        VALUES ($1, $2, $3)\n        RETURNING user_id;\n        "
   }
 }
