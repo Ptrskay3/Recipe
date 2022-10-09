@@ -150,11 +150,8 @@ where
 {
     sqlx::query!(
         r#"
-        INSERT INTO failed_jobs
-        (job_type, context)
-        VALUES
-        ('email_delivery', $1)
-        ON CONFLICT DO NOTHING
+        INSERT INTO failed_jobs (job_type, context)
+        VALUES ('email_delivery', $1)
         "#,
         serde_json::json!({ "email": email, "confirmation_id": confirmation_id, "error": e.to_string() })
     )

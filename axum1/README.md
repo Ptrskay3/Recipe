@@ -26,6 +26,7 @@ cd .. && ./run_dev.sh
 
 Technical to-do list:
 
-- [ ] decision about the `Queryable`
+- [ ] Merge some migrations (we don't have a stable scheme yet)
+- [ ] Decision about the `Queryable`
 - [ ] Static file server to allow uploading files
 - [ ] Migrate to 0.6.0, `State` instead of `Extension`
