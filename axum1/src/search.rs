@@ -37,11 +37,9 @@ async fn run_meili_indexer(
         let task = meili_client
             .index("ingredients")
             .add_documents(&records, None)
-            .await
-            .unwrap()
+            .await?
             .wait_for_completion(&meili_client, None, None)
-            .await
-            .unwrap();
+            .await?;
 
         tracing::info!("indexing finished, success: {}", task.is_success());
         tokio::time::sleep(std::time::Duration::from_secs(3600)).await;
