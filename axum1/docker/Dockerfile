@@ -5,7 +5,7 @@ FROM chef as planner
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM chef as builderc
+FROM chef as builder
 ENV SQLX_OFFLINE=1
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
