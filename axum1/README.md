@@ -13,7 +13,7 @@ cd docker && ./setup_dev.sh
 then install `sqlx-cli`:
 
 ```sh
-cargo install --version=0.5.7 sqlx-cli --no-default-features --features postgres
+cargo install sqlx-cli --version=0.6.2
 ```
 
 Create a `configuration/local.yml` based on the `local.example.yml`.

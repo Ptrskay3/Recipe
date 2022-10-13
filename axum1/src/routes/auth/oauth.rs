@@ -107,7 +107,7 @@ macro_rules! oauth_handlers_for_provider {
                     .await
                     .map_err(|_| ApiError::BadRequest)?;
 
-                // Fetch user data from Google
+                // Fetch user data from the external provider
                 let client = reqwest::Client::new();
                 let user_data: $response_data = client
                     .get($url)
@@ -116,7 +116,7 @@ macro_rules! oauth_handlers_for_provider {
                     .await?
                     .json::<$response_data>()
                     .await
-                    .expect("They promised");
+                    .expect(concat!($provider, " promised"));
 
                 let mut tx = conn.begin().await?;
 
