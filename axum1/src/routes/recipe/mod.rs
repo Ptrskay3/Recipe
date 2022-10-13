@@ -261,6 +261,7 @@ async fn delete_ingredient_from_recipe(
     Ok(())
 }
 
+#[tracing::instrument(skip(conn, auth_user))]
 async fn insert_full_recipe(
     DatabaseConnection(mut conn): DatabaseConnection,
     // We want to accept Json input here instead of Form, because the structure
@@ -359,6 +360,7 @@ struct RecipeWithIngredientCount {
     ingredient_count: Option<i64>,
 }
 
+#[tracing::instrument(skip_all)]
 async fn my_recipes(
     DatabaseConnection(mut conn): DatabaseConnection,
     auth_user: AuthUser,
@@ -381,6 +383,7 @@ async fn my_recipes(
     Ok(Json(results))
 }
 
+#[tracing::instrument(skip(conn, auth_user))]
 async fn toggle_favorite_recipe(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path(name): Path<String>,
@@ -404,6 +407,7 @@ async fn toggle_favorite_recipe(
     }
 }
 
+#[tracing::instrument(skip_all)]
 async fn my_favorite_recipes(
     DatabaseConnection(mut conn): DatabaseConnection,
     auth_user: AuthUser,
@@ -437,6 +441,7 @@ struct LimitedQuery {
     limit: Option<i64>,
 }
 
+#[tracing::instrument(skip(conn))]
 async fn most_popular_recipes(
     DatabaseConnection(mut conn): DatabaseConnection,
     Query(query): Query<LimitedQuery>,

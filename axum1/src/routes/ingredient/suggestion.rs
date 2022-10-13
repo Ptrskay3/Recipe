@@ -21,6 +21,7 @@ impl IngredientSuggestion {
     }
 }
 
+#[tracing::instrument(skip(conn, auth_user))]
 pub async fn add_ingredient_suggestion(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path(name): Path<String>,
@@ -95,6 +96,7 @@ pub struct SuggestedIngredient {
     suggester: String,
 }
 
+#[tracing::instrument(skip(conn))]
 pub async fn get_ingredient_suggestions(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path(name): Path<String>,
@@ -147,6 +149,7 @@ pub struct Suggestion {
     is_delete_vote: Option<bool>,
 }
 
+#[tracing::instrument(skip(conn))]
 pub async fn get_ingredient_suggestion(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path((name, id)): Path<(String, uuid::Uuid)>,
@@ -181,6 +184,7 @@ pub async fn get_ingredient_suggestion(
     Ok(Json(suggestion))
 }
 
+#[tracing::instrument(skip(conn, id))]
 pub async fn apply_suggestion(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path((name, id)): Path<(String, uuid::Uuid)>,
@@ -243,6 +247,7 @@ pub async fn apply_suggestion(
     Ok(())
 }
 
+#[tracing::instrument(skip_all)]
 pub async fn decline_suggestion(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path((_, id)): Path<(String, uuid::Uuid)>,
