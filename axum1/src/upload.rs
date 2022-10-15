@@ -94,52 +94,26 @@ where
             );
         }
         let file_path = user_dir.join(path);
-        let already_exists = file_path.exists();
         let mut file = BufWriter::new(File::create(file_path.clone()).await?);
 
         // Copy the body into the file.
         let bytes_copied = tokio::io::copy(&mut body_reader, &mut file).await?;
         tracing::info!("written {bytes_copied} bytes");
 
-        // TODO: Probably we should make (uploader_id, file_name) a PK in the DB..
-        // That would clean up the logic below, so that we don't even need `already_exists`, and we could
-        // use an `ON CONFLICT` clause.
-        if !already_exists {
-            sqlx::query!(
-                "INSERT INTO uploads (uploader_id, bytes, file_name) VALUES ($1, $2, $3)",
-                user_id,
-                bytes_copied as f32,
-                file_path
-                    .as_path()
-                    .file_name()
-                    .expect("only valid files can be uploaded")
-                    .to_str()
-                    .expect("only valid files can be uploaded")
-            )
-            .execute(tx)
-            .await
-            .map_err(|_| {
-                io::Error::new(ErrorKind::Interrupted, "failed to insert to uploads table")
-            })?;
-        } else {
-            sqlx::query!(
-                "UPDATE uploads SET bytes =  $1 WHERE uploader_id = $2 AND file_name = $3",
-                bytes_copied as f32,
-                user_id,
-                file_path
-                    .as_path()
-                    .file_name()
-                    .expect("only valid files can be uploaded")
-                    .to_str()
-                    .expect("only valid files can be uploaded")
-            )
-            .execute(tx)
-            .await
-            .map_err(|_| {
-                io::Error::new(ErrorKind::Interrupted, "failed to update uploads table")
-            })?;
-        }
-
+        sqlx::query!(
+            "INSERT INTO uploads (uploader_id, bytes, file_name) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING",
+            user_id,
+            bytes_copied as f32,
+            file_path
+                .as_path()
+                .file_name()
+                .expect("only valid files can be uploaded")
+                .to_str()
+                .expect("only valid files can be uploaded")
+        )
+        .execute(tx)
+        .await
+        .map_err(|_| io::Error::new(ErrorKind::Interrupted, "failed to insert to uploads table"))?;
         Ok::<_, io::Error>(())
     }
     .await
