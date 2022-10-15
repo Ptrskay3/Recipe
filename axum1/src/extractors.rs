@@ -108,3 +108,56 @@ where
         }
     }
 }
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct Uploader {
+    pub id: uuid::Uuid,
+    pub bytes_limit: f32,
+}
+
+#[async_trait]
+impl<S> FromRequestParts<S> for Uploader
+where
+    S: Send + Sync,
+{
+    type Rejection = ApiError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let Extension(session) =
+            Extension::<crate::session_ext::Session>::from_request_parts(parts, state)
+                .await
+                .expect("`SessionLayer` should be added");
+
+        let Extension(pool) = Extension::<PgPool>::from_request_parts(parts, state)
+            .await
+            .expect("`Database` extension is missing");
+
+        let mut db = pool.acquire().await?;
+
+        let user_id = session
+            .get::<uuid::Uuid>("user_id")
+            .ok_or(ApiError::Unauthorized)?;
+
+        let bytes_limit = sqlx::query!(
+            "SELECT COALESCE(SUM(bytes), 0) as upload_limit FROM uploads
+            WHERE
+              uploader_id = $1 AND created_at > current_timestamp - INTERVAL '1 days';",
+            user_id
+        )
+        .fetch_optional(&mut db)
+        .await?
+        .ok_or(ApiError::BadRequest)?
+        .upload_limit
+        .unwrap_or(0.0); // TODO: Probably this should take the max current limit value on some kind of error..
+
+        // 25 MB, TODO: make this some kind of config variable
+        if bytes_limit < (25 * 1024 * 1024) as f32 {
+            Ok(Self {
+                bytes_limit,
+                id: user_id,
+            })
+        } else {
+            Err(ApiError::Forbidden)
+        }
+    }
+}
