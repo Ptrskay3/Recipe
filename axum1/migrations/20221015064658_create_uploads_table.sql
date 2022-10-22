@@ -4,7 +4,7 @@ CREATE TABLE "uploads"
 
     file_name    TEXT NOT NULL,
   
-    bytes        REAL NOT NULL,
+    bytes        INT NOT NULL,
 
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 

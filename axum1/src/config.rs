@@ -14,12 +14,18 @@ use crate::{
 pub struct Settings {
     pub database: DatabaseSettings,
     pub redis: RedisSettings,
-    pub application_port: u16,
+    pub application_settings: ApplicationSettings,
     pub frontend_url: String,
     pub sentry_dsn: Option<String>,
     pub email_client: EmailClientSettings,
     pub meili: MeiliConfig,
     pub oauth: OAuth,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct ApplicationSettings {
+    pub port: u16,
+    pub daily_upload_limit_bytes: i64,
 }
 
 #[derive(Deserialize, Clone)]

@@ -23,7 +23,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
 
     let config = crate::config::get_config().expect("Configuration file is missing");
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], config.application_port));
+    let addr = SocketAddr::from(([127, 0, 0, 1], config.application_settings.port));
 
     let discord_oauth_client = oauth_client_discord(&config);
     let google_oauth_client = oauth_client_google(&config);
@@ -61,6 +61,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
                 .layer(TraceLayer::new_for_http())
                 .layer(metric_layer)
                 .layer(Extension(db_pool))
+                .layer(Extension(config.application_settings))
                 .layer(Extension(store.clone()))
                 .layer(
                     SessionLayer::new(store, config.redis.secret_key.as_bytes()).with_secure(

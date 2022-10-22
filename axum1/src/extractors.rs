@@ -1,6 +1,6 @@
 use std::{convert::Infallible, ops::Deref};
 
-use crate::error::ApiError;
+use crate::{config::ApplicationSettings, error::ApiError};
 use async_redis_session::RedisSessionStore;
 use axum::{async_trait, extract::FromRequestParts, http::request::Parts, Extension};
 use sqlx::{pool, PgPool, Postgres};
@@ -112,7 +112,7 @@ where
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct Uploader {
     pub id: uuid::Uuid,
-    pub bytes_limit: f32,
+    pub bytes_limit: i64,
 }
 
 #[async_trait]
@@ -132,6 +132,13 @@ where
             .await
             .expect("`Database` extension is missing");
 
+        let Extension(ApplicationSettings {
+            daily_upload_limit_bytes,
+            ..
+        }) = Extension::<ApplicationSettings>::from_request_parts(parts, state)
+            .await
+            .expect("`ApplicationSettings` extension is missing");
+
         let mut db = pool.acquire().await?;
 
         let user_id = session
@@ -140,18 +147,16 @@ where
 
         let bytes_limit = sqlx::query!(
             "SELECT COALESCE(SUM(bytes), 0) as upload_limit FROM uploads
-            WHERE
-              uploader_id = $1 AND created_at > current_timestamp - INTERVAL '1 days';",
+            WHERE uploader_id = $1 AND created_at > current_timestamp - INTERVAL '1 days';",
             user_id
         )
         .fetch_optional(&mut db)
         .await?
         .ok_or(ApiError::BadRequest)?
         .upload_limit
-        .unwrap_or(0.0); // TODO: Probably this should take the max current limit value on some kind of error..
+        .unwrap_or(daily_upload_limit_bytes);
 
-        // 25 MB, TODO: make this some kind of config variable
-        if bytes_limit < (25 * 1024 * 1024) as f32 {
+        if bytes_limit < daily_upload_limit_bytes {
             Ok(Self {
                 bytes_limit,
                 id: user_id,
