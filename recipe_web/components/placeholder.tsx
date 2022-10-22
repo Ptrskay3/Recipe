@@ -64,6 +64,7 @@ export default function Placeholder() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            // @ts-ignore
             let file = e.target.uploadFile.files[0];
             let formData = new FormData();
             formData.append('file', file);

@@ -15,11 +15,14 @@ import {
 import { useRouter } from 'next/router';
 import { intoFormBody } from '../utils/form';
 import { useFormik } from 'formik';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import NextLink from 'next/link';
 import { CloseIcon } from '@chakra-ui/icons';
 import { useToast } from '@chakra-ui/react';
+import useSWR from 'swr';
+import { fetcherOk } from '../utils/fetcher';
+import { useValidToken } from '../hooks/token';
 
 function ForgetPasswordGen() {
   const router = useRouter();
@@ -30,6 +33,21 @@ function ForgetPasswordGen() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ password?: string; password_ensure?: string }>({});
   const toast = useToast();
+
+  const { isLoading, isValid } = useValidToken(token);
+  useEffect(() => {
+    console.log('calling..');
+    if (!isLoading && isValid === false) {
+      toast({
+        title: 'Token is no longer valid',
+        description: 'Redirecting to the homepage.',
+        status: 'error',
+        duration: 9000,
+        isClosable: true,
+      });
+      router.replace('/');
+    }
+  }, [token, isLoading, isValid, router, toast]);
 
   const formik = useFormik({
     initialValues: {

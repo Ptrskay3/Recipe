@@ -35,6 +35,7 @@ pub fn auth_router() -> Router {
         .route("/confirm", get(confirm))
         .route("/forget_password_gen", post(forget_password_gen))
         .route("/forget_password", post(forget_password))
+        .route("/is_token_valid", get(is_token_valid))
         .route("/auth/discord_authorize", get(discord_authorize))
         .route("/auth/google_authorize", get(google_authorize))
         .route("/auth/discord", get(discord_auth))
@@ -330,4 +331,25 @@ async fn forget_password(
     } else {
         Err(ApiError::BadRequest)
     }
+}
+
+async fn is_token_valid(
+    Query(params): Query<ForgetPasswordParameters>,
+    DatabaseConnection(mut conn): DatabaseConnection,
+) -> Result<(), ApiError> {
+    sqlx::query!(
+        r#"
+        SELECT token
+        FROM forget_password_tokens
+        WHERE created_at > current_timestamp - INTERVAL '2 days' AND token = $1
+        ORDER BY created_at DESC
+        LIMIT 1;
+        "#,
+        params.token,
+    )
+    .fetch_optional(&mut conn)
+    .await?
+    .ok_or(ApiError::NotFound)?;
+
+    Ok(())
 }
