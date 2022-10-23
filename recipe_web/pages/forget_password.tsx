@@ -36,7 +36,6 @@ function ForgetPasswordGen() {
 
   const { isLoading, isValid } = useValidToken(token);
   useEffect(() => {
-    console.log('calling..');
     if (!isLoading && isValid === false) {
       toast({
         title: 'Token is no longer valid',
