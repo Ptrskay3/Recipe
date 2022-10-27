@@ -150,9 +150,8 @@ where
             WHERE uploader_id = $1 AND created_at > current_timestamp - INTERVAL '1 days';",
             user_id
         )
-        .fetch_optional(&mut db)
+        .fetch_one(&mut db)
         .await?
-        .ok_or(ApiError::BadRequest)?
         .upload_limit
         .unwrap_or(daily_upload_limit_bytes);
 
