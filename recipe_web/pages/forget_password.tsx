@@ -20,8 +20,6 @@ import dynamic from 'next/dynamic';
 import NextLink from 'next/link';
 import { CloseIcon } from '@chakra-ui/icons';
 import { useToast } from '@chakra-ui/react';
-import useSWR from 'swr';
-import { fetcherOk } from '../utils/fetcher';
 import { useValidToken } from '../hooks/token';
 
 function ForgetPasswordGen() {

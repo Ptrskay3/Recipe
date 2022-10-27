@@ -2,6 +2,7 @@ use crate::{
     email::EmailClient,
     routes::{admin_router, auth_router, ingredient_router, recipe_router},
     session::SessionLayer,
+    sse::sse_handler,
     upload::upload_router,
     utils::{oauth_client_discord, oauth_client_google, shutdown_signal},
 };
@@ -15,7 +16,7 @@ use axum::{
 };
 use axum_prometheus::PrometheusMetricLayer;
 use sqlx::postgres::PgPoolOptions;
-use std::net::SocketAddr;
+use std::{net::SocketAddr, sync::Arc};
 use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
 
 pub async fn application() -> Result<(), anyhow::Error> {
@@ -48,8 +49,13 @@ pub async fn application() -> Result<(), anyhow::Error> {
 
     let (metric_layer, metric_handle) = PrometheusMetricLayer::pair();
 
+    let (tx, rx) = tokio::sync::broadcast::channel::<String>(16);
+    let tx = Arc::new(tx);
+    let rx = Arc::new(rx);
+
     let app = Router::new()
         .route("/metrics", get(|| async move { metric_handle.render() }))
+        .route("/sse", get(sse_handler))
         .nest("/i", ingredient_router())
         .nest("/r", recipe_router())
         .nest("/", auth_router())
@@ -63,6 +69,8 @@ pub async fn application() -> Result<(), anyhow::Error> {
                 .layer(Extension(db_pool))
                 .layer(Extension(config.application_settings))
                 .layer(Extension(store.clone()))
+                .layer(Extension(tx))
+                .layer(Extension(rx))
                 .layer(
                     SessionLayer::new(store, config.redis.secret_key.as_bytes()).with_secure(
                         std::env::var("APP_ENVIRONMENT").unwrap_or_else(|_| String::from("local"))

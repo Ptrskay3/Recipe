@@ -62,5 +62,6 @@ axum-macros = "0.3.0-rc.1"
 base64 = "*"
 blake3 = "*"
 paste = "1.0.9"
+async-stream = "0.3.3"
 
 [dev-dependencies]

@@ -14,7 +14,6 @@ import {
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { intoFormBody } from '../utils/form';
-import { useAlreadyAuth } from '../utils/useAlreadyAuth';
 import { useFormik } from 'formik';
 import { useState } from 'react';
 import dynamic from 'next/dynamic';

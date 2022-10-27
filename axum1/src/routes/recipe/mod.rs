@@ -3,7 +3,7 @@ use axum::{
     extract::{Json, Path, Query},
     http::StatusCode,
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 use axum_extra::extract::Form;
 use sqlx::{types::BigDecimal, Acquire};
@@ -263,6 +263,7 @@ async fn delete_ingredient_from_recipe(
 
 #[tracing::instrument(skip(conn, auth_user))]
 async fn insert_full_recipe(
+    Extension(channel): Extension<std::sync::Arc<tokio::sync::broadcast::Sender<String>>>,
     DatabaseConnection(mut conn): DatabaseConnection,
     // We want to accept Json input here instead of Form, because the structure
     // of `RecipeWithIngredients` is too complicated to handle with a form.
@@ -350,6 +351,10 @@ async fn insert_full_recipe(
     }
 
     tx.commit().await?;
+
+    channel
+        .send("Someone just added a new recipe".into())
+        .unwrap();
     Ok(())
 }
 
