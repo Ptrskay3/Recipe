@@ -24,7 +24,8 @@ pub fn recipe_router() -> Router {
     let action_router = Router::new()
         .route("/my-recipes", get(my_recipes))
         .route("/favorites", get(my_favorite_recipes))
-        .route("/popular", get(most_popular_recipes));
+        .route("/popular", get(most_popular_recipes))
+        .route("/hot", get(hot_recipes));
 
     Router::new()
         .route("/", post(insert_full_recipe))
@@ -451,10 +452,7 @@ async fn most_popular_recipes(
     DatabaseConnection(mut conn): DatabaseConnection,
     Query(query): Query<LimitedQuery>,
 ) -> Result<Json<Vec<RecipeWithFavoriteCount>>, ApiError> {
-    let limit = match query.limit {
-        Some(limit) if limit >= 0 => limit,
-        _ => 10,
-    };
+    let limit = query.limit.filter(|&limit| limit >= 0).unwrap_or(10);
     let results = sqlx::query_as!(
         RecipeWithFavoriteCount,
         r#"
@@ -463,6 +461,30 @@ async fn most_popular_recipes(
         GROUP BY r.name
         ORDER BY count DESC
         LIMIT $1;
+        "#,
+        limit
+    )
+    .fetch_all(&mut conn)
+    .await?;
+
+    Ok(Json(results))
+}
+
+#[tracing::instrument(skip(conn))]
+async fn hot_recipes(
+    DatabaseConnection(mut conn): DatabaseConnection,
+    Query(query): Query<LimitedQuery>,
+) -> Result<Json<Vec<RecipeWithFavoriteCount>>, ApiError> {
+    let limit = query.limit.filter(|&limit| limit >= 0).unwrap_or(10);
+    let results = sqlx::query_as!(
+        RecipeWithFavoriteCount,
+        r#"
+        SELECT r.name, COUNT(fr.recipe_id) FROM favorite_recipe fr
+        INNER JOIN recipes r ON r.id = fr.recipe_id
+        WHERE fr.created_at > current_timestamp - INTERVAL '14 days'
+        GROUP BY r.name
+        ORDER BY count DESC
+        LIMIT $1
         "#,
         limit
     )

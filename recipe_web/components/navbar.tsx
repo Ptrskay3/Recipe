@@ -277,8 +277,13 @@ const NAV_ITEMS: Array<NavItem> = [
     children: [
       {
         label: 'Popular',
-        subLabel: 'See recently popular meals',
+        subLabel: 'See all-time popular meals',
         href: '/popular',
+      },
+      {
+        label: 'Hot',
+        subLabel: 'See recently featured meals',
+        href: '/hot',
       },
       {
         label: 'New',

@@ -36,11 +36,11 @@ interface ModifiedAttributes {
 
 export default function Ingredient({
   iProps,
-  withModifiedAttributes = [],
   isNew,
   isDeleteVote,
-  shouldShowEditControls = false,
   editableMapping,
+  shouldShowEditControls = false,
+  withModifiedAttributes = [],
 }: { iProps: IngredientProps } & ModifiedAttributes) {
   const coloring = isNew ? 'green.400' : 'red.400';
   const [editModeOpen, editedValues, updateEditedValues] = useIngredientEditMode((state) => [
@@ -174,5 +174,5 @@ export default function Ingredient({
 
 // TODO: this is dumb
 const intoCategory = (c: string) => {
-  return c.split('_').join(' ');
+  return c.replaceAll('_', ' ');
 };
