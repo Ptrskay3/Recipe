@@ -8,11 +8,12 @@ use axum::{
     Extension,
 };
 use futures::{Stream, StreamExt};
+use serde::{Deserialize, Serialize};
 
 use crate::utils::shutdown_signal;
 
 pub async fn sse_handler(
-    Extension(chan): Extension<Arc<tokio::sync::broadcast::Sender<String>>>,
+    Extension(chan): Extension<Arc<tokio::sync::broadcast::Sender<Notification>>>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     // Create an internal channel which transmits all traffic that's coming from our `chan`.
     let (mut tx, rx) = futures::channel::mpsc::channel::<Result<Event, Infallible>>(16);
@@ -22,7 +23,7 @@ pub async fn sse_handler(
         use futures::SinkExt;
 
         while let Ok(m) = sub.recv().await {
-            let _ = tx.send(Ok(Event::default().data(m.as_str()))).await;
+            let _ = tx.send(Ok(Event::default().json_data(m).unwrap())).await;
         }
     });
 
@@ -53,4 +54,15 @@ where
             }
         }
     }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "t")]
+pub enum Notification {
+    NewRecipe(NewRecipe),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NewRecipe {
+    pub name: String,
 }

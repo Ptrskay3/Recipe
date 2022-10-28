@@ -12,6 +12,7 @@ use validator::Validate;
 use crate::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
+    sse::{NewRecipe, Notification},
     RE_RECIPE,
 };
 
@@ -203,12 +204,24 @@ struct InsertIngredient {
 #[tracing::instrument(skip(conn))]
 async fn add_or_update_ingredient_to_recipe(
     DatabaseConnection(mut conn): DatabaseConnection,
+    auth_user: AuthUser,
     Path(name): Path<String>,
     Form(ingredient): Form<InsertIngredient>,
 ) -> Result<(), ApiError> {
     ingredient
         .validate()
         .map_err(ApiError::unprocessable_entity_from_validation_errors)?;
+
+    let mut tx = conn.begin().await?;
+
+    sqlx::query!(
+        "SELECT id FROM recipes WHERE creator_id = $1 AND name = $2",
+        *auth_user,
+        name
+    )
+    .fetch_optional(&mut tx)
+    .await?
+    .ok_or(ApiError::BadRequest)?;
 
     sqlx::query!(
         r#"
@@ -228,10 +241,11 @@ async fn add_or_update_ingredient_to_recipe(
         ingredient.quantity,
         ingredient.quantity_unit
     )
-    .execute(&mut conn)
+    .execute(&mut tx)
     .await
     .map_err(|_| ApiError::BadRequest)?;
 
+    tx.commit().await?;
     Ok(())
 }
 
@@ -264,7 +278,7 @@ async fn delete_ingredient_from_recipe(
 
 #[tracing::instrument(skip(conn, auth_user))]
 async fn insert_full_recipe(
-    Extension(channel): Extension<std::sync::Arc<tokio::sync::broadcast::Sender<String>>>,
+    Extension(channel): Extension<std::sync::Arc<tokio::sync::broadcast::Sender<Notification>>>,
     DatabaseConnection(mut conn): DatabaseConnection,
     // We want to accept Json input here instead of Form, because the structure
     // of `RecipeWithIngredients` is too complicated to handle with a form.
@@ -354,7 +368,7 @@ async fn insert_full_recipe(
     tx.commit().await?;
 
     channel
-        .send("Someone just added a new recipe".into())
+        .send(Notification::NewRecipe(NewRecipe { name }))
         .unwrap();
     Ok(())
 }

@@ -61,6 +61,15 @@ export function AddIngredientForm() {
       });
 
       setLoading(false);
+      if (response.status === 400) {
+        toast({
+          title: 'Not authorized to perform that',
+          status: 'error',
+          duration: 9000,
+          isClosable: true,
+        });
+        return;
+      }
       if (!response.ok) {
         toast({
           title: 'This ingredient does not exist',

@@ -2,7 +2,7 @@ use crate::{
     email::EmailClient,
     routes::{admin_router, auth_router, ingredient_router, recipe_router},
     session::SessionLayer,
-    sse::sse_handler,
+    sse::{sse_handler, Notification},
     upload::upload_router,
     utils::{oauth_client_discord, oauth_client_google, shutdown_signal},
 };
@@ -49,7 +49,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
 
     let (metric_layer, metric_handle) = PrometheusMetricLayer::pair();
 
-    let (tx, rx) = tokio::sync::broadcast::channel::<String>(16);
+    let (tx, rx) = tokio::sync::broadcast::channel::<Notification>(16);
     let tx = Arc::new(tx);
     let rx = Arc::new(rx);
 

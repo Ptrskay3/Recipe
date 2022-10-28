@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import theme from '../common/theme';
 import '../styles/globals.css';
+import { prettyNotification } from '../utils/pretty';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [mounted, setMounted] = useState(false);
@@ -22,11 +23,14 @@ function MyApp({ Component, pageProps }: AppProps) {
     };
 
     sse.onmessage = (e) => {
+      const { t, name } = JSON.parse(e.data);
       toast({
-        title: e.data,
-        status: 'success',
+        title: prettyNotification(t),
+        description: `someone just added a recipe called "${name}"`,
+        status: 'info',
         duration: 9000,
         isClosable: true,
+        position: 'bottom-right',
       });
     };
     return () => {
