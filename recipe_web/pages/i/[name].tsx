@@ -13,6 +13,7 @@ import Ingredient from '../../components/ingredient';
 import { Layout } from '../../components/layout';
 import { editableMapping } from '../../utils/constants';
 import { fetcher } from '../../utils/fetcher';
+import NextLink from 'next/link';
 
 export default function IngredientDetailed() {
   const router = useRouter();
@@ -59,9 +60,9 @@ export default function IngredientDetailed() {
                   <UnorderedList>
                     {suggestions.map(({ id, suggester }: { id: number; suggester: string }) => (
                       <Stack mb="2" key={id}>
-                        <ListItem as={'a'} href={`/i/${name}/suggestion/${id}`}>
-                          {'Suggestion by ' + suggester}
-                        </ListItem>
+                        <NextLink passHref href={`/i/${name}/suggestion/${id}`}>
+                          <ListItem as={'a'}>{'Suggestion by ' + suggester}</ListItem>
+                        </NextLink>
                       </Stack>
                     ))}
                   </UnorderedList>

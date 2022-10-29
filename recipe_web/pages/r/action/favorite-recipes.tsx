@@ -13,6 +13,7 @@ import useSWR from 'swr';
 import { Layout } from '../../../components/layout';
 import { fetcher } from '../../../utils/fetcher';
 import { useAuth } from '../../../utils/useAuth';
+import NextLink from 'next/link';
 
 interface IRecipe {
   name: string;
@@ -53,11 +54,13 @@ export default function MyRecipes() {
               <UnorderedList>
                 {data.map((recipe: IRecipe) => (
                   <ListItem key={recipe.name}>
-                    <Flex as="a" href={`/r/${recipe.name}`} _hover={{ color: 'orange.400' }}>
-                      <Heading>{recipe.name}</Heading>
-                      <Text m={4}>{recipe.description}</Text>
-                      <Text m={4}>{'ingredients: ' + recipe.ingredient_count}</Text>
-                    </Flex>
+                    <NextLink passHref href={`/r/${recipe.name}`}>
+                      <Flex as="a" _hover={{ color: 'orange.400' }}>
+                        <Heading>{recipe.name}</Heading>
+                        <Text m={4}>{recipe.description}</Text>
+                        <Text m={4}>{'ingredients: ' + recipe.ingredient_count}</Text>
+                      </Flex>
+                    </NextLink>
                   </ListItem>
                 ))}
               </UnorderedList>

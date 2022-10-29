@@ -20,10 +20,12 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { FaMoon, FaPlus, FaSun } from 'react-icons/fa';
-import { useMe } from '../hooks/me';
+import NextLink from 'next/link';
+import React from 'react';
 import { UserMenu } from './menu';
+import { useMe } from '../hooks/me';
 
-export default function WithSubnavigation() {
+function WithSubnavigation() {
   const { isOpen, onToggle } = useDisclosure();
   const { colorMode, toggleColorMode } = useColorMode();
 
@@ -54,15 +56,16 @@ export default function WithSubnavigation() {
           />
         </Flex>
         <Flex flex={{ base: 1 }} justify={{ base: 'center', md: 'start' }}>
-          <Text
-            textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
-            fontFamily={'heading'}
-            color={useColorModeValue('gray.800', 'white')}
-            as={'a'}
-            href="/"
-          >
-            Recipes
-          </Text>
+          <NextLink passHref href="/">
+            <Text
+              textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
+              fontFamily={'heading'}
+              color={useColorModeValue('gray.800', 'white')}
+              as={'a'}
+            >
+              Recipes
+            </Text>
+          </NextLink>
 
           <Flex display={{ base: 'none', md: 'flex' }} ml={10}>
             <DesktopNav />
@@ -101,13 +104,14 @@ export default function WithSubnavigation() {
           ) : (
             <Center>
               <HStack>
-                <IconButton
-                  as={'a'}
-                  href="/r/action/new"
-                  aria-label="new recipe"
-                  icon={<FaPlus />}
-                  mr="4"
-                ></IconButton>
+                <NextLink passHref href="/r/action/new">
+                  <IconButton
+                    as={'a'}
+                    aria-label="new recipe"
+                    icon={<FaPlus />}
+                    mr="4"
+                  ></IconButton>
+                </NextLink>
                 <UserMenu name={me.name}></UserMenu>
               </HStack>
             </Center>
@@ -314,3 +318,6 @@ const NAV_ITEMS: Array<NavItem> = [
     ],
   },
 ];
+
+const NavBar = React.memo(WithSubnavigation);
+export default NavBar;

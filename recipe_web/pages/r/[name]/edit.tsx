@@ -1,4 +1,4 @@
-import { EditIcon } from '@chakra-ui/icons';
+import { PlusSquareIcon } from '@chakra-ui/icons';
 import {
   Box,
   Center,
@@ -14,20 +14,17 @@ import {
 import { useRouter } from 'next/router';
 import { FaHeart, FaHeartBroken } from 'react-icons/fa';
 import useSWR, { useSWRConfig } from 'swr';
-import IncludedIngredient from '../../components/included_ingredient';
-import { Layout } from '../../components/layout';
-import { useMe } from '../../hooks/me';
-import { useAddIngredient } from '../../stores/useAddIngredient';
-import { fetcher } from '../../utils/fetcher';
-import NextLink from 'next/link';
+import { AddIngredientForm } from '../../../components/add_ingredient_form';
+import IncludedIngredient from '../../../components/included_ingredient';
+import { Layout } from '../../../components/layout';
+import { useMe } from '../../../hooks/me';
+import { fetcher } from '../../../utils/fetcher';
 
-export default function RecipeDetailed() {
+export default function RecipeDetailedEdit() {
   const { me } = useMe();
   const { mutate } = useSWRConfig();
   const router = useRouter();
   const { name } = router.query;
-  const addIngredientOpen = useAddIngredient((state) => state.addIngredientOpen);
-  const setAddIngredientOpen = useAddIngredient((state) => state.setAddIngredientOpen);
 
   const { data, error } = useSWR(
     !!name ? `${process.env.NEXT_PUBLIC_BASE_URL}/r/${name}` : null,
@@ -108,15 +105,10 @@ export default function RecipeDetailed() {
                     ))}
                 </Wrap>
               </VStack>
-              <NextLink passHref href={`/r/${name}/edit`}>
-                <IconButton
-                  aria-label="edit recipe"
-                  size="md"
-                  icon={<EditIcon></EditIcon>}
-                  as={'a'}
-                />
-              </NextLink>
             </Flex>
+          </Center>
+          <Center>
+            <AddIngredientForm />
           </Center>
         </Box>
       </Layout>

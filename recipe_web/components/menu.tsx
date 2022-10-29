@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { primaryButtonStyles } from '../common/ button_styles';
+import NextLink from 'next/link';
 
 export const UserMenu = ({ name }: { name: string }) => {
   const router = useRouter();
@@ -50,24 +51,26 @@ export const UserMenu = ({ name }: { name: string }) => {
           >
             My Profile
           </MenuItem>
-          <MenuItem
-            value="recipes"
-            {...primaryButtonStyles}
-            _hover={{ textColor: 'orange.400', bg: useColorModeValue('orange.50', 'gray.900') }}
-            as={'a'}
-            href="/r/action/my-recipes"
-          >
-            My Recipes
-          </MenuItem>
-          <MenuItem
-            value="favorites"
-            {...primaryButtonStyles}
-            _hover={{ textColor: 'orange.400', bg: useColorModeValue('orange.50', 'gray.900') }}
-            as={'a'}
-            href="/r/action/favorite-recipes"
-          >
-            Favorite recipes
-          </MenuItem>
+          <NextLink passHref href="/r/action/my-recipes">
+            <MenuItem
+              value="recipes"
+              {...primaryButtonStyles}
+              _hover={{ textColor: 'orange.400', bg: useColorModeValue('orange.50', 'gray.900') }}
+              as={'a'}
+            >
+              My Recipes
+            </MenuItem>
+          </NextLink>
+          <NextLink passHref href="/r/action/favorite-recipes">
+            <MenuItem
+              value="favorites"
+              {...primaryButtonStyles}
+              _hover={{ textColor: 'orange.400', bg: useColorModeValue('orange.50', 'gray.900') }}
+              as={'a'}
+            >
+              Favorite recipes
+            </MenuItem>
+          </NextLink>
           <MenuItem
             value="settings"
             {...primaryButtonStyles}

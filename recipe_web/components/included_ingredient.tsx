@@ -14,6 +14,7 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { intoFormBody } from '../utils/form';
 import { EditableControls } from './editable_custom_controls';
+import NextLink from 'next/link';
 
 interface IncludedIngredientProps {
   name: string;
@@ -83,15 +84,11 @@ export default function IncludedIngredient({
           }}
         ></Box>
         <Stack pt={10} align={'center'}>
-          <Text
-            as={'a'}
-            href={`/i/${name}`}
-            fontSize={'xl'}
-            textTransform={'uppercase'}
-            color={'orange.400'}
-          >
-            {name}
-          </Text>
+          <NextLink passHref href={`/i/${name}`}>
+            <Text as={'a'} fontSize={'xl'} textTransform={'uppercase'} color={'orange.400'}>
+              {name}
+            </Text>
+          </NextLink>
           <Editable
             submitOnBlur={true}
             defaultValue={quantity}

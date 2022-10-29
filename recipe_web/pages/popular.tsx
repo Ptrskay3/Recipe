@@ -12,6 +12,7 @@ import {
 import useSWR from 'swr';
 import { Layout } from '../components/layout';
 import { fetcher } from '../utils/fetcher';
+import NextLink from 'next/link';
 
 export default function PopularRecipes() {
   const { data, error } = useSWR(`${process.env.NEXT_PUBLIC_BASE_URL}/r/action/popular`, fetcher);
@@ -45,10 +46,12 @@ export default function PopularRecipes() {
               <UnorderedList>
                 {data.map((recipe: any) => (
                   <ListItem key={recipe.name}>
-                    <Flex as="a" href={`/r/${recipe.name}`} _hover={{ color: 'orange.400' }}>
-                      <Heading>{recipe.name}</Heading>
-                      <Text m={4}>{'likes: ' + recipe.count}</Text>
-                    </Flex>
+                    <NextLink passHref href={`/r/${recipe.name}`}>
+                      <Flex as="a" _hover={{ color: 'orange.400' }}>
+                        <Heading>{recipe.name}</Heading>
+                        <Text m={4}>{'likes: ' + recipe.count}</Text>
+                      </Flex>
+                    </NextLink>
                   </ListItem>
                 ))}
               </UnorderedList>
