@@ -2,7 +2,7 @@ use axum::{
     async_trait,
     extract::Path,
     middleware::from_extractor,
-    routing::{get, post},
+    routing::{delete, get, post},
     Json, Router,
 };
 // Because we need to deserialize a sequence from a form, we need `axum-extra`.
@@ -36,18 +36,17 @@ pub fn ingredient_router() -> Router {
         .route("/:name/suggestion/:id/decline", get(decline_suggestion))
         .route("/:name/suggestion/:id", get(get_ingredient_suggestion))
         .route("/:name/suggestions", get(get_ingredient_suggestions))
+        .route(
+            "/:name",
+            delete(delete_ingredient).patch(upgrade_ingredient),
+        )
+        .route("/new", post(add_ingredient))
         .route_layer(from_extractor::<AdminUser>());
 
     Router::new()
         .route("/all", get(all_ingredients))
         .route("/category/:category", get(ingredients_by_category))
-        .route("/new", post(add_ingredient))
-        .route(
-            "/:name",
-            get(get_ingredient)
-                .delete(delete_ingredient)
-                .patch(upgrade_ingredient),
-        )
+        .route("/:name", get(get_ingredient))
         .route("/favorite/:name", post(make_favorite)) // TODO: swap route to `/:name/favorite` maybe for consistency?
         .route("/:name/suggestion", post(add_ingredient_suggestion))
         .merge(admin_services)
@@ -180,10 +179,9 @@ async fn ingredients_by_category(
 
 async fn add_ingredient(
     DatabaseConnection(mut conn): DatabaseConnection,
-    auth_user: Option<AuthUser>,
+    auth_user: AuthUser,
     Form(ingredient): Form<Ingredient>,
 ) -> Result<(), ApiError> {
-    let creator_id = auth_user.map(|u| *u);
     sqlx::query!(
         r#"
         INSERT INTO ingredients (
@@ -215,7 +213,7 @@ async fn add_ingredient(
         ingredient.fiber,
         ingredient.caffeine,
         ingredient.contains_alcohol,
-        creator_id
+        *auth_user,
     )
     .execute(&mut conn)
     .await?;

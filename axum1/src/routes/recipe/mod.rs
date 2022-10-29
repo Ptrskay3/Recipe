@@ -52,6 +52,7 @@ struct RecipeDetailedWithFav {
     ingredients: Vec<DetailedIngredient>,
     full_calories: f32,
     favorited: bool,
+    is_author: bool,
 }
 #[derive(
     Debug, Clone, serde::Deserialize, serde::Serialize, sqlx::FromRow, validator::Validate,
@@ -141,8 +142,8 @@ async fn get_recipe_with_ingredients(
             / 100.0)
     });
 
-    let favorited = if let Some(user_id) = maybe_auth_user.into_inner() {
-        sqlx::query!(
+    let (favorited, is_author) = if let Some(user_id) = maybe_auth_user.into_inner() {
+        let favorited = sqlx::query!(
             r#"
         SELECT 1 as _e FROM favorite_recipe
         WHERE user_id = $1 AND recipe_id = (SELECT id FROM recipes WHERE name = $2)"#,
@@ -152,9 +153,20 @@ async fn get_recipe_with_ingredients(
         .fetch_optional(&mut tx)
         .await
         .context("failed to query for favorite recipes")?
-        .is_some()
+        .is_some();
+
+        let is_author = sqlx::query!(
+            "SELECT 1 as _e FROM recipes WHERE name = $1 AND creator_id = $2",
+            name,
+            *user_id
+        )
+        .fetch_optional(&mut tx)
+        .await?
+        .is_some();
+
+        (favorited, is_author)
     } else {
-        false
+        (false, false)
     };
 
     tx.commit().await?;
@@ -171,6 +183,7 @@ async fn get_recipe_with_ingredients(
         meal_type: recipe.meal_type,
         full_calories,
         favorited,
+        is_author,
     }))
 }
 
@@ -221,7 +234,7 @@ async fn add_or_update_ingredient_to_recipe(
     )
     .fetch_optional(&mut tx)
     .await?
-    .ok_or(ApiError::BadRequest)?;
+    .ok_or(ApiError::Forbidden)?;
 
     sqlx::query!(
         r#"
@@ -258,8 +271,20 @@ struct NamedIngredient {
 async fn delete_ingredient_from_recipe(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path(name): Path<String>,
+    auth_user: AuthUser,
     Form(ingredient): Form<NamedIngredient>,
 ) -> Result<(), ApiError> {
+    let mut tx = conn.begin().await?;
+
+    sqlx::query!(
+        "SELECT id FROM recipes WHERE creator_id = $1 AND name = $2",
+        *auth_user,
+        name
+    )
+    .fetch_optional(&mut tx)
+    .await?
+    .ok_or(ApiError::Forbidden)?;
+
     sqlx::query!(
         r#"
         DELETE FROM ingredients_to_recipes
@@ -269,9 +294,11 @@ async fn delete_ingredient_from_recipe(
         name,
         ingredient.name
     )
-    .execute(&mut conn)
+    .execute(&mut tx)
     .await
     .context("Failed to delete from ingredients_to_recipes")?;
+
+    tx.commit().await?;
 
     Ok(())
 }
