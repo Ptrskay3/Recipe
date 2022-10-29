@@ -1,4 +1,4 @@
-import { PlusSquareIcon } from '@chakra-ui/icons';
+import { CloseIcon, PlusSquareIcon } from '@chakra-ui/icons';
 import {
   Box,
   Center,
@@ -19,6 +19,8 @@ import IncludedIngredient from '../../../components/included_ingredient';
 import { Layout } from '../../../components/layout';
 import { useMe } from '../../../hooks/me';
 import { fetcher } from '../../../utils/fetcher';
+import NextLink from 'next/link';
+import { useEffect } from 'react';
 
 export default function RecipeDetailedEdit() {
   const { me } = useMe();
@@ -41,6 +43,11 @@ export default function RecipeDetailedEdit() {
       mutate(`${process.env.NEXT_PUBLIC_BASE_URL}/r/${name}`);
     }
   };
+  useEffect(() => {
+    if (name && data && !data.is_author) {
+      router.push(`/r/${name}`);
+    }
+  }, [data, name, router]);
 
   if (error)
     return (
@@ -105,6 +112,14 @@ export default function RecipeDetailedEdit() {
                     ))}
                 </Wrap>
               </VStack>
+              <NextLink passHref href={`/r/${name}`}>
+                <IconButton
+                  aria-label="edit recipe"
+                  size="md"
+                  icon={<CloseIcon></CloseIcon>}
+                  as={'a'}
+                />
+              </NextLink>
             </Flex>
           </Center>
           <Center>

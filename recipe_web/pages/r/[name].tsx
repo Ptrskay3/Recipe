@@ -26,8 +26,6 @@ export default function RecipeDetailed() {
   const { mutate } = useSWRConfig();
   const router = useRouter();
   const { name } = router.query;
-  const addIngredientOpen = useAddIngredient((state) => state.addIngredientOpen);
-  const setAddIngredientOpen = useAddIngredient((state) => state.setAddIngredientOpen);
 
   const { data, error } = useSWR(
     !!name ? `${process.env.NEXT_PUBLIC_BASE_URL}/r/${name}` : null,
@@ -108,14 +106,16 @@ export default function RecipeDetailed() {
                     ))}
                 </Wrap>
               </VStack>
-              <NextLink passHref href={`/r/${name}/edit`}>
-                <IconButton
-                  aria-label="edit recipe"
-                  size="md"
-                  icon={<EditIcon></EditIcon>}
-                  as={'a'}
-                />
-              </NextLink>
+              {data.is_author ? (
+                <NextLink passHref href={`/r/${name}/edit`}>
+                  <IconButton
+                    aria-label="edit recipe"
+                    size="md"
+                    icon={<EditIcon></EditIcon>}
+                    as={'a'}
+                  />
+                </NextLink>
+              ) : null}
             </Flex>
           </Center>
         </Box>
