@@ -10,7 +10,7 @@ import {
 import { useState } from 'react';
 
 export function DurationSlider({ onChangeEnd }: { onChangeEnd?: (...args: any) => any }) {
-  const [sliderValue, setSliderValue] = useState(5);
+  const [sliderValue, setSliderValue] = useState(0);
   const [showTooltip, setShowTooltip] = useState(false);
   const [isLargerThan900] = useMediaQuery('(min-width: 900px)');
   const suffix = isLargerThan900 ? 'mins' : 'm';

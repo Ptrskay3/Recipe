@@ -34,6 +34,7 @@ const NewRecipe = () => {
     setDescription,
     setCuisine,
     setMealType,
+    resetState,
   ] = useAddRecipe((state) => [
     state.name,
     state.description,
@@ -53,6 +54,7 @@ const NewRecipe = () => {
     state.setDescription,
     state.setCuisine,
     state.setMealType,
+    state.resetState,
   ]);
 
   return (
@@ -114,6 +116,7 @@ const NewRecipe = () => {
             });
 
             if (response.ok) {
+              resetState();
               push(`/r/${values.name}`);
             } else if (response.status === 422) {
               const { errors } = await response.json();
