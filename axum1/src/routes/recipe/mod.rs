@@ -12,14 +12,16 @@ use validator::Validate;
 use crate::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
-    sse::{NewRecipe, Notification},
+    sse::Notification,
     RE_RECIPE,
 };
 
 mod helpers;
 use helpers::{DifficultyLevel, TypeByTime};
 
-use self::helpers::QuantityUnit;
+use self::{extractors::RecipeCreator, helpers::QuantityUnit};
+
+mod extractors;
 
 pub fn recipe_router() -> Router {
     let action_router = Router::new()
@@ -217,7 +219,7 @@ struct InsertIngredient {
 #[tracing::instrument(skip(conn))]
 async fn add_or_update_ingredient_to_recipe(
     DatabaseConnection(mut conn): DatabaseConnection,
-    auth_user: AuthUser,
+    creator: RecipeCreator,
     Path(name): Path<String>,
     Form(ingredient): Form<InsertIngredient>,
 ) -> Result<(), ApiError> {
@@ -226,15 +228,6 @@ async fn add_or_update_ingredient_to_recipe(
         .map_err(ApiError::unprocessable_entity_from_validation_errors)?;
 
     let mut tx = conn.begin().await?;
-
-    sqlx::query!(
-        "SELECT id FROM recipes WHERE creator_id = $1 AND name = $2",
-        *auth_user,
-        name
-    )
-    .fetch_optional(&mut tx)
-    .await?
-    .ok_or(ApiError::Forbidden)?;
 
     sqlx::query!(
         r#"
@@ -271,19 +264,10 @@ struct NamedIngredient {
 async fn delete_ingredient_from_recipe(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path(name): Path<String>,
-    auth_user: AuthUser,
+    creator: RecipeCreator,
     Form(ingredient): Form<NamedIngredient>,
 ) -> Result<(), ApiError> {
     let mut tx = conn.begin().await?;
-
-    sqlx::query!(
-        "SELECT id FROM recipes WHERE creator_id = $1 AND name = $2",
-        *auth_user,
-        name
-    )
-    .fetch_optional(&mut tx)
-    .await?
-    .ok_or(ApiError::Forbidden)?;
 
     sqlx::query!(
         r#"
@@ -394,9 +378,7 @@ async fn insert_full_recipe(
 
     tx.commit().await?;
 
-    channel
-        .send(Notification::NewRecipe(NewRecipe { name }))
-        .unwrap();
+    channel.send(Notification::new_recipe(name)).unwrap();
     Ok(())
 }
 

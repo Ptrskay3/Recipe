@@ -62,6 +62,12 @@ pub enum Notification {
     NewRecipe(NewRecipe),
 }
 
+impl Notification {
+    pub fn new_recipe(name: String) -> Self {
+        Self::NewRecipe(NewRecipe { name })
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NewRecipe {
     pub name: String,
