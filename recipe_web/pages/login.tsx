@@ -38,7 +38,7 @@ function Login() {
       email: '',
       password: '',
     },
-    validate: () => {}, // TODO
+    validate: () => {},
     onSubmit: async (values) => {
       setErrors({});
       setLoading(true);

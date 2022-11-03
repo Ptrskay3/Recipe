@@ -19,7 +19,6 @@ import IngredientSearch from './search/IngredientSearch';
 
 export function AddIngredientForm() {
   const { mutate } = useSWRConfig();
-  const setAddIngredientOpen = useAddIngredient((state) => state.setAddIngredientOpen);
   const selected = useAddIngredient((state) => state.selected);
 
   const toast = useToast();
@@ -79,7 +78,7 @@ export function AddIngredientForm() {
         });
         return;
       }
-      setAddIngredientOpen(false);
+
       mutate(`${process.env.NEXT_PUBLIC_BASE_URL}/r/${name}`, true);
     },
   });

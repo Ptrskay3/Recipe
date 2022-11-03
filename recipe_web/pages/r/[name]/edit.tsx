@@ -1,4 +1,4 @@
-import { CloseIcon, PlusSquareIcon } from '@chakra-ui/icons';
+import { CloseIcon } from '@chakra-ui/icons';
 import {
   Box,
   Center,
@@ -44,7 +44,7 @@ export default function RecipeDetailedEdit() {
     }
   };
   useEffect(() => {
-    if (name && data && !data.is_author) {
+    if (name && data && !data.is_author && data !== true) {
       router.push(`/r/${name}`);
     }
   }, [data, name, router]);

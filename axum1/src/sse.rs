@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::utils::shutdown_signal;
 
+#[tracing::instrument(skip_all)]
 pub async fn sse_handler(
     Extension(chan): Extension<Arc<tokio::sync::broadcast::Sender<Notification>>>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
@@ -23,7 +24,9 @@ pub async fn sse_handler(
         use futures::SinkExt;
 
         while let Ok(m) = sub.recv().await {
-            let _ = tx.send(Ok(Event::default().json_data(m).unwrap())).await;
+            if let Err(send_error) = tx.send(Ok(Event::default().json_data(m).unwrap())).await {
+                tracing::error!("Broadcasting error:\n{:?}", send_error);
+            }
         }
     });
 

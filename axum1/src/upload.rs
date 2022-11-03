@@ -2,6 +2,7 @@ use anyhow::Context;
 use axum::{
     body::Bytes,
     extract::{BodyStream, ContentLengthLimit, Multipart, Path},
+    middleware::from_extractor,
     routing::post,
     BoxError, Router,
 };
@@ -14,6 +15,7 @@ use tokio_util::io::StreamReader;
 use crate::{
     error::ApiError,
     extractors::{DatabaseConnection, Uploader},
+    routes::AdminUser,
 };
 
 pub const UPLOADS_DIRECTORY: &str = "uploads";
@@ -21,6 +23,7 @@ pub const UPLOADS_DIRECTORY: &str = "uploads";
 pub fn upload_router() -> Router {
     Router::new()
         .route("/:file_name", post(save_request_body))
+        .route_layer(from_extractor::<AdminUser>())
         .route("/", post(accept_form))
 }
 

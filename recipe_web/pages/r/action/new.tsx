@@ -201,6 +201,7 @@ const NewRecipe = () => {
                   type="submit"
                   isLoading={isSubmitting}
                   fontWeight={600}
+                  autoFocus={isSubmitting} // This'll trigger an onBlur on every input field
                   color={'white'}
                   bg={'orange.400'}
                   _hover={{
