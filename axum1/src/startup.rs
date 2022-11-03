@@ -61,7 +61,9 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .nest("/", auth_router())
         .nest("/admin", admin_router())
         .nest("/upload", upload_router())
-        .fallback_service(get_service(ServeDir::new("./static/assets")).handle_error(handle_asset_error))
+        .fallback_service(
+            get_service(ServeDir::new("./static/assets")).handle_error(handle_asset_error),
+        )
         .layer(
             tower::ServiceBuilder::new()
                 .layer(TraceLayer::new_for_http())
