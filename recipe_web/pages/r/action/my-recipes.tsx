@@ -47,26 +47,24 @@ export default function MyRecipes() {
     );
 
   return (
-    data && (
-      <Layout>
-        <Box>
-          <Center mt="14">
-            <UnorderedList>
-              {data.map((recipe: IRecipe) => (
-                <ListItem key={recipe.name}>
-                  <NextLink href={`/r/${recipe.name}`} passHref>
-                    <Flex as="a" _hover={{ color: 'orange.400' }}>
-                      <Heading>{recipe.name}</Heading>
-                      <Text m={4}>{recipe.description}</Text>
-                      <Text m={4}>{'ingredients: ' + recipe.ingredient_count}</Text>
-                    </Flex>
-                  </NextLink>
-                </ListItem>
-              ))}
-            </UnorderedList>
-          </Center>
-        </Box>
-      </Layout>
-    )
+    <Layout>
+      <Box>
+        <Center mt="14">
+          <UnorderedList>
+            {data.map((recipe: IRecipe) => (
+              <ListItem key={recipe.name}>
+                <NextLink href={`/r/${recipe.name}`} passHref>
+                  <Flex as="a" _hover={{ color: 'orange.400' }}>
+                    <Heading>{recipe.name}</Heading>
+                    <Text m={4}>{recipe.description}</Text>
+                    <Text m={4}>{'ingredients: ' + recipe.ingredient_count}</Text>
+                  </Flex>
+                </NextLink>
+              </ListItem>
+            ))}
+          </UnorderedList>
+        </Center>
+      </Box>
+    </Layout>
   );
 }

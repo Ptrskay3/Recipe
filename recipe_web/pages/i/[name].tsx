@@ -48,30 +48,28 @@ export default function IngredientDetailed() {
     );
 
   return (
-    data && (
-      <Layout>
-        <Center mt="4">
-          <Stack>
-            <Ingredient iProps={data} shouldShowEditControls editableMapping={editableMapping} />
-            {suggestions && suggestions.length > 0 && (
-              <>
-                <Heading>Suggestions:</Heading>
-                <Stack>
-                  <UnorderedList>
-                    {suggestions.map(({ id, suggester }: { id: number; suggester: string }) => (
-                      <Stack mb="2" key={id}>
-                        <NextLink passHref href={`/i/${name}/suggestion/${id}`}>
-                          <ListItem as={'a'}>{'Suggestion by ' + suggester}</ListItem>
-                        </NextLink>
-                      </Stack>
-                    ))}
-                  </UnorderedList>
-                </Stack>
-              </>
-            )}
-          </Stack>
-        </Center>
-      </Layout>
-    )
+    <Layout>
+      <Center mt="4">
+        <Stack>
+          <Ingredient iProps={data} shouldShowEditControls editableMapping={editableMapping} />
+          {suggestions && suggestions.length > 0 && (
+            <>
+              <Heading>Suggestions:</Heading>
+              <Stack>
+                <UnorderedList>
+                  {suggestions.map(({ id, suggester }: { id: number; suggester: string }) => (
+                    <Stack mb="2" key={id}>
+                      <NextLink passHref href={`/i/${name}/suggestion/${id}`}>
+                        <ListItem as={'a'}>{'Suggestion by ' + suggester}</ListItem>
+                      </NextLink>
+                    </Stack>
+                  ))}
+                </UnorderedList>
+              </Stack>
+            </>
+          )}
+        </Stack>
+      </Center>
+    </Layout>
   );
 }

@@ -1,6 +1,5 @@
-import { Box, Heading, Link, Text } from '@chakra-ui/react';
+import { Box, Heading, Text } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
-import NextLink from 'next/link';
 import { Layout } from '../components/layout';
 import dynamic from 'next/dynamic';
 

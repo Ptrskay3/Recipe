@@ -2,7 +2,7 @@ import { FormControl, FormLabel, Container } from '@chakra-ui/react';
 import { AsyncSelect, chakraComponents, GroupBase } from 'chakra-react-select';
 import { useAddIngredient } from '../../stores/useAddIngredient';
 
-const asyncComponents = {
+const asyncComponents = { 
   LoadingIndicator: (props: any) => (
     <chakraComponents.LoadingIndicator
       color="currentColor"

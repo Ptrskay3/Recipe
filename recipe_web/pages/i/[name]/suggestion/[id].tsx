@@ -80,41 +80,38 @@ export default function IngredientDetailed() {
     );
 
   return (
-    data &&
-    suggestion && (
-      <Layout>
-        <Center mt="14">
-          <Ingredient
-            iProps={data}
-            isNew={false}
-            withModifiedAttributes={diffObjects(data, suggestion)}
-            editableMapping={editableMapping}
-          />
-          <Heading m="4">
-            <ArrowRightIcon></ArrowRightIcon>
-          </Heading>
-          <Ingredient
-            key={id as string}
-            withModifiedAttributes={diffObjects(data, suggestion)}
-            isNew={true}
-            isDeleteVote={suggestion.is_delete_vote}
-            iProps={suggestion}
-            editableMapping={editableMapping}
-          />
-          <HStack>
-            <IconButton
-              onClick={() => suggestionAction('apply')}
-              aria-label="apply"
-              icon={<FaCheck />}
-            ></IconButton>
-            <IconButton
-              onClick={() => suggestionAction('decline')}
-              aria-label="decline"
-              icon={<CloseIcon />}
-            ></IconButton>
-          </HStack>
-        </Center>
-      </Layout>
-    )
+    <Layout>
+      <Center mt="14">
+        <Ingredient
+          iProps={data}
+          isNew={false}
+          withModifiedAttributes={diffObjects(data, suggestion)}
+          editableMapping={editableMapping}
+        />
+        <Heading m="4">
+          <ArrowRightIcon></ArrowRightIcon>
+        </Heading>
+        <Ingredient
+          key={id as string}
+          withModifiedAttributes={diffObjects(data, suggestion)}
+          isNew={true}
+          isDeleteVote={suggestion.is_delete_vote}
+          iProps={suggestion}
+          editableMapping={editableMapping}
+        />
+        <HStack>
+          <IconButton
+            onClick={() => suggestionAction('apply')}
+            aria-label="apply"
+            icon={<FaCheck />}
+          ></IconButton>
+          <IconButton
+            onClick={() => suggestionAction('decline')}
+            aria-label="decline"
+            icon={<CloseIcon />}
+          ></IconButton>
+        </HStack>
+      </Center>
+    </Layout>
   );
 }

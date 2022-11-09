@@ -1,6 +1,5 @@
 import { HamburgerIcon, EditIcon, DeleteIcon, CheckIcon, CloseIcon } from '@chakra-ui/icons';
 import { IconButton, Menu, MenuButton, MenuItem, MenuList, useToast } from '@chakra-ui/react';
-import { useRouter } from 'next/router';
 import { useSWRConfig } from 'swr';
 import { useIngredientEditMode } from '../stores/useIngredientEditMode';
 import { diffObjects } from '../utils/diff';
