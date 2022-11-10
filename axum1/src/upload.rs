@@ -1,7 +1,7 @@
 use anyhow::Context;
 use axum::{
     body::Bytes,
-    extract::{BodyStream, ContentLengthLimit, Multipart, Path},
+    extract::{BodyStream, DefaultBodyLimit, Multipart, Path},
     middleware::from_extractor,
     routing::post,
     BoxError, Router,
@@ -11,6 +11,7 @@ use sqlx::{Acquire, PgExecutor};
 use std::io::{self, ErrorKind};
 use tokio::{fs::File, io::BufWriter};
 use tokio_util::io::StreamReader;
+use tower_http::limit::RequestBodyLimitLayer;
 
 use crate::{
     error::ApiError,
@@ -25,6 +26,8 @@ pub fn upload_router() -> Router {
         .route("/:file_name", post(save_request_body))
         .route_layer(from_extractor::<AdminUser>())
         .route("/", post(accept_form))
+        .layer(DefaultBodyLimit::disable())
+        .layer(RequestBodyLimitLayer::new(25 * 1024 * 1024)) // 25mb
 }
 
 pub async fn save_request_body(
@@ -40,12 +43,7 @@ pub async fn save_request_body(
 pub async fn accept_form(
     uploader: Uploader,
     DatabaseConnection(mut conn): DatabaseConnection,
-    ContentLengthLimit(mut multipart): ContentLengthLimit<
-        Multipart,
-        {
-            25 * 1024 * 1024 // 25mb
-        },
-    >,
+    mut multipart: Multipart,
 ) -> Result<(), ApiError> {
     let mut tx = conn.begin().await?;
     while let Some(field) = multipart
