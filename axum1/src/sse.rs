@@ -24,8 +24,11 @@ pub async fn sse_handler(
         use futures::SinkExt;
 
         while let Ok(m) = sub.recv().await {
-            if let Err(send_error) = tx.send(Ok(Event::default().json_data(m).unwrap())).await {
-                tracing::error!("Broadcasting error:\n{:?}", send_error);
+            if let Err(send_error) = tx
+                .send(Ok(Event::default().event(m.name()).json_data(m).unwrap()))
+                .await
+            {
+                tracing::trace!("Broadcasting error: {:?}", send_error);
             }
         }
     });
@@ -60,7 +63,7 @@ where
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "t")]
+#[serde(untagged)]
 pub enum Notification {
     NewRecipe(NewRecipe),
 }
@@ -68,6 +71,12 @@ pub enum Notification {
 impl Notification {
     pub fn new_recipe(name: String) -> Self {
         Self::NewRecipe(NewRecipe { name })
+    }
+
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::NewRecipe(_) => "new_recipe",
+        }
     }
 }
 

@@ -22,20 +22,20 @@ function MyApp({ Component, pageProps }: AppProps) {
       sse.close();
     };
 
-    sse.onmessage = (e) => {
-      const { t, name } = JSON.parse(e.data);
+    sse.addEventListener('new_recipe', (e) => {
+      const { name } = JSON.parse(e.data);
       toast({
-        title: prettyNotification(t),
+        title: 'New recipe',
         description: `someone just added a recipe called "${name}"`,
         status: 'info',
         duration: 9000,
         isClosable: true,
         position: 'bottom-right',
       });
-    };
-    return () => {
-      sse.close();
-    };
+      return () => {
+        sse.close();
+      };
+    });
   }, [toast]);
 
   const body = (

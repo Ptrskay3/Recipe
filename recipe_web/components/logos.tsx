@@ -6,7 +6,7 @@ export const DiscordLogo = (props: HTMLChakraProps<'svg'>) => (
     width="16"
     height="16"
     fill="white"
-    class="bi bi-discord"
+    className="bi bi-discord"
     viewBox="0 0 16 16"
     {...props}
   >
