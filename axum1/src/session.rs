@@ -246,21 +246,19 @@ where
     fn call(&mut self, mut request: Request<Body>) -> Self::Future {
         let session_layer = self.layer.clone();
 
-        let cookie_values = request
+        // Multiple cookies may be all concatenated into a single Cookie header
+        // separated with semicolons (HTTP/1.1 behaviour) or into multiple separate
+        // Cookie headers (HTTP/2 behaviour, see [RFC 7540](https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2.5)).
+        // Search for the session cookie from all Cookie headers, assuming both forms are possible
+        let cookie_value = request
             .headers()
-            .get(COOKIE)
-            .map(|cookies| cookies.to_str());
-
-        let cookie_value = if let Some(Ok(cookies)) = cookie_values {
-            cookies
-                .split(';')
-                .map(|cookie| cookie.trim())
-                .filter_map(|cookie| Cookie::parse_encoded(cookie).ok())
-                .filter(|cookie| cookie.name() == session_layer.cookie_name)
-                .find_map(|cookie| self.layer.verify_signature(cookie.value()).ok())
-        } else {
-            None
-        };
+            .get_all(COOKIE)
+            .iter()
+            .filter_map(|cookie_header| cookie_header.to_str().ok())
+            .flat_map(|cookie_header| cookie_header.split(';'))
+            .filter_map(|cookie_header| Cookie::parse_encoded(cookie_header.trim()).ok())
+            .filter(|cookie| cookie.name() == session_layer.cookie_name)
+            .find_map(|cookie| self.layer.verify_signature(cookie.value()).ok());
 
         let secure = self
             .layer
