@@ -211,6 +211,24 @@ impl<Store: SessionStore> SessionLayer<Store> {
             .map(|_| value.to_string())
             .map_err(|_| "value did not verify")
     }
+
+    /// Returns the cookie value corresponding to `self.cookie_name`.
+    ///
+    /// Multiple cookies may be all concatenated into a single Cookie header
+    /// separated with semicolons (HTTP/1.1 behaviour) or into multiple separate
+    /// Cookie headers (HTTP/2 behaviour, see [RFC 7540](https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2.5)).
+    /// Search for the session cookie from all Cookie headers, assuming both forms are possible.
+    pub(crate) fn cookie_value(&self, request: &Request<Body>) -> Option<String> {
+        request
+            .headers()
+            .get_all(COOKIE)
+            .iter()
+            .filter_map(|cookie_header| cookie_header.to_str().ok())
+            .flat_map(|cookie_header| cookie_header.split(';'))
+            .filter_map(|cookie_header| Cookie::parse_encoded(cookie_header.trim()).ok())
+            .filter(|cookie| cookie.name() == self.cookie_name)
+            .find_map(|cookie| self.verify_signature(cookie.value()).ok())
+    }
 }
 
 impl<S, Store: SessionStore> Layer<S> for SessionLayer<Store> {
@@ -246,19 +264,7 @@ where
     fn call(&mut self, mut request: Request<Body>) -> Self::Future {
         let session_layer = self.layer.clone();
 
-        // Multiple cookies may be all concatenated into a single Cookie header
-        // separated with semicolons (HTTP/1.1 behaviour) or into multiple separate
-        // Cookie headers (HTTP/2 behaviour, see [RFC 7540](https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2.5)).
-        // Search for the session cookie from all Cookie headers, assuming both forms are possible
-        let cookie_value = request
-            .headers()
-            .get_all(COOKIE)
-            .iter()
-            .filter_map(|cookie_header| cookie_header.to_str().ok())
-            .flat_map(|cookie_header| cookie_header.split(';'))
-            .filter_map(|cookie_header| Cookie::parse_encoded(cookie_header.trim()).ok())
-            .filter(|cookie| cookie.name() == session_layer.cookie_name)
-            .find_map(|cookie| self.layer.verify_signature(cookie.value()).ok());
+        let cookie_value = self.layer.cookie_value(&request);
 
         let secure = self
             .layer

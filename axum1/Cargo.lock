@@ -259,9 +259,9 @@ dependencies = [
 [[package]]
 name = "axum-prometheus"
 version = "0.1.0"
-source = "git+https://github.com/Ptrskay3/axum-prometheus?branch=axum-0.6#304f6942148fb8fe2113ed99167657d0cc4c697b"
+source = "git+https://github.com/Ptrskay3/axum-prometheus?branch=axum-0.6#52f57a5fd248d1924617b0edcd5aa2c5c94e55e9"
 dependencies = [
- "axum-core",
+ "axum",
  "bytes",
  "futures",
  "futures-core",
