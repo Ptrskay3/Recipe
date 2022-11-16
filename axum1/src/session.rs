@@ -53,7 +53,7 @@ pub enum SessionPolicy {
     /// Do not store empty "guest" sessions, only ping the storage layer if
     /// the session data changed.
     ChangedOnly,
-    /// Do not store empty "guest" sessions, always ping the storage layer.
+    /// Do not store empty "guest" sessions, always ping the storage layer for existing sessions.
     ExistingOnly,
 }
 
