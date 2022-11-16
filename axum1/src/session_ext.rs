@@ -220,7 +220,7 @@ impl Session {
     }
 
     /// Marks the session to generate a new id and cookie for this session.
-    /// 
+    ///
     /// The action is done in the session middleware __after__ your handler is called.
     pub fn regenerate(&mut self) {
         self.regenerate.store(true, Ordering::Relaxed);
