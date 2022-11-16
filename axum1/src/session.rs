@@ -51,7 +51,7 @@ pub enum SessionPolicy {
     /// Always ping the storage layer and store empty "guest" sessions.
     Always,
     /// Do not store empty "guest" sessions, only ping the storage layer if
-    /// the session data changed or just created.
+    /// the session data changed.
     ChangedOnly,
     /// Do not store empty "guest" sessions, always ping the storage layer.
     ExistingOnly,
@@ -76,7 +76,7 @@ impl<Store: SessionStore> SessionLayer<Store> {
     /// cryptographically signed cookie. When the client sends a valid,
     /// known cookie then the session is hydrated from this. Otherwise a new
     /// cookie is created and returned in the response.
-    /// 
+    ///
     /// The default behaviour is to enable "guest" sessions with [`SessionPolicy::Always`].
     ///
     /// # Panics
@@ -142,15 +142,12 @@ impl<Store: SessionStore> SessionLayer<Store> {
         self
     }
 
-    fn guest_session_enabled(&self) -> bool {
-        !matches!(self.policy, SessionPolicy::Always)
-    }
-
-    fn save_unchanged(&self) -> bool {
-        matches!(
-            self.policy,
-            SessionPolicy::Always | SessionPolicy::ExistingOnly
-        )
+    fn should_store(&self, cookie_value: &Option<String>) -> bool {
+        // Store if
+        //  - We have guest sessions
+        //  - We received a valid cookie and we use the `ExistingOnly` policy.
+        matches!(self.policy, SessionPolicy::Always)
+            || (matches!(self.policy, SessionPolicy::ExistingOnly) && cookie_value.is_some())
     }
 
     async fn load_or_create(&self, cookie_value: Option<String>) -> crate::session_ext::Session {
@@ -299,10 +296,6 @@ where
         let not_ready_service = self.inner.clone();
         let mut ready_service = std::mem::replace(&mut self.inner, not_ready_service);
 
-        if !session_layer.guest_session_enabled() && cookie_value.is_none() {
-            return Box::pin(async move { ready_service.call(request).await });
-        }
-
         Box::pin(async move {
             let mut session = session_layer.load_or_create(cookie_value.clone()).await;
 
@@ -313,7 +306,6 @@ where
             request.extensions_mut().insert(session.clone());
 
             let mut response: Response = ready_service.call(request).await?;
-
             if session.is_destroyed() {
                 if let Err(e) = session_layer
                     .store
@@ -330,7 +322,7 @@ where
                     SET_COOKIE,
                     HeaderValue::from_str(&removal_cookie.to_string()).unwrap(),
                 );
-            } else if session_layer.save_unchanged() || session.data_changed() {
+            } else if session_layer.should_store(&cookie_value) || session.data_changed() {
                 if session.should_regenerate() {
                     if let Err(e) = session_layer
                         .store

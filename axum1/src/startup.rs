@@ -74,10 +74,13 @@ pub async fn application() -> Result<(), anyhow::Error> {
                 .layer(Extension(tx))
                 .layer(Extension(rx))
                 .layer(
-                    SessionLayer::new(store, config.redis.secret_key.as_bytes()).with_secure(
-                        std::env::var("APP_ENVIRONMENT").unwrap_or_else(|_| String::from("local"))
-                            == "production",
-                    ),
+                    SessionLayer::new(store, config.redis.secret_key.as_bytes())
+                        .with_secure(
+                            std::env::var("APP_ENVIRONMENT")
+                                .unwrap_or_else(|_| String::from("local"))
+                                == "production",
+                        )
+                        .with_policy(crate::session::SessionPolicy::Always),
                 )
                 .layer(Extension(email_client.clone()))
                 .layer(Extension(discord_oauth_client))
