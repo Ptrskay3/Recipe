@@ -219,24 +219,9 @@ impl Session {
         self.inner.len()
     }
 
-    /// Generates a new id and cookie for this session
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// # use async_session::Session;
-    /// # fn main() -> async_session::Result { let rt = tokio::runtime::Runtime::new().unwrap();
-    /// let handle = rt.handle();
-    /// handle.block_on(async {
-    /// let mut session = Session::new();
-    /// let old_id = session.id().to_string();
-    /// session.regenerate();
-    /// assert!(session.id() != &old_id);
-    /// let new_id = session.id().to_string();
-    /// let cookie_value = session.into_cookie_value().unwrap();
-    /// assert_eq!(new_id, Session::id_from_cookie_value(&cookie_value)?);
-    /// # Ok(()) }) }
-    /// ```
+    /// Marks the session to generate a new id and cookie for this session.
+    /// 
+    /// The action is done in the session middleware __after__ your handler is called.
     pub fn regenerate(&mut self) {
         self.regenerate.store(true, Ordering::Relaxed);
     }

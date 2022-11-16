@@ -45,6 +45,18 @@ use tower::{Layer, Service};
 
 const BASE64_DIGEST_LEN: usize = 44;
 
+/// Controls how the session data is persisted and created.
+#[derive(Clone)]
+pub enum SessionPolicy {
+    /// Always ping the storage layer and store empty "guest" sessions.
+    Always,
+    /// Do not store empty "guest" sessions, only ping the storage layer if
+    /// the session data changed or just created.
+    ChangedOnly,
+    /// Do not store empty "guest" sessions, always ping the storage layer.
+    ExistingOnly,
+}
+
 #[derive(Clone)]
 pub struct SessionLayer<Store> {
     store: Store,
@@ -52,7 +64,7 @@ pub struct SessionLayer<Store> {
     cookie_name: String,
     cookie_domain: Option<String>,
     session_ttl: Option<Duration>,
-    save_unchanged: bool,
+    policy: SessionPolicy,
     same_site_policy: SameSite,
     secure: Option<bool>,
     key: Key,
@@ -64,6 +76,8 @@ impl<Store: SessionStore> SessionLayer<Store> {
     /// cryptographically signed cookie. When the client sends a valid,
     /// known cookie then the session is hydrated from this. Otherwise a new
     /// cookie is created and returned in the response.
+    /// 
+    /// The default behaviour is to enable "guest" sessions with [`SessionPolicy::Always`].
     ///
     /// # Panics
     ///
@@ -71,7 +85,7 @@ impl<Store: SessionStore> SessionLayer<Store> {
     pub fn new(store: Store, secret: &[u8]) -> Self {
         Self {
             store,
-            save_unchanged: true,
+            policy: SessionPolicy::Always,
             cookie_path: "/".into(),
             cookie_name: "axum_sid".into(),
             cookie_domain: None,
@@ -85,8 +99,8 @@ impl<Store: SessionStore> SessionLayer<Store> {
     /// When `true`, a session cookie will always be set. When `false` the
     /// session data must be modified in order for it to be set. Defaults to
     /// `true`.
-    pub fn with_save_unchanged(mut self, save_unchanged: bool) -> Self {
-        self.save_unchanged = save_unchanged;
+    pub fn with_policy(mut self, policy: SessionPolicy) -> Self {
+        self.policy = policy;
         self
     }
 
@@ -126,6 +140,17 @@ impl<Store: SessionStore> SessionLayer<Store> {
     pub fn with_secure(mut self, secure: bool) -> Self {
         self.secure = Some(secure);
         self
+    }
+
+    fn guest_session_enabled(&self) -> bool {
+        !matches!(self.policy, SessionPolicy::Always)
+    }
+
+    fn save_unchanged(&self) -> bool {
+        matches!(
+            self.policy,
+            SessionPolicy::Always | SessionPolicy::ExistingOnly
+        )
     }
 
     async fn load_or_create(&self, cookie_value: Option<String>) -> crate::session_ext::Session {
@@ -274,6 +299,10 @@ where
         let not_ready_service = self.inner.clone();
         let mut ready_service = std::mem::replace(&mut self.inner, not_ready_service);
 
+        if !session_layer.guest_session_enabled() && cookie_value.is_none() {
+            return Box::pin(async move { ready_service.call(request).await });
+        }
+
         Box::pin(async move {
             let mut session = session_layer.load_or_create(cookie_value.clone()).await;
 
@@ -301,10 +330,7 @@ where
                     SET_COOKIE,
                     HeaderValue::from_str(&removal_cookie.to_string()).unwrap(),
                 );
-            } else if session_layer.save_unchanged
-                || session.data_changed()
-                || cookie_value.is_none()
-            {
+            } else if session_layer.save_unchanged() || session.data_changed() {
                 if session.should_regenerate() {
                     if let Err(e) = session_layer
                         .store
