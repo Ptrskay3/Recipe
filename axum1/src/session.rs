@@ -143,9 +143,6 @@ impl<Store: SessionStore> SessionLayer<Store> {
     }
 
     fn should_store(&self, cookie_value: &Option<String>) -> bool {
-        // Store if
-        //  - We have guest sessions
-        //  - We received a valid cookie and we use the `ExistingOnly` policy.
         matches!(self.policy, SessionPolicy::Always)
             || (matches!(self.policy, SessionPolicy::ExistingOnly) && cookie_value.is_some())
     }
@@ -322,6 +319,11 @@ where
                     SET_COOKIE,
                     HeaderValue::from_str(&removal_cookie.to_string()).unwrap(),
                 );
+
+            // Store if
+            //  - We have guest sessions
+            //  - We received a valid cookie and we use the `ExistingOnly` policy.
+            //  - If we use the `ChangedOnly` policy, only `session.data_changed()` should trigger this branch.
             } else if session_layer.should_store(&cookie_value) || session.data_changed() {
                 if session.should_regenerate() {
                     if let Err(e) = session_layer
