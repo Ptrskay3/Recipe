@@ -64,7 +64,7 @@ pub struct SessionLayer<Store> {
     cookie_name: String,
     cookie_domain: Option<String>,
     session_ttl: Option<Duration>,
-    policy: Persistance,
+    persistance: Persistance,
     same_site_policy: SameSite,
     secure: Option<bool>,
     key: Key,
@@ -85,7 +85,7 @@ impl<Store: SessionStore> SessionLayer<Store> {
     pub fn new(store: Store, secret: &[u8]) -> Self {
         Self {
             store,
-            policy: Persistance::Always,
+            persistance: Persistance::Always,
             cookie_path: "/".into(),
             cookie_name: "axum_sid".into(),
             cookie_domain: None,
@@ -141,8 +141,8 @@ impl<Store: SessionStore> SessionLayer<Store> {
     }
 
     fn should_store(&self, cookie_value: &Option<String>) -> bool {
-        matches!(self.policy, Persistance::Always)
-            || (matches!(self.policy, Persistance::ExistingOnly) && cookie_value.is_some())
+        matches!(self.persistance, Persistance::Always)
+            || (matches!(self.persistance, Persistance::ExistingOnly) && cookie_value.is_some())
     }
 
     async fn load_or_create(&self, cookie_value: Option<String>) -> crate::session_ext::Session {
