@@ -80,7 +80,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
                                 .unwrap_or_else(|_| String::from("local"))
                                 == "production",
                         )
-                        .with_policy(crate::session::SessionPolicy::Always),
+                        .with_persistance(crate::session::Persistance::Always),
                 )
                 .layer(Extension(email_client.clone()))
                 .layer(Extension(discord_oauth_client))
