@@ -47,7 +47,7 @@ const BASE64_DIGEST_LEN: usize = 44;
 
 /// Controls how the session data is persisted and created.
 #[derive(Clone)]
-pub enum Persistance {
+pub enum Persistence {
     /// Store empty "guest" sessions and always reach for the storage layer.
     Always,
     /// Do not store empty "guest" sessions, only ping the storage layer if
@@ -64,7 +64,7 @@ pub struct SessionLayer<Store> {
     cookie_name: String,
     cookie_domain: Option<String>,
     session_ttl: Option<Duration>,
-    persistance: Persistance,
+    persistence: Persistence,
     same_site_policy: SameSite,
     secure: Option<bool>,
     key: Key,
@@ -77,7 +77,7 @@ impl<Store: SessionStore> SessionLayer<Store> {
     /// known cookie then the session is hydrated from this. Otherwise a new
     /// cookie is created and returned in the response.
     ///
-    /// The default behaviour is to enable "guest" sessions with [`Persistance::Always`].
+    /// The default behaviour is to enable "guest" sessions with [`Persistence::Always`].
     ///
     /// # Panics
     ///
@@ -85,7 +85,7 @@ impl<Store: SessionStore> SessionLayer<Store> {
     pub fn new(store: Store, secret: &[u8]) -> Self {
         Self {
             store,
-            persistance: Persistance::Always,
+            persistence: Persistence::Always,
             cookie_path: "/".into(),
             cookie_name: "axum_sid".into(),
             cookie_domain: None,
@@ -96,9 +96,9 @@ impl<Store: SessionStore> SessionLayer<Store> {
         }
     }
 
-    /// Sets how the persistance and guest sessions are handled. Defaults to [`Persistance::Always`].
-    pub fn with_persistance(mut self, persistance: Persistance) -> Self {
-        self.persistance = persistance;
+    /// Sets how the persistence and guest sessions are handled. Defaults to [`Persistence::Always`].
+    pub fn with_persistence(mut self, persistence: Persistence) -> Self {
+        self.persistence = persistence;
         self
     }
 
@@ -141,8 +141,8 @@ impl<Store: SessionStore> SessionLayer<Store> {
     }
 
     fn should_store(&self, cookie_value: &Option<String>) -> bool {
-        matches!(self.persistance, Persistance::Always)
-            || (matches!(self.persistance, Persistance::ExistingOnly) && cookie_value.is_some())
+        matches!(self.persistence, Persistence::Always)
+            || (matches!(self.persistence, Persistence::ExistingOnly) && cookie_value.is_some())
     }
 
     async fn load_or_create(&self, cookie_value: Option<String>) -> crate::session_ext::Session {
