@@ -1,20 +1,20 @@
-use std::{convert::Infallible, sync::Arc};
+use std::convert::Infallible;
 
 use axum::{
+    extract::State,
     response::{
         sse::{Event, KeepAlive},
         Sse,
     },
-    Extension,
 };
 use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
 
-use crate::utils::shutdown_signal;
+use crate::{state::AppState, utils::shutdown_signal};
 
 #[tracing::instrument(skip_all)]
 pub async fn sse_handler(
-    Extension(chan): Extension<Arc<tokio::sync::broadcast::Sender<Notification>>>,
+    State(AppState { tx: chan, .. }): State<AppState>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     // Create an internal channel which transmits all traffic that's coming from our `chan`.
     let (mut tx, rx) = futures::channel::mpsc::channel::<Result<Event, Infallible>>(16);

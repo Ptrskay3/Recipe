@@ -1,9 +1,12 @@
 use async_session::async_trait;
-use axum::{extract::FromRequestParts, http::request::Parts, Extension};
+use axum::{
+    extract::{FromRef, FromRequestParts},
+    http::request::Parts,
+    Extension,
+};
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
 
-use crate::error::ApiError;
+use crate::{error::ApiError, state::AppState};
 
 #[derive(sqlx::FromRow, Serialize, Deserialize, Clone, Debug)]
 pub struct AdminUser {
@@ -14,6 +17,7 @@ pub struct AdminUser {
 #[async_trait]
 impl<S> FromRequestParts<S> for AdminUser
 where
+    AppState: FromRef<S>,
     S: Send + Sync,
 {
     type Rejection = ApiError;
@@ -24,11 +28,9 @@ where
                 .await
                 .expect("`SessionLayer` should be added");
 
-        let Extension(pool) = Extension::<PgPool>::from_request_parts(parts, state)
-            .await
-            .expect("`Database` extension is missing");
+        let AppState { db_pool, .. } = AppState::from_ref(state);
 
-        let mut db = pool.acquire().await?;
+        let mut db = db_pool.acquire().await?;
 
         let user_id = session
             .get::<uuid::Uuid>("user_id")

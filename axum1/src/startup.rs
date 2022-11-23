@@ -3,6 +3,7 @@ use crate::{
     routes::{admin_router, auth_router, ingredient_router, recipe_router},
     session::SessionLayer,
     sse::{sse_handler, Notification},
+    state::AppState,
     upload::upload_router,
     utils::{oauth_client_discord, oauth_client_google, shutdown_signal},
 };
@@ -42,7 +43,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
 
     let redis_conn_str = config.redis.connection_string();
 
-    let store =
+    let redis_store =
         RedisSessionStore::new(redis_conn_str.as_ref()).context("failed to connect redis")?;
 
     let email_client = EmailClient::from_config(config.email_client);
@@ -53,14 +54,23 @@ pub async fn application() -> Result<(), anyhow::Error> {
     let tx = Arc::new(tx);
     let rx = Arc::new(rx);
 
-    let app = Router::new()
+    let app_state = AppState {
+        db_pool,
+        config: config.application_settings,
+        email_client,
+        tx,
+        rx,
+        redis_store: redis_store.clone(),
+    };
+
+    let app = Router::<AppState>::new()
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .route("/sse", get(sse_handler))
-        .nest("/i", ingredient_router())
+        .nest("/i", ingredient_router(app_state.clone()))
         .nest("/r", recipe_router())
         .nest("/", auth_router())
-        .nest("/admin", admin_router())
-        .nest("/upload", upload_router())
+        .nest("/admin", admin_router(app_state.clone()))
+        .nest("/upload", upload_router(app_state.clone()))
         .fallback_service(
             get_service(ServeDir::new("./static/assets")).handle_error(handle_asset_error),
         )
@@ -68,13 +78,10 @@ pub async fn application() -> Result<(), anyhow::Error> {
             tower::ServiceBuilder::new()
                 .layer(TraceLayer::new_for_http())
                 .layer(metric_layer)
-                .layer(Extension(db_pool))
-                .layer(Extension(config.application_settings))
-                .layer(Extension(store.clone()))
-                .layer(Extension(tx))
-                .layer(Extension(rx))
+                .layer(Extension(discord_oauth_client))
+                .layer(Extension(google_oauth_client))
                 .layer(
-                    SessionLayer::new(store, config.redis.secret_key.as_bytes())
+                    SessionLayer::new(redis_store, config.redis.secret_key.as_bytes())
                         .with_secure(
                             std::env::var("APP_ENVIRONMENT")
                                 .unwrap_or_else(|_| String::from("local"))
@@ -82,15 +89,13 @@ pub async fn application() -> Result<(), anyhow::Error> {
                         )
                         .with_persistence(crate::session::Persistence::Always),
                 )
-                .layer(Extension(email_client.clone()))
-                .layer(Extension(discord_oauth_client))
-                .layer(Extension(google_oauth_client))
                 .layer(
                     CorsLayer::very_permissive()
                         .allow_origin(config.frontend_url.parse::<HeaderValue>().unwrap())
                         .allow_credentials(true),
                 ),
-        );
+        )
+        .with_state(app_state);
 
     axum::Server::bind(&addr)
         .serve(app.into_make_service())

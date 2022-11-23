@@ -1,9 +1,14 @@
 use std::{convert::Infallible, ops::Deref};
 
-use crate::{config::ApplicationSettings, error::ApiError};
+use crate::{config::ApplicationSettings, error::ApiError, state::AppState};
 use async_redis_session::RedisSessionStore;
-use axum::{async_trait, extract::FromRequestParts, http::request::Parts, Extension};
-use sqlx::{pool, PgPool, Postgres};
+use axum::{
+    async_trait,
+    extract::{FromRef, FromRequestParts},
+    http::request::Parts,
+    Extension,
+};
+use sqlx::{pool, Postgres};
 
 pub struct DatabaseConnection(pub pool::PoolConnection<Postgres>);
 
@@ -11,15 +16,13 @@ pub struct DatabaseConnection(pub pool::PoolConnection<Postgres>);
 impl<S> FromRequestParts<S> for DatabaseConnection
 where
     S: Send + Sync,
+    AppState: FromRef<S>,
 {
     type Rejection = ApiError;
 
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let Extension(pool) = Extension::<PgPool>::from_request_parts(parts, state)
-            .await
-            .expect("`Database` extension is missing");
-
-        let conn = pool.acquire().await?;
+    async fn from_request_parts(_parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let AppState { db_pool, .. } = AppState::from_ref(state);
+        let conn = db_pool.acquire().await?;
         Ok(Self(conn))
     }
 }
@@ -30,15 +33,14 @@ pub struct RedisConnection(pub RedisSessionStore);
 impl<S> FromRequestParts<S> for RedisConnection
 where
     S: Send + Sync,
+    AppState: FromRef<S>,
 {
     type Rejection = Infallible;
 
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let Extension(store) = Extension::<RedisSessionStore>::from_request_parts(parts, state)
-            .await
-            .expect("`RedisSessionStore` extension is missing");
+    async fn from_request_parts(_parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let AppState { redis_store, .. } = AppState::from_ref(state);
 
-        Ok(Self(store))
+        Ok(Self(redis_store))
     }
 }
 
@@ -119,6 +121,7 @@ pub struct Uploader {
 impl<S> FromRequestParts<S> for Uploader
 where
     S: Send + Sync,
+    AppState: FromRef<S>,
 {
     type Rejection = ApiError;
 
@@ -128,18 +131,17 @@ where
                 .await
                 .expect("`SessionLayer` should be added");
 
-        let Extension(pool) = Extension::<PgPool>::from_request_parts(parts, state)
-            .await
-            .expect("`Database` extension is missing");
-
-        let Extension(ApplicationSettings {
-            daily_upload_limit_bytes,
+        let AppState {
+            db_pool,
+            config:
+                ApplicationSettings {
+                    daily_upload_limit_bytes,
+                    ..
+                },
             ..
-        }) = Extension::<ApplicationSettings>::from_request_parts(parts, state)
-            .await
-            .expect("`ApplicationSettings` extension is missing");
+        } = AppState::from_ref(state);
 
-        let mut db = pool.acquire().await?;
+        let mut db = db_pool.acquire().await?;
 
         let user_id = session
             .get::<uuid::Uuid>("user_id")

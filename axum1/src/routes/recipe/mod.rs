@@ -1,9 +1,9 @@
 use anyhow::Context;
 use axum::{
-    extract::{Json, Path, Query},
+    extract::{Json, Path, Query, State},
     http::StatusCode,
     routing::{get, post},
-    Extension, Router,
+    Router,
 };
 use axum_extra::extract::Form;
 use sqlx::{types::BigDecimal, Acquire};
@@ -13,6 +13,7 @@ use crate::{
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
     sse::Notification,
+    state::AppState,
     RE_RECIPE,
 };
 
@@ -23,7 +24,7 @@ use self::{extractors::RecipeCreator, helpers::QuantityUnit};
 
 mod extractors;
 
-pub fn recipe_router() -> Router {
+pub fn recipe_router() -> Router<AppState> {
     let action_router = Router::new()
         .route("/my-recipes", get(my_recipes))
         .route("/favorites", get(my_favorite_recipes))
@@ -289,7 +290,7 @@ async fn delete_ingredient_from_recipe(
 
 #[tracing::instrument(skip(conn, auth_user))]
 async fn insert_full_recipe(
-    Extension(channel): Extension<std::sync::Arc<tokio::sync::broadcast::Sender<Notification>>>,
+    State(AppState { tx: channel, .. }): State<AppState>,
     DatabaseConnection(mut conn): DatabaseConnection,
     // We want to accept Json input here instead of Form, because the structure
     // of `RecipeWithIngredients` is too complicated to handle with a form.

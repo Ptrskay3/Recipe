@@ -1,7 +1,7 @@
 use axum::{
     async_trait,
     extract::Path,
-    middleware::from_extractor,
+    middleware::from_extractor_with_state,
     routing::{delete, get, post},
     Json, Router,
 };
@@ -17,6 +17,7 @@ use sqlx::{
 use crate::{
     error::ApiError,
     extractors::{AuthUser, DatabaseConnection},
+    state::AppState,
     Queryable,
 };
 
@@ -29,8 +30,7 @@ use self::suggestion::{
 
 use super::AdminUser;
 
-#[must_use]
-pub fn ingredient_router() -> Router {
+pub fn ingredient_router(state: AppState) -> Router<AppState> {
     let admin_services = Router::new()
         .route("/:name/suggestion/:id/apply", get(apply_suggestion))
         .route("/:name/suggestion/:id/decline", get(decline_suggestion))
@@ -41,7 +41,7 @@ pub fn ingredient_router() -> Router {
             delete(delete_ingredient).patch(upgrade_ingredient),
         )
         .route("/new", post(add_ingredient))
-        .route_layer(from_extractor::<AdminUser>());
+        .route_layer(from_extractor_with_state::<AdminUser, _>(state));
 
     Router::new()
         .route("/all", get(all_ingredients))

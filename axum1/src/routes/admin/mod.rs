@@ -1,19 +1,19 @@
 mod middleware;
 pub use middleware::AdminUser;
 
-use axum::{http::StatusCode, middleware::from_extractor, routing::get, Json, Router};
+use axum::{http::StatusCode, middleware::from_extractor_with_state, routing::get, Json, Router};
 
 use crate::{
     error::ApiError,
     extractors::{DatabaseConnection, RedisConnection},
+    state::AppState,
 };
 
-#[must_use]
-pub fn admin_router() -> Router {
+pub fn admin_router(state: AppState) -> Router<AppState> {
     Router::new()
         .route("/pg", get(pg_health))
         .route("/redis", get(redis_health))
-        .route_layer(from_extractor::<AdminUser>())
+        .route_layer(from_extractor_with_state::<AdminUser, _>(state))
         .route("/health_check", get(|| async { StatusCode::OK }))
 }
 

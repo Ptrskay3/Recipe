@@ -1,11 +1,11 @@
 use async_session::async_trait;
 use axum::{
-    extract::{FromRequestParts, Path},
+    extract::{FromRef, FromRequestParts, Path},
     http::request::Parts,
     Extension,
 };
 
-use crate::{error::ApiError, extractors::DatabaseConnection};
+use crate::{error::ApiError, extractors::DatabaseConnection, state::AppState};
 
 #[derive(Debug)]
 pub struct RecipeCreator(uuid::Uuid);
@@ -14,6 +14,7 @@ pub struct RecipeCreator(uuid::Uuid);
 impl<S> FromRequestParts<S> for RecipeCreator
 where
     S: Send + Sync,
+    AppState: FromRef<S>,
 {
     type Rejection = ApiError;
 

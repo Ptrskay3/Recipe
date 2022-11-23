@@ -1,6 +1,6 @@
 use anyhow::Context;
 use axum::{
-    extract::Query,
+    extract::{Query, State},
     routing::{get, post, put},
     Extension, Form, Json, Router,
 };
@@ -9,9 +9,10 @@ use sqlx::Acquire;
 use validator::Validate;
 
 use crate::{
-    email::{Email, EmailClient},
+    email::Email,
     error::{ApiError, ResultExt},
     extractors::{AuthUser, DatabaseConnection, MaybeAuthUser},
+    state::AppState,
     RE_USERNAME,
 };
 
@@ -24,8 +25,7 @@ use password::{compute_password_hash, validate_credentials};
 
 use self::confirm::{confirm, enqueue_delivery_task, generate_confirmation_token, store_token};
 
-#[must_use]
-pub fn auth_router() -> Router {
+pub fn auth_router() -> Router<AppState> {
     Router::new()
         .route("/me", get(me))
         .route("/auth", post(authorize))
@@ -208,7 +208,7 @@ struct ForgetPassword {
 
 async fn forget_password_gen(
     DatabaseConnection(mut conn): DatabaseConnection,
-    Extension(client): Extension<EmailClient>,
+    State(AppState { email_client, .. }): State<AppState>,
     Form(form): Form<ForgetPassword>,
 ) -> Result<(), ApiError> {
     let ForgetPassword { name, email } = form;
@@ -239,7 +239,7 @@ async fn forget_password_gen(
         .execute(&mut conn)
         .await?;
 
-        client
+        email_client
             .send_mail(
                 Email::parse(email)?,
                 "Recipe App - Your password reset",

@@ -2,7 +2,7 @@ use anyhow::Context;
 use axum::{
     body::Bytes,
     extract::{BodyStream, DefaultBodyLimit, Multipart, Path},
-    middleware::from_extractor,
+    middleware::from_extractor_with_state,
     routing::post,
     BoxError, Router,
 };
@@ -17,14 +17,15 @@ use crate::{
     error::ApiError,
     extractors::{DatabaseConnection, Uploader},
     routes::AdminUser,
+    state::AppState,
 };
 
 pub const UPLOADS_DIRECTORY: &str = "uploads";
 
-pub fn upload_router() -> Router {
+pub fn upload_router(state: AppState) -> Router<AppState> {
     Router::new()
         .route("/:file_name", post(save_request_body))
-        .route_layer(from_extractor::<AdminUser>())
+        .route_layer(from_extractor_with_state::<AdminUser, _>(state))
         .route("/", post(accept_form))
         .layer(DefaultBodyLimit::disable())
         .layer(RequestBodyLimitLayer::new(25 * 1024 * 1024)) // 25mb
