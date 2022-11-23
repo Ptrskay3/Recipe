@@ -1,10 +1,10 @@
 use crate::{
     email::EmailClient,
-    routes::{admin_router, auth_router, ingredient_router, recipe_router},
+    routes::{admin, auth, ingredient, recipe},
     session::SessionLayer,
     sse::{sse_handler, Notification},
     state::AppState,
-    upload::upload_router,
+    upload,
     utils::{oauth_client_discord, oauth_client_google, shutdown_signal},
 };
 use anyhow::Context;
@@ -66,11 +66,11 @@ pub async fn application() -> Result<(), anyhow::Error> {
     let app = Router::<AppState>::new()
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .route("/sse", get(sse_handler))
-        .nest("/i", ingredient_router(app_state.clone()))
-        .nest("/r", recipe_router())
-        .nest("/", auth_router())
-        .nest("/admin", admin_router(app_state.clone()))
-        .nest("/upload", upload_router(app_state.clone()))
+        .nest("/i", ingredient::router(app_state.clone()))
+        .nest("/r", recipe::router())
+        .nest("/", auth::router())
+        .nest("/admin", admin::router(app_state.clone()))
+        .nest("/upload", upload::router(app_state.clone()))
         .fallback_service(
             get_service(ServeDir::new("./static/assets")).handle_error(handle_asset_error),
         )

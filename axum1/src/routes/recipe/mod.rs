@@ -24,7 +24,7 @@ use self::{extractors::RecipeCreator, helpers::QuantityUnit};
 
 mod extractors;
 
-pub fn recipe_router() -> Router<AppState> {
+pub fn router() -> Router<AppState> {
     let action_router = Router::new()
         .route("/my-recipes", get(my_recipes))
         .route("/favorites", get(my_favorite_recipes))

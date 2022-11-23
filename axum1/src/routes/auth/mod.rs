@@ -25,7 +25,7 @@ use password::{compute_password_hash, validate_credentials};
 
 use self::confirm::{confirm, enqueue_delivery_task, generate_confirmation_token, store_token};
 
-pub fn auth_router() -> Router<AppState> {
+pub fn router() -> Router<AppState> {
     Router::new()
         .route("/me", get(me))
         .route("/auth", post(authorize))

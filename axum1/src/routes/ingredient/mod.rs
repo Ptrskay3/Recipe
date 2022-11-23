@@ -28,9 +28,9 @@ use self::suggestion::{
     apply_suggestion, decline_suggestion, get_ingredient_suggestion, get_ingredient_suggestions,
 };
 
-use super::AdminUser;
+use super::admin::AdminUser;
 
-pub fn ingredient_router(state: AppState) -> Router<AppState> {
+pub fn router(state: AppState) -> Router<AppState> {
     let admin_services = Router::new()
         .route("/:name/suggestion/:id/apply", get(apply_suggestion))
         .route("/:name/suggestion/:id/decline", get(decline_suggestion))

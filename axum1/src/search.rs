@@ -1,7 +1,7 @@
 use meilisearch_sdk::client::Client;
 use sqlx::{Pool, Postgres};
 
-use crate::{config::Settings, queue::get_connection_pool, routes::FoodCategory};
+use crate::{config::Settings, queue::get_connection_pool, routes::ingredient::FoodCategory};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Ingredient {

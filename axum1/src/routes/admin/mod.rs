@@ -9,7 +9,7 @@ use crate::{
     state::AppState,
 };
 
-pub fn admin_router(state: AppState) -> Router<AppState> {
+pub fn router(state: AppState) -> Router<AppState> {
     Router::new()
         .route("/pg", get(pg_health))
         .route("/redis", get(redis_health))

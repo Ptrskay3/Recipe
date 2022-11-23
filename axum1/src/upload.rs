@@ -16,13 +16,13 @@ use tower_http::limit::RequestBodyLimitLayer;
 use crate::{
     error::ApiError,
     extractors::{DatabaseConnection, Uploader},
-    routes::AdminUser,
+    routes::admin::AdminUser,
     state::AppState,
 };
 
 pub const UPLOADS_DIRECTORY: &str = "uploads";
 
-pub fn upload_router(state: AppState) -> Router<AppState> {
+pub fn router(state: AppState) -> Router<AppState> {
     Router::new()
         .route("/:file_name", post(save_request_body))
         .route_layer(from_extractor_with_state::<AdminUser, _>(state))
