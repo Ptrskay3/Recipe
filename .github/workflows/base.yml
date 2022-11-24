@@ -5,13 +5,13 @@ on:
     branches:
       - master
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types: [opened, synchronize, reopened]
     branches:
       - master
 
 env:
   CARGO_TERM_COLOR: always
-  APP_ENVIRONMENT: "ci"
+  APP_ENVIRONMENT: 'ci'
 
 jobs:
   test:
@@ -31,7 +31,7 @@ jobs:
         ports:
           - 6379:6379
     env:
-      SQLX_VERSION: 0.5.7
+      SQLX_VERSION: 0.6.2
       SQLX_FEATURES: postgres
     steps:
       - name: Checkout repository
@@ -80,10 +80,10 @@ jobs:
           sudo apt-get install libpq-dev -y
           cd axum1/
           SKIP_DOCKER=true ./scripts/init_db.sh
-      # - name: Check sqlx-data.json is up-to-date
-      #   run: |
-      #     cd axum1/
-      #     cargo sqlx prepare --check -- --bin axum1
+      - name: Check sqlx-data.json is up-to-date
+        run: |
+          cd axum1/
+          cargo sqlx prepare --check -- --bin axum1
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
