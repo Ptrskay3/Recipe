@@ -73,7 +73,6 @@ jobs:
             --force
             --version=${{ env.SQLX_VERSION }}
             --features=${{ env.SQLX_FEATURES }}
-            --no-default-features
             --locked
       - name: Migrate database
         run: |
@@ -119,7 +118,7 @@ jobs:
         ports:
           - 5432:5432
     env:
-      SQLX_VERSION: 0.5.7
+      SQLX_VERSION: 0.6.2
       SQLX_FEATURES: postgres
     steps:
       - name: Checkout repository
@@ -150,7 +149,6 @@ jobs:
             --force
             --version=${{ env.SQLX_VERSION }}
             --features=${{ env.SQLX_FEATURES }}
-            --no-default-features
             --locked
       - name: Migrate database
         run: |
