@@ -1,5 +1,31 @@
 {
   "db": "PostgreSQL",
+  "00b5f6daa46fad8f84e6bdc5308ed5107201eae853ec30eebf93811b8e69d479": {
+    "describe": {
+      "columns": [
+        {
+          "name": "name",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "count",
+          "ordinal": 1,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n        SELECT r.name, COUNT(fr.recipe_id) FROM favorite_recipe fr\n        INNER JOIN recipes r ON r.id = fr.recipe_id\n        WHERE fr.created_at > current_timestamp - INTERVAL '14 days'\n        GROUP BY r.name\n        ORDER BY count DESC\n        LIMIT $1\n        "
+  },
   "018bfae0432690c66169b816362b0f0b29c3c6ea0ab0d9aba3c895144b814f32": {
     "describe": {
       "columns": [],
@@ -255,6 +281,20 @@
       }
     },
     "query": "\n        SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n        protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n        FROM ingredients;\n        "
+  },
+  "14cbd43eb8b3b87fa82c65d5ea4e70d79f33299066ae4723873f4b993eb94502": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4",
+          "Text"
+        ]
+      }
+    },
+    "query": "INSERT INTO uploads (uploader_id, bytes, file_name) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING"
   },
   "2e5a2b956a4b461174914264af9f42b987e4d4b2ff18f8fc7c231449a60a3181": {
     "describe": {
@@ -833,6 +873,26 @@
     },
     "query": "SELECT name FROM users WHERE user_id = $1"
   },
+  "4e149700de5242b3ce942049be9bc7a7e2c63a858db5f9722e122e4431f21a69": {
+    "describe": {
+      "columns": [
+        {
+          "name": "upload_limit",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT COALESCE(SUM(bytes), 0) as upload_limit FROM uploads\n            WHERE uploader_id = $1 AND created_at > current_timestamp - INTERVAL '1 days';"
+  },
   "4e3ffa01cd6a727476a9080aff84d2c5f9e891551df666e353497e5898f2a0fa": {
     "describe": {
       "columns": [
@@ -1116,6 +1176,27 @@
     },
     "query": "\n        UPDATE ingredients i \n            SET\n                name = COALESCE(igs.name, i.name),\n                category = COALESCE(igs.category, i.category),\n                calories_per_100g = COALESCE(igs.calories_per_100g, i.calories_per_100g),\n                g_per_piece = COALESCE(igs.g_per_piece, i.g_per_piece),\n                protein = COALESCE(igs.protein, i.protein),\n                water = COALESCE(igs.water, i.water),\n                fat = COALESCE(igs.fat, i.fat),\n                sugar = COALESCE(igs.sugar, i.sugar),\n                carbohydrate = COALESCE(igs.carbohydrate, i.carbohydrate),\n                fiber = COALESCE(igs.fiber, i.fiber),\n                caffeine = COALESCE(igs.caffeine, i.caffeine),\n                contains_alcohol = COALESCE(igs.contains_alcohol, i.contains_alcohol)\n        FROM ingredient_suggestions igs\n        WHERE i.name = $1 AND igs.id = $2\n        "
   },
+  "6a3ffa1df76d4ceaf0a17e4c816b9f37a02aca6ff54bb8a752355215f838e3ac": {
+    "describe": {
+      "columns": [
+        {
+          "name": "_e",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "SELECT 1 as _e FROM recipes WHERE name = $1 AND creator_id = $2"
+  },
   "6a5dee8455ad5afd5ab011e25989ae1e975cb27e67c71d7f763e7fab05b3ab19": {
     "describe": {
       "columns": [
@@ -1211,6 +1292,27 @@
       }
     },
     "query": "\n        SELECT id\n        FROM ingredients\n        WHERE name = $1\n        "
+  },
+  "73f025031c847f709dbba21f185fb6d6042472f31c4b399abfd0afeef964f765": {
+    "describe": {
+      "columns": [
+        {
+          "name": "_e",
+          "ordinal": 0,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "SELECT 1 AS _e FROM recipes WHERE creator_id = $1 AND name = $2"
   },
   "77c073ee850e092a0fe86a780d0b134783ee1699d2f062a8b05005f67f0dcc04": {
     "describe": {
@@ -1715,6 +1817,26 @@
       }
     },
     "query": "\n                    SELECT user_id FROM users\n                    WHERE oauth_provider = $2 AND oauth_id = $1\n                    "
+  },
+  "d20836b45ad4ed567a992fe38cf6139c250eac69bb871efcae1894f7b8278f7a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "token",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT token\n        FROM forget_password_tokens\n        WHERE created_at > current_timestamp - INTERVAL '2 days' AND token = $1\n        ORDER BY created_at DESC\n        LIMIT 1;\n        "
   },
   "f1d9568facb0a52c26ad57aab7a01b48d55f734ac7cba900fa669336fc7bc6ba": {
     "describe": {
