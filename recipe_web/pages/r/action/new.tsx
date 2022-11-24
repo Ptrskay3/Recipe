@@ -8,8 +8,9 @@ import { Layout } from '../../../components/layout';
 import { Listable } from '../../../components/Listable';
 import { DurationSlider } from '../../../components/slider';
 import { useAddRecipe } from '../../../stores/useAddRecipe';
-import { DifficultyLevel, difficultyLevels, MealType, mealTypes } from '../../../utils/types';
+import { difficultyLevels, mealTypes } from '../../../utils/types';
 import { useAuth } from '../../../utils/useAuth';
+import type { DifficultyLevel, MealType } from '../../../utils/types';
 
 const NewRecipe = () => {
   const { push } = useRouter();
