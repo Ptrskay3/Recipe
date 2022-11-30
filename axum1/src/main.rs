@@ -17,9 +17,10 @@ async fn main() -> anyhow::Result<()> {
     ));
 
     tracing_subscriber::registry()
-        .with(tracing_subscriber::EnvFilter::new(
-            std::env::var("RUST_LOG").unwrap_or_else(|_| "axum1=debug,tower_http=debug".into()),
-        ))
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "axum1=debug,tower_http=debug".into()),
+        )
         .with(tracing_subscriber::fmt::layer())
         .with(sentry_tracing::layer())
         .init();
