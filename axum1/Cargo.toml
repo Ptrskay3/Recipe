@@ -21,7 +21,7 @@ tower-http = { version = "=0.3.4", features = ["add-extension", "trace", "cors",
 chrono = { version = "0.4.23", features = ["serde"] }
 time = { version = "0.3.17", features = ["formatting", "serde", "serde-well-known"] }
 # for configuration and auxiliary things
-config = "0.13.2"
+config = "0.13.3"
 dotenv = "0.15.0"
 rand = "0.8.5"
 # (de)serialization
