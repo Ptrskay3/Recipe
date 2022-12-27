@@ -25,7 +25,7 @@ config = "0.13.3"
 dotenv = "0.15.0"
 rand = "0.8.5"
 # (de)serialization
-serde = { version = "1.0.150", features = ["derive"] }
+serde = { version = "1.0.152", features = ["derive"] }
 # database interaction
 sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "any", "postgres", "json", "macros", "chrono", "uuid", "migrate", "offline", "bigdecimal"], default-features = false }
 # tracing and logging utilites
