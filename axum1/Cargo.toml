@@ -8,7 +8,7 @@ description = "A backend for recipe app"
 
 [dependencies]
 # for idiomatic error handling
-anyhow = "1.0.66"
+anyhow = "1.0.69"
 thiserror = "1.0.39"
 # our choice as a web framework, and other related utilities
 axum = { version = "0.6.1", features = ["json", "headers", "multipart"] }
