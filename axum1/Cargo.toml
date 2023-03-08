@@ -11,12 +11,12 @@ description = "A backend for recipe app"
 anyhow = "1.0.69"
 thiserror = "1.0.39"
 # our choice as a web framework, and other related utilities
-axum = { version = "0.6.1", features = ["json", "headers", "multipart"] }
+axum = { version = "0.6.10", features = ["json", "headers", "multipart"] }
 tokio = { version = "1.23.0", features = ["full"] }
 tokio-util = { version = "0.7", features = ["io"] }
 uuid = { version = "1", features = ["v4", "serde"] }
-axum-extra = { version = "0.4.2", features = ["cookie", "cookie-signed", "form"] }
-tower-http = { version = "=0.3.5", features = ["add-extension", "trace", "cors", "fs", "limit"] }
+axum-extra = { version = "0.7.0", features = ["cookie", "cookie-signed", "form"] }
+tower-http = { version = "0.4.0", features = ["add-extension", "trace", "cors", "fs", "limit"] }
 # for handling dates
 chrono = { version = "0.4.23", features = ["serde"] }
 time = { version = "0.3.17", features = ["formatting", "serde", "serde-well-known"] }
@@ -29,16 +29,16 @@ serde = { version = "1.0.153", features = ["derive"] }
 # database interaction
 sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "any", "postgres", "json", "macros", "chrono", "uuid", "migrate", "offline", "bigdecimal"], default-features = false }
 # tracing and logging utilites
-sentry = "0.29.1"
-sentry-tracing = "0.29"
+sentry = "0.30.0"
+sentry-tracing = "0.30"
 tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }
 log = "0.4.14"
 # monitoring
 metrics-exporter-prometheus = "0.11.0"
-axum-prometheus = "0.2.0"
+axum-prometheus = "0.3.1"
 # password hashing
-argon2 = { version = "0.4", features = ["std"] }
+argon2 = { version = "0.5", features = ["std"] }
 # for avoiding exposing sensitive information
 secrecy = { version = "0.8.0", features = ["serde"] } 
 # session ext
@@ -49,7 +49,7 @@ async-redis-session = { path = "./crates/async-redis-session" }
 # emails
 reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
 # searching
-meilisearch-sdk = "0.20"
+meilisearch-sdk = "0.22"
 serde_json = "1.0.94"
 # OAuth
 oauth2 = "4.3.0"

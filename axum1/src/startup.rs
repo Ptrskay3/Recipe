@@ -11,7 +11,6 @@ use anyhow::Context;
 use async_redis_session::RedisSessionStore;
 use axum::{
     http::HeaderValue,
-    response::IntoResponse,
     routing::{get, get_service},
     Extension, Router,
 };
@@ -71,9 +70,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
         .nest("/", auth::router())
         .nest("/admin", admin::router(app_state.clone()))
         .nest("/upload", upload::router(app_state.clone()))
-        .fallback_service(
-            get_service(ServeDir::new("./static/assets")).handle_error(handle_asset_error),
-        )
+        .fallback_service(get_service(ServeDir::new("static")))
         .layer(
             tower::ServiceBuilder::new()
                 .layer(TraceLayer::new_for_http())
@@ -97,16 +94,14 @@ pub async fn application() -> Result<(), anyhow::Error> {
         )
         .with_state(app_state);
 
-    axum::Server::bind(&addr)
+    // Just cannot handle the insane `hyper::server::Builder::serve` trait bounds otherwise..
+    if let Err(e) = axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .with_graceful_shutdown(shutdown_signal())
         .await
-        .context("Failed to start server")
-}
-
-async fn handle_asset_error(_err: std::io::Error) -> impl IntoResponse {
-    (
-        axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-        "something went wrong",
-    )
+    {
+        Err(anyhow::anyhow!(e.to_string()))
+    } else {
+        Ok(())
+    }
 }

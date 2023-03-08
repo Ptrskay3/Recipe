@@ -1,6 +1,6 @@
 application_settings:
   port: 3000
-  daily_upload_limit_bytes: 26_214_400 # 25 * 1024 * 1024, 25 Mb
+  daily_upload_limit_bytes: 26_214_400 # = 25 * 1024 * 1024, which is 25 Mb
 database:
   host: '127.0.0.1'
   port: 5432
