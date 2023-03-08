@@ -146,7 +146,7 @@ pub fn get_config() -> Result<Settings, config::ConfigError> {
     let environment_filename = format!("{}.yml", environment.as_str());
     let settings = config::Config::builder()
         .add_source(config::File::from(
-            configuration_directory.join(&environment_filename),
+            configuration_directory.join(environment_filename),
         ))
         .build()
         .unwrap();
