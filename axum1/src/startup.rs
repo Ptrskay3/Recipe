@@ -94,14 +94,9 @@ pub async fn application() -> Result<(), anyhow::Error> {
         )
         .with_state(app_state);
 
-    // Just cannot handle the insane `hyper::server::Builder::serve` trait bounds otherwise..
-    if let Err(e) = axum::Server::bind(&addr)
+    axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .with_graceful_shutdown(shutdown_signal())
         .await
-    {
-        Err(anyhow::anyhow!(e.to_string()))
-    } else {
-        Ok(())
-    }
+        .context("Failed to start server")
 }
