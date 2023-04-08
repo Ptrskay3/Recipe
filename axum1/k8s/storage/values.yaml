@@ -1,0 +1,38 @@
+postgresql:
+  postgresqlUsername: postgres
+  postgresqlPassword: postgres
+  postgresqlDatabase: hummus
+  persistence:
+    enabled: true
+    size: 10Gi
+    mountPath: /var/lib/postgresql/data
+  service:
+    type: ClusterIP
+    name: postgresql
+    port: 5432
+
+# Figure out what's working and what's not..
+# I just cannot understand what the actual fuck helm wants me to do to disable authentication for redis.
+# Let's run this as `helm install recipe-redis bitnami/redis -f storage/values.yaml --set auth.enabled=false`...
+global:
+  postgresql:
+    auth:
+      postgresPassword: 'postgres'
+      username: 'postgres'
+      password: 'postgres'
+      database: 'hummus'
+  redis:
+    auth:
+      enabled: false
+
+redis:
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 5Gi
+  service:
+    type: ClusterIP
+    name: redis
+    port: 6379

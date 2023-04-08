@@ -1,8 +1,5 @@
-use axum::async_trait;
-use error::ApiError;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use sqlx::PgExecutor;
 
 pub mod config;
 pub mod email;
@@ -26,17 +23,3 @@ static RE_RECIPE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r#"^[a-zA-Z0-9-íáéúőóüöűÍÁÉÚŐÓÜÖŰ](\-?[a-zA-Z0-9 íáéúőóüöűÍÁÉÚŐÓÜÖŰ - \s])*$"#)
         .unwrap()
 });
-
-#[async_trait]
-pub trait Queryable: Sized {
-    type Id;
-    type Name;
-
-    async fn get_by_id<'c, E>(tx: E, id: Self::Id) -> Result<Self, ApiError>
-    where
-        E: PgExecutor<'c>;
-
-    async fn get_by_name<'c, E>(tx: E, name: Self::Name) -> Result<Self, ApiError>
-    where
-        E: PgExecutor<'c>;
-}

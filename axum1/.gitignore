@@ -7,3 +7,4 @@ data/
 docker/volumes/
 uploads/
 configuration/local.yml
+configuration/production.yml

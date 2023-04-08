@@ -25,6 +25,7 @@ pub struct Settings {
 #[derive(Deserialize, Clone)]
 pub struct ApplicationSettings {
     pub port: u16,
+    pub host: [u8; 4],
     pub daily_upload_limit_bytes: i64,
 }
 
@@ -94,6 +95,8 @@ pub struct RedisSettings {
     pub host: String,
     pub port: u16,
     pub secret_key: String,
+    pub username: Option<String>,
+    pub password: Option<Secret<String>>,
 }
 
 impl DatabaseSettings {
@@ -131,7 +134,17 @@ impl DatabaseSettings {
 
 impl RedisSettings {
     pub fn connection_string(&self) -> String {
-        format!("redis://{}:{}", self.host, self.port)
+        if let Some(pw) = &self.password {
+            format!(
+                "redis://{}:{}@{}:{}",
+                self.username.as_deref().unwrap_or_default(),
+                pw.expose_secret(),
+                self.host,
+                self.port
+            )
+        } else {
+            format!("redis://{}:{}", self.host, self.port)
+        }
     }
 }
 

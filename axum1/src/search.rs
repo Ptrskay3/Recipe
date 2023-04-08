@@ -21,7 +21,7 @@ pub struct Ingredient {
 }
 
 pub async fn run_meili_indexer_until_stopped(config: Settings) -> Result<(), anyhow::Error> {
-    let meili_client = Client::new(config.meili.url, config.meili.master_key);
+    let meili_client = Client::new(config.meili.url, Some(config.meili.master_key));
     let pool = get_connection_pool(&config.database);
     run_meili_indexer(pool, meili_client).await
 }

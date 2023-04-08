@@ -1,5 +1,4 @@
 use axum::{
-    async_trait,
     extract::Path,
     middleware::from_extractor_with_state,
     routing::{delete, get, post},
@@ -11,14 +10,13 @@ use axum_extra::extract::Form;
 use serde::{Deserialize, Serialize};
 use sqlx::{
     postgres::{PgHasArrayType, PgTypeInfo},
-    Connection, PgExecutor,
+    Connection,
 };
 
 use crate::{
     error::ApiError,
     extractors::{AuthUser, DatabaseConnection},
     state::AppState,
-    Queryable,
 };
 
 pub mod suggestion;
@@ -94,52 +92,6 @@ pub struct Ingredient {
     pub fiber: f32,
     pub caffeine: f32,
     pub contains_alcohol: bool,
-}
-
-#[async_trait]
-impl Queryable for Ingredient {
-    type Id = uuid::Uuid;
-    type Name = String;
-
-    async fn get_by_id<'c, E>(e: E, id: Self::Id) -> Result<Self, ApiError>
-    where
-        E: PgExecutor<'c>,
-    {
-        let query = sqlx::query_as!(
-            Self,
-            r#"
-            SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece,
-            protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol
-            FROM ingredients
-            WHERE id = $1;
-            "#,
-            id
-        )
-        .fetch_optional(e)
-        .await?
-        .ok_or(ApiError::NotFound)?;
-        Ok(query)
-    }
-
-    async fn get_by_name<'c, E>(e: E, name: Self::Name) -> Result<Self, ApiError>
-    where
-        E: PgExecutor<'c>,
-    {
-        let query = sqlx::query_as!(
-            Self,
-            r#"
-            SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece,
-            protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol
-            FROM ingredients
-            WHERE name = $1;
-            "#,
-            name
-        )
-        .fetch_optional(e)
-        .await?
-        .ok_or(ApiError::NotFound)?;
-        Ok(query)
-    }
 }
 
 async fn all_ingredients(
@@ -302,7 +254,19 @@ async fn get_ingredient(
     Path(name): Path<String>,
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<Json<Ingredient>, ApiError> {
-    let row = Ingredient::get_by_name(&mut conn, name).await?;
+    let row = sqlx::query_as!(
+        Ingredient,
+        r#"
+            SELECT name, calories_per_100g, category as "category: Vec<FoodCategory>", g_per_piece,
+            protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol
+            FROM ingredients
+            WHERE name = $1;
+            "#,
+        name
+    )
+    .fetch_optional(&mut conn)
+    .await?
+    .ok_or(ApiError::NotFound)?;
 
     Ok(Json(row))
 }

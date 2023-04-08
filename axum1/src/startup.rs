@@ -24,7 +24,10 @@ pub async fn application() -> Result<(), anyhow::Error> {
 
     let config = crate::config::get_config().expect("Configuration file is missing");
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], config.application_settings.port));
+    let addr = SocketAddr::from((
+        config.application_settings.host,
+        config.application_settings.port,
+    ));
 
     let discord_oauth_client = oauth_client_discord(&config);
     let google_oauth_client = oauth_client_google(&config);
