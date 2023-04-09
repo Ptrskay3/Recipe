@@ -31,12 +31,22 @@ async fn run_meili_indexer(
     meili_client: Client,
 ) -> Result<(), anyhow::Error> {
     loop {
-        let records = get_ingredient_records(&pool).await?;
+        let ingredient_records = get_ingredient_records(&pool).await?;
+        let cuisine_records = get_cuisine_records(&pool).await?;
 
         tracing::info!("Started indexing ingredients");
         let task = meili_client
             .index("ingredients")
-            .add_documents(&records, None)
+            .add_documents(&ingredient_records, None)
+            .await?
+            .wait_for_completion(&meili_client, None, None)
+            .await?;
+        tracing::info!("indexing finished, success: {}", task.is_success());
+
+        tracing::info!("Started indexing cuisines");
+        let task = meili_client
+            .index("cuisines")
+            .add_documents(&cuisine_records, None)
             .await?
             .wait_for_completion(&meili_client, None, None)
             .await?;
@@ -46,7 +56,7 @@ async fn run_meili_indexer(
     }
 }
 
-async fn get_ingredient_records(pool: &Pool<Postgres>) -> Result<Vec<Ingredient>, anyhow::Error> {
+async fn get_ingredient_records(pool: &Pool<Postgres>) -> anyhow::Result<Vec<Ingredient>> {
     let mut tx = pool.begin().await?;
     let records = sqlx::query_as!(
         Ingredient,
@@ -60,4 +70,24 @@ async fn get_ingredient_records(pool: &Pool<Postgres>) -> Result<Vec<Ingredient>
     .await?;
     tx.commit().await?;
     Ok(records)
+}
+
+async fn get_cuisine_records(pool: &Pool<Postgres>) -> anyhow::Result<Vec<Cuisine>> {
+    let mut tx = pool.begin().await?;
+    let records = sqlx::query_as!(
+        Cuisine,
+        r#"
+        SELECT id, name FROM cuisines;
+        "#
+    )
+    .fetch_all(&mut tx)
+    .await?;
+    tx.commit().await?;
+    Ok(records)
+}
+
+#[derive(sqlx::FromRow, serde::Serialize)]
+struct Cuisine {
+    name: String,
+    id: uuid::Uuid,
 }

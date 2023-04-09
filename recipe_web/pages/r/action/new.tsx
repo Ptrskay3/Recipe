@@ -11,6 +11,7 @@ import { useAddRecipe } from '../../../stores/useAddRecipe';
 import { difficultyLevels, mealTypes } from '../../../utils/types';
 import { useAuth } from '../../../utils/useAuth';
 import type { DifficultyLevel, MealType } from '../../../utils/types';
+import CuisineSearch from '../../../components/search/CuisineSearch';
 
 const NewRecipe = () => {
   const { push } = useRouter();
@@ -150,13 +151,10 @@ const NewRecipe = () => {
                 onBlur={(e) => setDescription(e.target.value)}
               />
               <Box mt="4" />
-              <InputField
+              <CuisineSearch
                 name="cuisine"
                 label="Cuisine"
-                placeholder="cuisine"
-                required
                 errors={errors as any}
-                onBlur={(e) => setCuisine(e.target.value)}
               />
               <Divider m="4"></Divider>
               <Heading fontSize={'lg'} m="2">

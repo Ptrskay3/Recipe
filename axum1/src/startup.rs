@@ -14,7 +14,7 @@ use axum::{
     routing::{get, get_service},
     Extension, Router,
 };
-use axum_prometheus::PrometheusMetricLayer;
+use axum_prometheus::PrometheusMetricLayerBuilder;
 use sqlx::postgres::PgPoolOptions;
 use std::{net::SocketAddr, sync::Arc};
 use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
@@ -50,7 +50,10 @@ pub async fn application() -> Result<(), anyhow::Error> {
 
     let email_client = EmailClient::from_config(config.email_client);
 
-    let (metric_layer, metric_handle) = PrometheusMetricLayer::pair();
+    let (metric_layer, metric_handle) = PrometheusMetricLayerBuilder::new()
+        .with_ignore_pattern("/admin")
+        .with_default_metrics()
+        .build_pair();
 
     let (tx, rx) = tokio::sync::broadcast::channel::<Notification>(16);
     let tx = Arc::new(tx);

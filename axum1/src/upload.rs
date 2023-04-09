@@ -52,11 +52,7 @@ pub async fn accept_form(
         .await
         .context("Failed to get next field")?
     {
-        let file_name = if let Some(file_name) = field.file_name() {
-            file_name.to_owned()
-        } else {
-            continue;
-        };
+        let Some(file_name) = field.file_name().map(ToOwned::to_owned) else { continue };
 
         stream_to_file(&file_name, uploader.id, field, &mut tx).await?;
     }
@@ -66,8 +62,8 @@ pub async fn accept_form(
     Ok(())
 }
 
-async fn stream_to_file<'c, T, S, E>(
-    path: &str,
+async fn stream_to_file<'c, T, S, E, P>(
+    path: P,
     user_id: uuid::Uuid,
     stream: S,
     tx: T,
@@ -76,8 +72,9 @@ where
     T: PgExecutor<'c>,
     S: Stream<Item = Result<Bytes, E>>,
     E: Into<BoxError>,
+    P: AsRef<std::path::Path>,
 {
-    if !path_is_valid(path) {
+    if !path_is_valid(&path) {
         return Err(ApiError::BadRequest);
     }
 
@@ -124,9 +121,8 @@ where
 
 // to prevent directory traversal attacks we ensure the path consists of exactly one normal
 // component
-fn path_is_valid(path: &str) -> bool {
-    let path = std::path::Path::new(path);
-    let mut components = path.components().peekable();
+fn path_is_valid<P: AsRef<std::path::Path>>(path: P) -> bool {
+    let mut components = path.as_ref().components().peekable();
 
     if let Some(first) = components.peek() {
         if !matches!(first, std::path::Component::Normal(_)) {

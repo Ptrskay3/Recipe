@@ -1,18 +1,29 @@
 import { CloseIcon } from '@chakra-ui/icons';
-import { Box, Center, CircularProgress, Flex, Heading, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Center,
+  CircularProgress,
+  Flex,
+  Heading,
+  VStack,
+  Text,
+  Link,
+  Stack,
+} from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { Layout } from '../../components/layout';
+import NextLink from 'next/link';
 
 export default function DiscordAuthorize() {
   const router = useRouter();
   const { mutate } = useSWRConfig();
   const { code, state, error: discordError } = router.query;
-  const [error, setError] = useState<boolean>(false);
+  const [error, setError] = useState<{ isError: boolean; message?: string }>({ isError: false });
   useEffect(() => {
     if (discordError) {
-      setError(true);
+      setError({ isError: true });
       return;
     }
     if (!state || !code) return;
@@ -21,19 +32,20 @@ export default function DiscordAuthorize() {
       {
         credentials: 'include',
       }
-    )
-      .then((r) => r.ok)
-      .then((ok) => {
-        if (ok) {
-          mutate(`${process.env.NEXT_PUBLIC_BASE_URL}/me`);
-          router.push('/');
-        } else {
-          setError(true);
-        }
-      });
+    ).then((r) => {
+      if (r.ok) {
+        mutate(`${process.env.NEXT_PUBLIC_BASE_URL}/me`);
+        router.push('/');
+      } else if (r.status === 422) {
+        setError({
+          isError: true,
+          message: 'User with this email already exists as a regular non-OAuth user.',
+        });
+      }
+    });
   }, [router, code, state, mutate, discordError]);
 
-  if (error) {
+  if (error.isError) {
     return (
       <Layout>
         <Center mt="14">
@@ -51,9 +63,21 @@ export default function DiscordAuthorize() {
               <CloseIcon boxSize={'20px'} color={'white'} />
             </Flex>
           </Box>
-          <Heading as="h2" size="xl" mt={6} mb={2}>
-            Something went wrong.
-          </Heading>
+          <Stack>
+            <Heading as="h2" size="xl" mt={6} mb={2}>
+              Something went wrong. <br /> Details might be shown below.
+            </Heading>
+            {error.message && (
+              <>
+                <Text fontSize="md">{error.message}</Text>
+                <NextLink href="/login">
+                  <Link mt={4} color={'orange.400'}>
+                    Login with that email instead?
+                  </Link>
+                </NextLink>
+              </>
+            )}
+          </Stack>
         </Center>
       </Layout>
     );
