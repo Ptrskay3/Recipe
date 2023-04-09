@@ -38,123 +38,6 @@
     },
     "query": "\n        INSERT INTO failed_jobs (job_type, context)\n        VALUES ('email_delivery', $1)\n        "
   },
-  "023fecb5c33fb017d324f9ec9101bbc68fdc644d23d1e94564d0d812e0527815": {
-    "describe": {
-      "columns": [
-        {
-          "name": "name",
-          "ordinal": 0,
-          "type_info": "Text"
-        },
-        {
-          "name": "calories_per_100g",
-          "ordinal": 1,
-          "type_info": "Float4"
-        },
-        {
-          "name": "category: Vec<FoodCategory>",
-          "ordinal": 2,
-          "type_info": {
-            "Custom": {
-              "kind": {
-                "Array": {
-                  "Custom": {
-                    "kind": {
-                      "Enum": [
-                        "vegetable",
-                        "fruit",
-                        "meat",
-                        "dairy",
-                        "grains",
-                        "legumes",
-                        "baked",
-                        "eggs",
-                        "seafood",
-                        "nuts_and_seeds",
-                        "herbs_and_spices",
-                        "garnishes",
-                        "deserts_and_sweets",
-                        "supplements",
-                        "beverages",
-                        "uncategorized"
-                      ]
-                    },
-                    "name": "food_category"
-                  }
-                }
-              },
-              "name": "_food_category"
-            }
-          }
-        },
-        {
-          "name": "g_per_piece",
-          "ordinal": 3,
-          "type_info": "Float4"
-        },
-        {
-          "name": "protein",
-          "ordinal": 4,
-          "type_info": "Float4"
-        },
-        {
-          "name": "water",
-          "ordinal": 5,
-          "type_info": "Float4"
-        },
-        {
-          "name": "fat",
-          "ordinal": 6,
-          "type_info": "Float4"
-        },
-        {
-          "name": "sugar",
-          "ordinal": 7,
-          "type_info": "Float4"
-        },
-        {
-          "name": "carbohydrate",
-          "ordinal": 8,
-          "type_info": "Float4"
-        },
-        {
-          "name": "fiber",
-          "ordinal": 9,
-          "type_info": "Float4"
-        },
-        {
-          "name": "caffeine",
-          "ordinal": 10,
-          "type_info": "Float4"
-        },
-        {
-          "name": "contains_alcohol",
-          "ordinal": 11,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n            SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n            protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n            FROM ingredients\n            WHERE id = $1;\n            "
-  },
   "061caac252990eaf1dadcdd96b6c8447cd13a942596ca8316ab37929fdbc6bcd": {
     "describe": {
       "columns": [],
@@ -166,6 +49,30 @@
       }
     },
     "query": "\n            DELETE FROM ingredient_suggestions\n            WHERE id = $1\n            "
+  },
+  "0946d072e9fb641a07ab1931776eb302343ed7df3d522fc5ecacf12d5a6302ff": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        SELECT id, name FROM cuisines;\n        "
   },
   "11ac830439dc9854f212b0b629e5b9d426af6b4e90153d73407bc1053a4ccd84": {
     "describe": {
