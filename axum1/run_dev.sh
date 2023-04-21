@@ -10,13 +10,11 @@ if ! [ -x "$(command -v sqlx)" ]; then
   exit 1
 fi
 
-cd ./docker/
-docker-compose -f docker-compose.dev.yml down
-cd ..
-docker-compose -f docker/docker-compose.dev.yml up -d
+docker compose -f ./docker/docker-compose.dev.yml down
+docker compose -f docker/docker-compose.dev.yml up -d
 
-echo "Waiting 10 seconds for pg to come alive.."
-sleep 10
+PG_CONTAINER=$(docker ps --filter 'name=postgres' --format '{{.ID}}')
+timeout 30s bash -c "until docker exec $PG_CONTAINER pg_isready ; do sleep 5 ; done"
 
 sqlx migrate run
 cargo run

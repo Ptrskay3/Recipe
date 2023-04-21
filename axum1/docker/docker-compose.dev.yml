@@ -52,5 +52,4 @@ services:
 
 networks:
   axum_net:
-    external:
-      name: axum_net
+    name: axum_net

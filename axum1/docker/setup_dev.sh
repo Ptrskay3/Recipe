@@ -13,4 +13,4 @@ directories=(
 mkdir -p "${directories[@]}"
 sudo chown -R $(id -u):$(id -g) volumes/
 docker network inspect axum_net >/dev/null 2>&1 || docker network create --driver bridge axum_net
-docker-compose -f docker-compose.dev.yml build
+docker compose -f docker-compose.dev.yml build

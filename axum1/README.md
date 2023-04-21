@@ -7,7 +7,7 @@ You need to have Rust and Docker installed.
 First, setup the development environment
 
 ```sh
-cd docker && ./setup_dev.sh
+just setup
 ```
 
 then install `sqlx-cli`:
@@ -21,12 +21,12 @@ Create a `configuration/local.yml` based on the `local.example.yml`.
 Now you're ready to start with
 
 ```sh
-cd .. && ./run_dev.sh
+just run
 ```
 
 Technical to-do list:
 
 - [ ] Merge some migrations (we don't have a stable scheme yet)
-- [ ] Decision about the `Queryable`
-- [ ] Static file server to allow uploading files
-- [ ] Migrate to 0.6.0, `State` instead of `Extension`
+- [x] Decision about the `Queryable`
+- [?] Static file server to allow uploading files
+- [x] Migrate to 0.6.0, `State` instead of `Extension`
