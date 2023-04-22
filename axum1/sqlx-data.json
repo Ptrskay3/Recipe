@@ -1745,6 +1745,36 @@
     },
     "query": "\n        SELECT token\n        FROM forget_password_tokens\n        WHERE created_at > current_timestamp - INTERVAL '2 days' AND token = $1\n        ORDER BY created_at DESC\n        LIMIT 1;\n        "
   },
+  "ecb818ebd253d537c8e6a3b199508caa78a1d2f16b0180cc14f43e17d18078db": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "description",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        SELECT id, name, description FROM recipes\n        "
+  },
   "f1d9568facb0a52c26ad57aab7a01b48d55f734ac7cba900fa669336fc7bc6ba": {
     "describe": {
       "columns": [

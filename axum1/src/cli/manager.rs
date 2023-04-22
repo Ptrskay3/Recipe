@@ -15,7 +15,7 @@ pub async fn cli_manager_task(config: Settings) -> Result<(), anyhow::Error> {
         .ok_or_else(|| anyhow::anyhow!("cli_unix_socket is not set"))?;
 
     // Clean the tempfile on startup
-    if let Err(e) = std::fs::remove_file(&socket_path) {
+    if let Err(e) = std::fs::remove_file(socket_path) {
         if e.kind() != std::io::ErrorKind::NotFound {
             return Err(e.into());
         }

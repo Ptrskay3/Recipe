@@ -37,16 +37,16 @@ pub async fn run_meili_indexer(
     meili_client: &Client,
 ) -> Result<(), anyhow::Error> {
     // TODO: This is getting repetitive
-    let ingredient_records = get_ingredient_records(&pool).await?;
-    let cuisine_records = get_cuisine_records(&pool).await?;
-    let recipe_records = get_recipe_records(&pool).await?;
+    let ingredient_records = get_ingredient_records(pool).await?;
+    let cuisine_records = get_cuisine_records(pool).await?;
+    let recipe_records = get_recipe_records(pool).await?;
 
     tracing::info!("Started indexing ingredients");
     let task = meili_client
         .index("ingredients")
         .add_documents(&ingredient_records, None)
         .await?
-        .wait_for_completion(&meili_client, None, None)
+        .wait_for_completion(meili_client, None, None)
         .await?;
     tracing::info!("indexing finished, success: {}", task.is_success());
 
@@ -55,7 +55,7 @@ pub async fn run_meili_indexer(
         .index("cuisines")
         .add_documents(&cuisine_records, None)
         .await?
-        .wait_for_completion(&meili_client, None, None)
+        .wait_for_completion(meili_client, None, None)
         .await?;
     tracing::info!("indexing finished, success: {}", task.is_success());
 
@@ -64,7 +64,7 @@ pub async fn run_meili_indexer(
         .index("recipes")
         .add_documents(&recipe_records, None)
         .await?
-        .wait_for_completion(&meili_client, None, None)
+        .wait_for_completion(meili_client, None, None)
         .await?;
     tracing::info!("indexing finished, success: {}", task.is_success());
 
