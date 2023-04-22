@@ -40,7 +40,7 @@ pub fn report_exit(task_name: &str, outcome: Result<Result<(), impl Debug + Disp
             tracing::error!(
                 error.cause_chain = ?e,
                 error.message = %e,
-                "{}' task failed to complete",
+                "'{}' task failed to complete",
                 task_name
             );
         }

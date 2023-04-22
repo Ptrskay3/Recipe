@@ -4,3 +4,5 @@ setup:
 run: 
     ./run_dev.sh
 
+app:
+    cargo r

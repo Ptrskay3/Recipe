@@ -26,6 +26,7 @@ import { first, PreviewImage, second, third } from './form/upload';
 
 import { Listable } from './Listable';
 import { DurationSlider } from './slider';
+import RecipeSearch from './search/RecipeSearch';
 
 export default function Placeholder() {
   const [setPrepTime, setDifficulty, steps, pushStep, removeStepByIndex] = useAddRecipe((state) => [
@@ -42,6 +43,9 @@ export default function Placeholder() {
 
   return (
     <Container maxW={'7xl'}>
+      <Divider m="4" />
+      {/* TODO: Move this to the navbar later */}
+      <RecipeSearch></RecipeSearch>
       <Divider m="4" />
       <EnumSelector options={mealTypes} defaultValue={'breakfast'} name={'mealtype'}></EnumSelector>
       <Divider m="4" />

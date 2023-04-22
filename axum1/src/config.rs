@@ -27,12 +27,16 @@ pub struct ApplicationSettings {
     pub port: u16,
     pub host: [u8; 4],
     pub daily_upload_limit_bytes: i64,
+    pub cli_unix_socket: Option<String>,
 }
 
 #[derive(Deserialize, Clone)]
 pub struct MeiliConfig {
     pub url: String,
     pub master_key: String,
+    pub retry_seconds: Option<u64>,
+    pub max_retries: Option<usize>,
+    pub indexing_interval_seconds: Option<u64>,
 }
 
 #[derive(Deserialize, Clone)]

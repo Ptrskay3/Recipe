@@ -1,6 +1,6 @@
 use axum1::{
-    config::get_config, queue::run_worker_until_stopped, search::run_meili_indexer_until_stopped,
-    startup::application, utils::report_exit,
+    cli::cli_manager_task, config::get_config, queue::run_worker_until_stopped,
+    search::run_meili_indexer_until_stopped, startup::application, utils::report_exit,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -27,12 +27,14 @@ async fn main() -> anyhow::Result<()> {
 
     let application_task = tokio::spawn(application());
     let worker_task = tokio::spawn(run_worker_until_stopped(configuration.clone()));
-    let meili_indexing_task = tokio::spawn(run_meili_indexer_until_stopped(configuration));
+    let meili_indexing_task = tokio::spawn(run_meili_indexer_until_stopped(configuration.clone()));
+    let cli_manager = tokio::spawn(cli_manager_task(configuration));
 
     tokio::select! {
         f = application_task => report_exit("Server", f),
-        f = worker_task =>  report_exit("Background worker", f),
-        f = meili_indexing_task =>  report_exit("Meili indexer", f),
+        f = worker_task => report_exit("Background worker", f),
+        f = meili_indexing_task => report_exit("Meili indexer", f),
+        f = cli_manager => report_exit("CLI Manager", f),
     };
 
     Ok(())

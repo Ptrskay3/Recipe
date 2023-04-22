@@ -2,6 +2,7 @@ application_settings:
   port: 3000
   host: [127, 0, 0, 1]
   daily_upload_limit_bytes: 26_214_400 # = 25 * 1024 * 1024, which is 25 Mb
+  cli_unix_socket: "/tmp/recipe_unix_socket"
 database:
   host: '127.0.0.1'
   port: 5432
@@ -23,6 +24,9 @@ email_client:
 meili:
   url: http://localhost:7700
   master_key: SUPER_SECRET_KEY
+  retry_seconds: 60
+  max_retries: 5
+  indexing_interval_seconds: 3600
 oauth:
   discord:
     client_id: # Your Discord client ID

@@ -1,6 +1,7 @@
 use once_cell::sync::Lazy;
 use regex::Regex;
 
+pub mod cli;
 pub mod config;
 pub mod email;
 pub mod error;

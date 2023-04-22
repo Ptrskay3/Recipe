@@ -24,6 +24,7 @@ import NextLink from 'next/link';
 import React from 'react';
 import { UserMenu } from './menu';
 import { useMe } from '../hooks/me';
+import RecipeSearch from './search/RecipeSearch';
 
 function WithSubnavigation() {
   const { isOpen, onToggle } = useDisclosure();
@@ -310,23 +311,6 @@ const NAV_ITEMS: Array<NavItem> = [
   {
     label: 'Inspiration',
     href: '#',
-  },
-  {
-    label: 'Suggest me a ..',
-    children: [
-      {
-        label: 'Breakfast',
-        href: '#',
-      },
-      {
-        label: 'Lunch',
-        href: '#',
-      },
-      {
-        label: 'Dinner',
-        href: '#',
-      },
-    ],
   },
 ];
 
