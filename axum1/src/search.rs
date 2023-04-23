@@ -36,38 +36,29 @@ pub async fn run_meili_indexer(
     pool: &Pool<Postgres>,
     meili_client: &Client,
 ) -> Result<(), anyhow::Error> {
-    // TODO: This is getting repetitive
     let ingredient_records = get_ingredient_records(pool).await?;
     let cuisine_records = get_cuisine_records(pool).await?;
     let recipe_records = get_recipe_records(pool).await?;
 
-    tracing::info!("Started indexing ingredients");
-    let task = meili_client
-        .index("ingredients")
-        .add_documents(&ingredient_records, None)
-        .await?
-        .wait_for_completion(meili_client, None, None)
-        .await?;
-    tracing::info!("indexing finished, success: {}", task.is_success());
+    meili_indexing_task(meili_client, &ingredient_records, "ingredients").await?;
+    meili_indexing_task(meili_client, &cuisine_records, "cuisines").await?;
+    meili_indexing_task(meili_client, &recipe_records, "recipes").await?;
+    Ok(())
+}
 
-    tracing::info!("Started indexing cuisines");
-    let task = meili_client
-        .index("cuisines")
-        .add_documents(&cuisine_records, None)
-        .await?
-        .wait_for_completion(meili_client, None, None)
-        .await?;
-    tracing::info!("indexing finished, success: {}", task.is_success());
-
-    tracing::info!("Started indexing recipes");
-    let task = meili_client
+async fn meili_indexing_task<T: serde::Serialize>(
+    client: &Client,
+    records: &[T],
+    name: &str,
+) -> anyhow::Result<()> {
+    tracing::info!("started indexing '{name}'");
+    let task = client
         .index("recipes")
-        .add_documents(&recipe_records, None)
+        .add_documents(records, None)
         .await?
-        .wait_for_completion(meili_client, None, None)
+        .wait_for_completion(client, None, None)
         .await?;
-    tracing::info!("indexing finished, success: {}", task.is_success());
-
+    tracing::info!("indexing '{name}' finished, success: {}", task.is_success());
     Ok(())
 }
 
