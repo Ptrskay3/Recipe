@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: recipe-app
-          image: ptrskay3/recipe-app2:latest
+          image: ptrskay3/recipe-app:latest
           imagePullPolicy: 'Never'
           ports:
             - name: http

@@ -6,3 +6,17 @@ run:
 
 app:
     cargo r
+
+# K8s related commands.. uses default namespaces for now.
+
+deploy_app_kube_local:
+    docker build --build-arg APP_ENV=production -t ptrskay3/recipe-app -f docker/Dockerfile .
+    kubectl apply -f k8s/app/deployment.yaml
+
+run_infra_kube_local:
+    helm install recipe-postgres bitnami/postgresql -n default -f k8s/storage/values.yaml
+    helm install recipe-redis bitnami/redis -n default -f k8s/storage/values.yaml --set auth.enabled=false
+    helm install recipe-meilisearch meilisearch/meilisearch -n default
+
+delete_app_kube_local:
+    kubectl delete deployment recipe-app && kubectl delete svc recipe-app-lb
