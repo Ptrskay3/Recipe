@@ -53,7 +53,7 @@ async fn meili_indexing_task<T: serde::Serialize>(
 ) -> anyhow::Result<()> {
     tracing::info!("started indexing '{name}'");
     let task = client
-        .index("recipes")
+        .index(name)
         .add_documents(records, None)
         .await?
         .wait_for_completion(client, None, None)

@@ -88,7 +88,7 @@ where
         let user_dir = std::path::Path::new(UPLOADS_DIRECTORY).join(user_id.to_string());
         if let Err(e) = tokio::fs::create_dir_all(user_dir.clone()).await {
             tracing::error!(
-                "User directory doesn't exist and couldn't be crated: {:?}",
+                "User directory doesn't exist and couldn't be created: {:?}",
                 e
             );
         }

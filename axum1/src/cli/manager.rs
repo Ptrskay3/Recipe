@@ -7,7 +7,7 @@ use crate::queue::get_connection_pool;
 use crate::search::run_meili_indexer;
 use crate::utils::report_exit;
 
-pub async fn cli_manager_task(config: Settings) -> Result<(), anyhow::Error> {
+pub async fn cli_manager(config: Settings) -> Result<(), anyhow::Error> {
     let socket_path = config
         .application_settings
         .cli_unix_socket
