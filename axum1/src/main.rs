@@ -1,6 +1,10 @@
 use axum1::{
-    cli::cli_manager, config::get_config, queue::run_worker_until_stopped,
-    search::run_meili_indexer_until_stopped, startup::application, utils::report_exit,
+    cli::cli_manager,
+    config::get_config,
+    queue::run_worker_until_stopped,
+    search::run_meili_indexer_until_stopped,
+    startup::application,
+    utils::{init_tracing_panic_hook, report_exit},
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -24,6 +28,8 @@ async fn main() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .with(sentry_tracing::layer())
         .init();
+
+    init_tracing_panic_hook();
 
     let application_task = tokio::spawn(application());
     let worker_task = tokio::spawn(run_worker_until_stopped(configuration.clone()));

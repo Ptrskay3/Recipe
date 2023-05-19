@@ -23,6 +23,21 @@ where
     tokio::task::spawn_blocking(move || current_span.in_scope(f))
 }
 
+pub fn init_tracing_panic_hook() {
+    let next_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |panic_info| {
+        let payload = panic_info.payload().downcast_ref::<&str>();
+        let location = panic_info.location().map(|loc| loc.to_string());
+
+        tracing::error!(
+            panic.payload = payload,
+            panic.location = location,
+            "Unhandled panic"
+        );
+        next_hook(panic_info);
+    }));
+}
+
 pub fn report_exit(task_name: &str, outcome: Result<Result<(), impl Debug + Display>, JoinError>) {
     match outcome {
         Ok(Ok(())) => {
