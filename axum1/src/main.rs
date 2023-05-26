@@ -33,13 +33,17 @@ async fn main() -> anyhow::Result<()> {
 
     let application_task = tokio::spawn(application());
     let worker_task = tokio::spawn(run_worker_until_stopped(configuration.clone()));
-    let meili_indexing_task = tokio::spawn(run_meili_indexer_until_stopped(configuration.clone()));
-    let cli_manager_task = tokio::spawn(cli_manager(configuration));
+    let meili_indexing_task = run_meili_indexer_until_stopped(configuration.clone());
+
+    let (meili_task, state_handle) = axum1::PausableFuture::new(meili_indexing_task);
+    let meili_task_spawned = tokio::spawn(meili_task);
+    let meili_supervisor = axum1::PausableFutureSupervisor::new(&state_handle);
+    let cli_manager_task = tokio::spawn(cli_manager(configuration, meili_supervisor));
 
     tokio::select! {
-        f = application_task => report_exit("Server", f),
-        f = worker_task => report_exit("Background worker", f),
-        f = meili_indexing_task => report_exit("Meili indexer", f),
+        f = application_task => report_exit("server", f),
+        f = meili_task_spawned => report_exit("meili indexing", f),
+        f = worker_task => report_exit("queue", f),
         f = cli_manager_task => report_exit("CLI Manager", f),
     };
 
