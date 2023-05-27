@@ -301,7 +301,6 @@ dependencies = [
  "config",
  "dotenv",
  "futures",
- "futures-lite",
  "log",
  "meilisearch-sdk",
  "oauth2",
