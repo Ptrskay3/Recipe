@@ -49,7 +49,6 @@ impl<F> PausableFuture<F> {
 }
 
 pub struct PausableFutureSupervisor {
-    // join_handle: &'scope JoinHandle<O>,
     state: Arc<Mutex<PausableState>>,
 }
 
@@ -63,7 +62,6 @@ pub enum PausableState {
 impl PausableFutureSupervisor {
     pub fn new(state: &Arc<Mutex<PausableState>>) -> Self {
         Self {
-            // join_handle,
             state: Arc::clone(state),
         }
     }
@@ -99,9 +97,8 @@ impl<F: Future> Future for PausableFuture<F> {
                 Poll::Pending
             }
             PausableState::Running => {
-                let pollable = this.future;
-                tokio::pin!(pollable);
-                pollable.poll(cx)
+                drop(state);
+                this.future.poll(cx)
             }
         }
     }
