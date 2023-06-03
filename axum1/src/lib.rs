@@ -1,5 +1,6 @@
 use once_cell::sync::Lazy;
 use regex::Regex;
+use tokio::task::JoinHandle;
 
 pub mod cli;
 pub mod config;
@@ -102,4 +103,15 @@ impl<F: Future> Future for PausableFuture<F> {
             }
         }
     }
+}
+
+pub fn supervised_task<F>(f: F) -> (JoinHandle<F::Output>, PausableFutureSupervisor)
+where
+    F: std::future::Future + Send + 'static,
+    F::Output: Send + 'static,
+{
+    let (task, state) = PausableFuture::new(f);
+    let task = tokio::spawn(task);
+    let supervisor = PausableFutureSupervisor::new(&state);
+    (task, supervisor)
 }

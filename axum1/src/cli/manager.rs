@@ -11,6 +11,7 @@ use crate::PausableFutureSupervisor;
 pub async fn cli_manager(
     config: Settings,
     mut supervisor: PausableFutureSupervisor,
+    mut _worker: PausableFutureSupervisor,
 ) -> Result<(), anyhow::Error> {
     let socket_path = config
         .application_settings
