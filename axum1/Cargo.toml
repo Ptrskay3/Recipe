@@ -12,7 +12,7 @@ anyhow = "1.0.71"
 thiserror = "1.0.39"
 # our choice as a web framework, and other related utilities
 axum = { version = "0.6.10", features = ["json", "headers", "multipart"] }
-tokio = { version = "1.23.0", features = ["full"] }
+tokio = { version = "1.28.2", features = ["full"] }
 tokio-util = { version = "0.7", features = ["io"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 axum-extra = { version = "0.7.0", features = ["cookie", "cookie-signed", "form"] }
