@@ -51,7 +51,7 @@ reqwest = { version = "0.11", default-features = false, features = ["json", "rus
 meilisearch-sdk = "0.23"
 serde_json = "1.0.97"
 # OAuth
-oauth2 = "4.3.0"
+oauth2 = "4.4.1"
 # Input validation
 validator = { version = "0.16", features = ["derive"] }
 # regex (mostly for validation) and utilities
