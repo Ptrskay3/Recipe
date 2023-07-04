@@ -22,6 +22,10 @@ struct Cli {
 enum Commands {
     /// Trigger a MeiliSearch indexing task on the server.
     Index,
+    /// Resume the indexing
+    Resume,
+    /// Pause the indexing
+    Pause,
 }
 
 #[tokio::main]
@@ -39,6 +43,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Connected to {:?}", socket_path);
     let msg = match &cli.command {
         Some(Commands::Index) => "index",
+        Some(Commands::Resume) => "resume",
+        Some(Commands::Pause) => "pause",
         _ => "todo",
     };
 

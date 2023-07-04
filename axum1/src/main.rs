@@ -4,6 +4,7 @@ use axum1::{
     queue::run_worker_until_stopped,
     search::run_meili_indexer_until_stopped,
     startup::application,
+    task::supervised_task,
     utils::{init_tracing_panic_hook, report_exit},
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -32,14 +33,22 @@ async fn main() -> anyhow::Result<()> {
     init_tracing_panic_hook();
 
     let application_task = tokio::spawn(application());
-    let worker_task = tokio::spawn(run_worker_until_stopped(configuration.clone()));
-    let meili_indexing_task = tokio::spawn(run_meili_indexer_until_stopped(configuration.clone()));
-    let cli_manager_task = tokio::spawn(cli_manager(configuration));
+    let worker_task = run_worker_until_stopped(configuration.clone());
+    let meili_indexing_task = run_meili_indexer_until_stopped(configuration.clone());
+
+    let (meili_task_spawned, meili_supervisor) = supervised_task(meili_indexing_task);
+    let (worker_task_spawned, worker_supervisor) = supervised_task(worker_task);
+
+    let cli_manager_task = tokio::spawn(cli_manager(
+        configuration,
+        meili_supervisor,
+        worker_supervisor,
+    ));
 
     tokio::select! {
-        f = application_task => report_exit("Server", f),
-        f = worker_task => report_exit("Background worker", f),
-        f = meili_indexing_task => report_exit("Meili indexer", f),
+        f = application_task => report_exit("server", f),
+        f = meili_task_spawned => report_exit("meili indexing", f),
+        f = worker_task_spawned => report_exit("queue", f),
         f = cli_manager_task => report_exit("CLI Manager", f),
     };
 

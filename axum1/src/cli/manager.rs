@@ -5,9 +5,14 @@ use tokio::net::UnixListener;
 use crate::config::Settings;
 use crate::queue::get_connection_pool;
 use crate::search::run_meili_indexer;
+use crate::task::PausableFutureSupervisor;
 use crate::utils::report_exit;
 
-pub async fn cli_manager(config: Settings) -> Result<(), anyhow::Error> {
+pub async fn cli_manager(
+    config: Settings,
+    mut supervisor: PausableFutureSupervisor,
+    mut _worker: PausableFutureSupervisor,
+) -> Result<(), anyhow::Error> {
     let socket_path = config
         .application_settings
         .cli_unix_socket
@@ -42,6 +47,17 @@ pub async fn cli_manager(config: Settings) -> Result<(), anyhow::Error> {
                 tracing::warn!("Requested MeiliSearch indexing through CLI..");
                 let result = tokio::spawn(run_meili_indexer_once(config.clone())).await;
                 report_exit("Meili indexing", result);
+                socket.write_all(b"ok").await?;
+                supervisor.pause();
+            }
+            "resume" => {
+                tracing::warn!("Resuming MeiliSearch indexing from CLI..");
+                supervisor.resume();
+                socket.write_all(b"ok").await?;
+            }
+            "pause" => {
+                tracing::warn!("Pausing MeiliSearch indexing from CLI..");
+                supervisor.pause();
                 socket.write_all(b"ok").await?;
             }
             cmd => {
