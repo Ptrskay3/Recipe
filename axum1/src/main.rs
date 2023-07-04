@@ -4,7 +4,7 @@ use axum1::{
     queue::run_worker_until_stopped,
     search::run_meili_indexer_until_stopped,
     startup::application,
-    supervised_task,
+    task::supervised_task,
     utils::{init_tracing_panic_hook, report_exit},
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};

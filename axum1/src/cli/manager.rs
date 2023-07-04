@@ -5,8 +5,8 @@ use tokio::net::UnixListener;
 use crate::config::Settings;
 use crate::queue::get_connection_pool;
 use crate::search::run_meili_indexer;
+use crate::task::PausableFutureSupervisor;
 use crate::utils::report_exit;
-use crate::PausableFutureSupervisor;
 
 pub async fn cli_manager(
     config: Settings,
