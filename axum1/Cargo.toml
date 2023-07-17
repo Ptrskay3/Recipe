@@ -11,7 +11,7 @@ description = "A backend for recipe app"
 anyhow = "1.0.71"
 thiserror = "1.0.43"
 # our choice as a web framework, and other related utilities
-axum = { version = "0.6.10", features = ["json", "headers", "multipart"] }
+axum = { version = "0.6.19", features = ["json", "headers", "multipart"] }
 tokio = { version = "1.29.1", features = ["full"] }
 tokio-util = { version = "0.7", features = ["io"] }
 uuid = { version = "1", features = ["v4", "serde"] }
