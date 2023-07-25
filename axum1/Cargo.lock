@@ -279,9 +279,9 @@ dependencies = [
 
 [[package]]
 name = "axum-prometheus"
-version = "0.3.4"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ab3e59a8cf89cddb1c8272c7849d6d22b056d7ed4c125422b5d012983d2aa9e"
+checksum = "97def327c5481791abb57ac295bfc70f2e1a0727675b7dbf74bd1b27a72b6fd8"
 dependencies = [
  "axum",
  "axum-core",
