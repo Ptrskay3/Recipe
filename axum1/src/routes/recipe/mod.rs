@@ -116,7 +116,7 @@ async fn get_recipe_with_ingredients(
         "#,
         name
     )
-    .fetch_optional(&mut tx)
+    .fetch_optional(&mut *tx)
     .await
     .context("Failed to query recipe")?
     .ok_or(ApiError::NotFound)?;
@@ -133,7 +133,7 @@ async fn get_recipe_with_ingredients(
         "#,
         name
     )
-    .fetch_all(&mut tx)
+    .fetch_all(&mut *tx)
     .await
     .context("Failed to query recipe ingredients")?;
 
@@ -153,7 +153,7 @@ async fn get_recipe_with_ingredients(
             *user_id,
             recipe.name
         )
-        .fetch_optional(&mut tx)
+        .fetch_optional(&mut *tx)
         .await
         .context("failed to query for favorite recipes")?
         .is_some();
@@ -163,7 +163,7 @@ async fn get_recipe_with_ingredients(
             name,
             *user_id
         )
-        .fetch_optional(&mut tx)
+        .fetch_optional(&mut *tx)
         .await?
         .is_some();
 
@@ -248,7 +248,7 @@ async fn add_or_update_ingredient_to_recipe(
         ingredient.quantity,
         ingredient.quantity_unit
     )
-    .execute(&mut tx)
+    .execute(&mut *tx)
     .await
     .map_err(|_| ApiError::BadRequest)?;
 
@@ -279,7 +279,7 @@ async fn delete_ingredient_from_recipe(
         name,
         ingredient.name
     )
-    .execute(&mut tx)
+    .execute(&mut *tx)
     .await
     .context("Failed to delete from ingredients_to_recipes")?;
 
@@ -341,7 +341,7 @@ async fn insert_full_recipe(
         cuisine,
         meal_type as _,
     )
-    .fetch_one(&mut tx)
+    .fetch_one(&mut *tx)
     .await
     .on_code("23502", |_| {
         ApiError::unprocessable_entity([("cuisine", "does not exist")])
@@ -367,7 +367,7 @@ async fn insert_full_recipe(
             ingredient.quantity,
             ingredient.quantity_unit
         )
-        .execute(&mut tx)
+        .execute(&mut *tx)
         .await
         .map_err(|_| {
             ApiError::unprocessable_entity([(
@@ -407,7 +407,7 @@ async fn my_recipes(
         "#,
         *auth_user
     )
-    .fetch_all(&mut conn)
+    .fetch_all(&mut *conn)
     .await?;
 
     Ok(Json(results))
@@ -426,7 +426,7 @@ async fn toggle_favorite_recipe(
         *auth_user,
         name,
     )
-    .fetch_one(&mut conn)
+    .fetch_one(&mut *conn)
     .await
     .map_err(|_| ApiError::BadRequest)?;
 
@@ -454,7 +454,7 @@ async fn my_favorite_recipes(
         "#,
         *auth_user
     )
-    .fetch_all(&mut conn)
+    .fetch_all(&mut *conn)
     .await?;
 
     Ok(Json(results))
@@ -488,7 +488,7 @@ async fn most_popular_recipes(
         "#,
         limit
     )
-    .fetch_all(&mut conn)
+    .fetch_all(&mut *conn)
     .await?;
 
     Ok(Json(results))
@@ -512,7 +512,7 @@ async fn hot_recipes(
         "#,
         limit
     )
-    .fetch_all(&mut conn)
+    .fetch_all(&mut *conn)
     .await?;
 
     Ok(Json(results))

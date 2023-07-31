@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT r.name, COUNT(fr.recipe_id) FROM recipes r\n        INNER JOIN favorite_recipe fr ON r.id = fr.recipe_id\n        GROUP BY r.name\n        ORDER BY count DESC\n        LIMIT $1;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "aa67f3a81c2e43b1dd0349c8b40669bbf03b1305a8203d7b1849ab221c823817"
+}

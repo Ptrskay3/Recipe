@@ -105,7 +105,7 @@ async fn all_ingredients(
         FROM ingredients;
         "#
     )
-    .fetch_all(&mut conn)
+    .fetch_all(&mut *conn)
     .await?;
     Ok(Json(rows))
 }
@@ -124,7 +124,7 @@ async fn ingredients_by_category(
         "#,
         category as _
     )
-    .fetch_all(&mut conn)
+    .fetch_all(&mut *conn)
     .await?;
     Ok(Json(rows))
 }
@@ -167,7 +167,7 @@ async fn add_ingredient(
         ingredient.contains_alcohol,
         *auth_user,
     )
-    .execute(&mut conn)
+    .execute(&mut *conn)
     .await?;
     Ok(())
 }
@@ -200,7 +200,7 @@ async fn upgrade_ingredient(
         FROM ingredients WHERE name = $1",
     )
     .bind(name.clone())
-    .fetch_optional(&mut tx)
+    .fetch_optional(&mut *tx)
     .await?
     .ok_or(ApiError::NotFound)?;
 
@@ -242,7 +242,7 @@ async fn upgrade_ingredient(
             .unwrap_or(original.contains_alcohol),
         name
     )
-    .fetch_one(&mut tx)
+    .fetch_one(&mut *tx)
     .await?;
 
     tx.commit().await?;
@@ -264,7 +264,7 @@ async fn get_ingredient(
             "#,
         name
     )
-    .fetch_optional(&mut conn)
+    .fetch_optional(&mut *conn)
     .await?
     .ok_or(ApiError::NotFound)?;
 
@@ -285,7 +285,7 @@ async fn delete_ingredient(
         "#,
         name
     )
-    .fetch_optional(&mut conn)
+    .fetch_optional(&mut *conn)
     .await?
     .ok_or(ApiError::NotFound)?;
 
@@ -329,7 +329,7 @@ async fn make_favorite(
         "#,
         name
     )
-    .fetch_optional(&mut tx)
+    .fetch_optional(&mut *tx)
     .await?
     .ok_or(ApiError::NotFound)?;
 
@@ -339,7 +339,7 @@ async fn make_favorite(
         ingredient.id,
         *auth_user
     )
-    .execute(&mut tx)
+    .execute(&mut *tx)
     .await?;
 
     // Don't forget to commit to actually run those queries against the database.

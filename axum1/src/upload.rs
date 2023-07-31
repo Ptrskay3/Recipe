@@ -37,7 +37,7 @@ pub async fn save_request_body(
     uploader: Uploader,
     body: BodyStream,
 ) -> Result<(), ApiError> {
-    stream_to_file(&file_name, uploader.id, body, &mut conn).await
+    stream_to_file(&file_name, uploader.id, body, &mut *conn).await
 }
 
 // Handler that accepts a multipart form upload and streams each field to a file.
@@ -54,7 +54,7 @@ pub async fn accept_form(
     {
         let Some(file_name) = field.file_name().map(ToOwned::to_owned) else { continue };
 
-        stream_to_file(&file_name, uploader.id, field, &mut tx).await?;
+        stream_to_file(&file_name, uploader.id, field, &mut *tx).await?;
     }
 
     tx.commit().await?;

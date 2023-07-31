@@ -41,7 +41,7 @@ where
             user_id,
             recipe_name
         )
-        .fetch_optional(&mut conn)
+        .fetch_optional(&mut *conn)
         .await?
         .ok_or(ApiError::Forbidden)?;
 

@@ -68,7 +68,7 @@ pub async fn try_execute_task(
                 )
                 .await
             {
-                insert_failed_task(&mut transaction, confirmation_id.clone(), email.as_ref(), &e).await?;
+                insert_failed_task(&mut *transaction, confirmation_id.clone(), email.as_ref(), &e).await?;
                 tracing::error!(
                     error.cause_chain = ?e,
                     error.message = %e,
@@ -78,7 +78,7 @@ pub async fn try_execute_task(
             }
         }
         Err(e) => {
-            insert_failed_task(&mut transaction, confirmation_id.clone(), &email, &e).await?;
+            insert_failed_task(&mut *transaction, confirmation_id.clone(), &email, &e).await?;
             tracing::error!(
                 error.cause_chain = ?e,
                 error.message = %e,
@@ -107,7 +107,7 @@ async fn dequeue_task(
         LIMIT 1
         "#,
     )
-    .fetch_optional(&mut tx)
+    .fetch_optional(&mut *tx)
     .await?;
     if let Some(r) = r {
         Ok(Some((tx, r.confirmation_id, r.user_email)))
@@ -132,7 +132,7 @@ async fn delete_task(
         confirmation_id,
         email
     )
-    .execute(&mut tx)
+    .execute(&mut *tx)
     .await?;
     tx.commit().await?;
     Ok(())
@@ -140,7 +140,7 @@ async fn delete_task(
 
 #[tracing::instrument(skip_all)]
 async fn insert_failed_task<E>(
-    tx: &mut PgTransaction,
+    tx: impl sqlx::Executor<'_, Database = Postgres>,
     confirmation_id: String,
     email: &str,
     e: &E,

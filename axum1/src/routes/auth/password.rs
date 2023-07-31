@@ -21,7 +21,7 @@ pub async fn validate_credentials(
         "#,
         credentials.email,
     )
-    .fetch_optional(&mut conn)
+    .fetch_optional(&mut *conn)
     .await
     .context("Failed to perform a query to retrieve stored credentials.")?;
 

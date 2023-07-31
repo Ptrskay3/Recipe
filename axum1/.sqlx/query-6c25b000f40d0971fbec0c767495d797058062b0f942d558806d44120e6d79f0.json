@@ -1,0 +1,57 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO ingredients (\n            name,\n            category,\n            calories_per_100g,\n            g_per_piece,\n            protein,\n            water,\n            fat,\n            sugar,\n            carbohydrate,\n            fiber,\n            caffeine,\n            contains_alcohol,\n            creator_id\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        {
+          "Custom": {
+            "name": "_food_category",
+            "kind": {
+              "Array": {
+                "Custom": {
+                  "name": "food_category",
+                  "kind": {
+                    "Enum": [
+                      "vegetable",
+                      "fruit",
+                      "meat",
+                      "dairy",
+                      "grains",
+                      "legumes",
+                      "baked",
+                      "eggs",
+                      "seafood",
+                      "nuts_and_seeds",
+                      "herbs_and_spices",
+                      "garnishes",
+                      "deserts_and_sweets",
+                      "supplements",
+                      "beverages",
+                      "uncategorized"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Float4",
+        "Float4",
+        "Float4",
+        "Float4",
+        "Float4",
+        "Float4",
+        "Float4",
+        "Float4",
+        "Float4",
+        "Bool",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6c25b000f40d0971fbec0c767495d797058062b0f942d558806d44120e6d79f0"
+}

@@ -70,7 +70,7 @@ pub async fn add_ingredient_suggestion(
         *auth_user,
         ingredient_suggestion.is_delete_vote,
     )
-    .execute(&mut conn)
+    .execute(&mut *conn)
     .await
     .on_constraint("ingredient_suggestions_ingredient_id_user_id_key", |_| ApiError::Conflict)
     ?;
@@ -127,7 +127,7 @@ pub async fn get_ingredient_suggestions(
         "#,
         name
     )
-    .fetch_all(&mut conn)
+    .fetch_all(&mut *conn)
     .await?;
     Ok(Json(suggestions))
 }
@@ -178,7 +178,7 @@ pub async fn get_ingredient_suggestion(
         name,
         id
     )
-    .fetch_optional(&mut conn)
+    .fetch_optional(&mut *conn)
     .await?
     .ok_or(ApiError::NotFound)?;
     Ok(Json(suggestion))
@@ -195,13 +195,13 @@ pub async fn apply_suggestion(
         r#"SELECT is_delete_vote FROM ingredient_suggestions WHERE id = $1"#,
         id
     )
-    .fetch_optional(&mut tx)
+    .fetch_optional(&mut *tx)
     .await?
     .ok_or(ApiError::NotFound)?;
 
     if suggestion_row.is_delete_vote.unwrap_or(false) {
         sqlx::query!(r#"DELETE FROM ingredients WHERE name = $1"#, name)
-            .execute(&mut tx)
+            .execute(&mut *tx)
             .await
             .context("failed to delete from ingredients")?;
     } else {
@@ -227,7 +227,7 @@ pub async fn apply_suggestion(
             name,
             id
         )
-        .execute(&mut tx)
+        .execute(&mut *tx)
         .await
         .on_constraint("ingredients_name_key", |_| ApiError::Conflict)?;
 
@@ -238,7 +238,7 @@ pub async fn apply_suggestion(
             "#,
             id
         )
-        .execute(&mut tx)
+        .execute(&mut *tx)
         .await
         .context("failed to delete from suggestions table")?;
     }
@@ -259,7 +259,7 @@ pub async fn decline_suggestion(
         "#,
         id
     )
-    .execute(&mut conn)
+    .execute(&mut *conn)
     .await
     .context("failed to delete from suggestions table")?;
 

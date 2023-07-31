@@ -19,7 +19,7 @@ pub fn router(state: AppState) -> Router<AppState> {
 
 async fn pg_health(DatabaseConnection(mut conn): DatabaseConnection) -> Result<(), ApiError> {
     let _ = sqlx::query_scalar!("SELECT 1 + 1")
-        .fetch_one(&mut conn)
+        .fetch_one(&mut *conn)
         .await?;
     Ok(())
 }

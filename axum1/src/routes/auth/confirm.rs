@@ -1,7 +1,7 @@
 use anyhow::Context;
 use axum::extract::Query;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
-use sqlx::{Acquire, PgExecutor, Postgres, Transaction};
+use sqlx::{Acquire, Executor, PgExecutor, Postgres};
 
 use crate::{
     email::{Email, EmailClient},
@@ -45,7 +45,7 @@ pub fn generate_confirmation_token() -> String {
     skip(confirmation_token, tx)
 )]
 pub async fn store_token(
-    tx: &mut Transaction<'_, Postgres>,
+    tx: impl Executor<'_, Database = Postgres>,
     confirmation_token: &str,
     user_id: uuid::Uuid,
 ) -> Result<(), ApiError> {
@@ -64,7 +64,7 @@ pub async fn store_token(
 
 #[tracing::instrument(skip_all)]
 pub async fn enqueue_delivery_task(
-    tx: &mut Transaction<'_, Postgres>,
+    tx: impl Executor<'_, Database = Postgres>,
     confirmation_id: String,
     user_email: String,
 ) -> Result<(), sqlx::Error> {
@@ -94,11 +94,11 @@ pub async fn confirm(
     DatabaseConnection(mut conn): DatabaseConnection,
 ) -> Result<(), ApiError> {
     let mut tx = conn.begin().await?;
-    let user_id = get_user_id_from_token(&mut tx, &parameters.token)
+    let user_id = get_user_id_from_token(&mut *tx, &parameters.token)
         .await
         .context("Failed to retrieve the user_id associated with the provided token.")?
         .ok_or(ApiError::BadRequest)?;
-    confirm_subscriber(&mut tx, user_id)
+    confirm_subscriber(&mut *tx, user_id)
         .await
         .context("Failed to update the user status to `confirmed`.")?;
 
@@ -106,7 +106,7 @@ pub async fn confirm(
         r#"DELETE FROM confirmation_tokens WHERE user_id = $1"#,
         user_id
     )
-    .execute(&mut tx)
+    .execute(&mut *tx)
     .await
     .context("Failed to delete from confirmation_tokens")?;
 

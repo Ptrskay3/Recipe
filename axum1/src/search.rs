@@ -72,7 +72,7 @@ async fn get_ingredient_records(pool: &Pool<Postgres>) -> anyhow::Result<Vec<Ing
         FROM ingredients
         "#
     )
-    .fetch_all(&mut tx)
+    .fetch_all(&mut *tx)
     .await?;
     tx.commit().await?;
     Ok(records)
@@ -86,7 +86,7 @@ async fn get_recipe_records(pool: &Pool<Postgres>) -> anyhow::Result<Vec<RecipeS
         SELECT id, name, description FROM recipes
         "#
     )
-    .fetch_all(&mut tx)
+    .fetch_all(&mut *tx)
     .await?;
     tx.commit().await?;
     Ok(records)
@@ -100,7 +100,7 @@ async fn get_cuisine_records(pool: &Pool<Postgres>) -> anyhow::Result<Vec<Cuisin
         SELECT id, name FROM cuisines;
         "#
     )
-    .fetch_all(&mut tx)
+    .fetch_all(&mut *tx)
     .await?;
     tx.commit().await?;
     Ok(records)

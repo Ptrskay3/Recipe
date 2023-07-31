@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT token\n        FROM forget_password_tokens\n        WHERE created_at > current_timestamp - INTERVAL '2 days' AND token = $1\n        ORDER BY created_at DESC\n        LIMIT 1;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "token",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d20836b45ad4ed567a992fe38cf6139c250eac69bb871efcae1894f7b8278f7a"
+}

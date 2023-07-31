@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO ingredients_to_recipes (ingredient_id, recipe_id, quantity, quantity_unit)\n        VALUES (\n            (SELECT id FROM ingredients WHERE name = $1),\n            (SELECT id FROM recipes WHERE name = $2),\n            $3,\n            $4\n        ) ON CONFLICT (ingredient_id, recipe_id) DO\n        UPDATE SET\n            quantity = EXCLUDED.quantity,\n            quantity_unit = EXCLUDED.quantity_unit;\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "aa836f3a0eb714009125b0838a2ae44c866bfff3c1b2babc94e2986b2d543057"
+}

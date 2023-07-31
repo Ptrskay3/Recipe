@@ -1,0 +1,143 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT name, calories_per_100g, category as \"category: Vec<FoodCategory>\", g_per_piece,\n        protein, water, fat, sugar, carbohydrate, fiber, caffeine, contains_alcohol\n        FROM ingredients\n        WHERE $1 = ANY (category);\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "calories_per_100g",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 2,
+        "name": "category: Vec<FoodCategory>",
+        "type_info": {
+          "Custom": {
+            "name": "_food_category",
+            "kind": {
+              "Array": {
+                "Custom": {
+                  "name": "food_category",
+                  "kind": {
+                    "Enum": [
+                      "vegetable",
+                      "fruit",
+                      "meat",
+                      "dairy",
+                      "grains",
+                      "legumes",
+                      "baked",
+                      "eggs",
+                      "seafood",
+                      "nuts_and_seeds",
+                      "herbs_and_spices",
+                      "garnishes",
+                      "deserts_and_sweets",
+                      "supplements",
+                      "beverages",
+                      "uncategorized"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "g_per_piece",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 4,
+        "name": "protein",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 5,
+        "name": "water",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 6,
+        "name": "fat",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 7,
+        "name": "sugar",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 8,
+        "name": "carbohydrate",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 9,
+        "name": "fiber",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 10,
+        "name": "caffeine",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 11,
+        "name": "contains_alcohol",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "food_category",
+            "kind": {
+              "Enum": [
+                "vegetable",
+                "fruit",
+                "meat",
+                "dairy",
+                "grains",
+                "legumes",
+                "baked",
+                "eggs",
+                "seafood",
+                "nuts_and_seeds",
+                "herbs_and_spices",
+                "garnishes",
+                "deserts_and_sweets",
+                "supplements",
+                "beverages",
+                "uncategorized"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3eb33bfb259bdb31e34cda8447ebd09e84e5637bc494529836e98251d4dd58c3"
+}

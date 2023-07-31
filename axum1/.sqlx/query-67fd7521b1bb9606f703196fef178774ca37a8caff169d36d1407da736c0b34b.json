@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE ingredients i \n            SET\n                name = COALESCE(igs.name, i.name),\n                category = COALESCE(igs.category, i.category),\n                calories_per_100g = COALESCE(igs.calories_per_100g, i.calories_per_100g),\n                g_per_piece = COALESCE(igs.g_per_piece, i.g_per_piece),\n                protein = COALESCE(igs.protein, i.protein),\n                water = COALESCE(igs.water, i.water),\n                fat = COALESCE(igs.fat, i.fat),\n                sugar = COALESCE(igs.sugar, i.sugar),\n                carbohydrate = COALESCE(igs.carbohydrate, i.carbohydrate),\n                fiber = COALESCE(igs.fiber, i.fiber),\n                caffeine = COALESCE(igs.caffeine, i.caffeine),\n                contains_alcohol = COALESCE(igs.contains_alcohol, i.contains_alcohol)\n        FROM ingredient_suggestions igs\n        WHERE i.name = $1 AND igs.id = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "67fd7521b1bb9606f703196fef178774ca37a8caff169d36d1407da736c0b34b"
+}

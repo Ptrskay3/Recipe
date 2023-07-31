@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE FROM confirmation_delivery_queue\n        WHERE \n            confirmation_id = $1 AND\n            user_email = $2 \n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "43c537e43d80b3a1952f9cef5301d34307b1dc5f54f41f7fc9d825917cfacfb4"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO failed_jobs (job_type, context)\n        VALUES ('email_delivery', $1)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Json"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "018bfae0432690c66169b816362b0f0b29c3c6ea0ab0d9aba3c895144b814f32"
+}

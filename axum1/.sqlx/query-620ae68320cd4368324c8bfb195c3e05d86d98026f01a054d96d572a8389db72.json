@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT i.name, i.calories_per_100g, ir.quantity, ir.quantity_unit FROM recipes r\n        INNER JOIN ingredients_to_recipes ir\n        ON r.id = ir.recipe_id\n        INNER JOIN ingredients i\n        ON i.id = ir.ingredient_id\n        WHERE r.name = $1;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "calories_per_100g",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 2,
+        "name": "quantity",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "quantity_unit",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "620ae68320cd4368324c8bfb195c3e05d86d98026f01a054d96d572a8389db72"
+}

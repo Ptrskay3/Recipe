@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT r.name, COUNT(fr.recipe_id) FROM favorite_recipe fr\n        INNER JOIN recipes r ON r.id = fr.recipe_id\n        WHERE fr.created_at > current_timestamp - INTERVAL '14 days'\n        GROUP BY r.name\n        ORDER BY count DESC\n        LIMIT $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "00b5f6daa46fad8f84e6bdc5308ed5107201eae853ec30eebf93811b8e69d479"
+}

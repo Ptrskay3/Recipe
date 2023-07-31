@@ -152,7 +152,7 @@ where
             WHERE uploader_id = $1 AND created_at > current_timestamp - INTERVAL '1 days';",
             user_id
         )
-        .fetch_one(&mut db)
+        .fetch_one(&mut *db)
         .await?
         .upload_limit
         .unwrap_or(daily_upload_limit_bytes);

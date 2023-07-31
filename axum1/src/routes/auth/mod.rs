@@ -57,7 +57,7 @@ async fn me(
             r#"SELECT name FROM users WHERE user_id = $1"#,
             *auth_user
         )
-        .fetch_one(&mut conn)
+        .fetch_one(&mut *conn)
         .await
         .map_err(|_| ApiError::NotFound)?;
         return Ok(Json(Some(name)));
@@ -146,7 +146,7 @@ async fn register(
         email,
         password_hash.expose_secret(),
     )
-    .fetch_one(&mut tx)
+    .fetch_one(&mut *tx)
     .await
     .on_constraint("users_email_key", |_| {
         ApiError::unprocessable_entity([("email", "email already taken")])
@@ -154,11 +154,11 @@ async fn register(
 
     let token = generate_confirmation_token();
 
-    store_token(&mut tx, &token, user_id.user_id)
+    store_token(&mut *tx, &token, user_id.user_id)
         .await
         .context("Failed to store the confirmation token for a new subscriber.")?;
 
-    enqueue_delivery_task(&mut tx, token, email)
+    enqueue_delivery_task(&mut *tx, token, email)
         .await
         .context("Failed to enqueue confirmation delivery task")?;
 
@@ -194,7 +194,7 @@ async fn update_password(
         name,
         *user_id,
     )
-    .execute(&mut conn)
+    .execute(&mut *conn)
     .await
     .context("Failed to change user's password in the database.")?;
     Ok(())
@@ -222,7 +222,7 @@ async fn forget_password_gen(
         name,
         email,
     )
-    .fetch_optional(&mut conn)
+    .fetch_optional(&mut *conn)
     .await?;
 
     if let Some(user_id) = result.map(|r| r.user_id) {
@@ -236,7 +236,7 @@ async fn forget_password_gen(
             token,
             user_id
         )
-        .execute(&mut conn)
+        .execute(&mut *conn)
         .await?;
 
         email_client
@@ -292,7 +292,7 @@ async fn forget_password(
         "#,
         params.token,
     )
-    .fetch_optional(&mut tx)
+    .fetch_optional(&mut *tx)
     .await?;
 
     if let Some(reset_details) = result {
@@ -310,7 +310,7 @@ async fn forget_password(
             password_hash.expose_secret(),
             reset_details.user_id,
         )
-        .execute(&mut tx)
+        .execute(&mut *tx)
         .await
         .context("Failed to change user's password in the database.")?;
 
@@ -322,7 +322,7 @@ async fn forget_password(
             reset_details.user_id,
             reset_details.token,
         )
-        .execute(&mut tx)
+        .execute(&mut *tx)
         .await
         .context("Failed to delete from forget_password_tokens.")?;
 
@@ -347,7 +347,7 @@ async fn is_token_valid(
         "#,
         params.token,
     )
-    .fetch_optional(&mut conn)
+    .fetch_optional(&mut *conn)
     .await?
     .ok_or(ApiError::NotFound)?;
 

@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(SUM(bytes), 0) as upload_limit FROM uploads\n            WHERE uploader_id = $1 AND created_at > current_timestamp - INTERVAL '1 days';",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "upload_limit",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "4e149700de5242b3ce942049be9bc7a7e2c63a858db5f9722e122e4431f21a69"
+}

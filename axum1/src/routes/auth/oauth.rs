@@ -128,7 +128,7 @@ macro_rules! oauth_handlers_for_provider {
                     user_data.id,
                     $provider,
                 )
-                .fetch_optional(&mut tx)
+                .fetch_optional(&mut *tx)
                 .await?;
 
                 let user_id = if let Some(u) = user {
@@ -153,7 +153,7 @@ macro_rules! oauth_handlers_for_provider {
                         user_data.id,
                         $provider
                     )
-                    .fetch_one(&mut tx)
+                    .fetch_one(&mut *tx)
                     .await
                     .on_constraint("users_email_key", |_| {
                         ApiError::unprocessable_entity([(

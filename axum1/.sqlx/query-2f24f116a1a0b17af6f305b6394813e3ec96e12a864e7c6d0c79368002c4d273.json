@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT toggle_favorite_recipe($1, (SELECT id FROM recipes WHERE name = $2))",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "toggle_favorite_recipe",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "2f24f116a1a0b17af6f305b6394813e3ec96e12a864e7c6d0c79368002c4d273"
+}

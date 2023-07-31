@@ -1,0 +1,91 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT r.name, description, prep_time, cook_time, difficulty as \"difficulty: DifficultyLevel\",\n        steps, c.name as cuisine, meal_type as \"meal_type: TypeByTime\"\n        FROM recipes r\n        INNER JOIN cuisines c ON c.id = r.cuisine_id\n        WHERE r.name = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "prep_time",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "cook_time",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "difficulty: DifficultyLevel",
+        "type_info": {
+          "Custom": {
+            "name": "difficulty_level",
+            "kind": {
+              "Enum": [
+                "easy",
+                "moderate",
+                "medium",
+                "challenging",
+                "hard",
+                "extreme",
+                "do_not_attempt"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "steps",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 6,
+        "name": "cuisine",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "meal_type: TypeByTime",
+        "type_info": {
+          "Custom": {
+            "name": "type_by_time",
+            "kind": {
+              "Enum": [
+                "breakfast",
+                "lunch",
+                "dinner",
+                "other"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ca260f281f5f097ce5f5fefb06690045073dd849782e8a38a6de61cefc39c67b"
+}

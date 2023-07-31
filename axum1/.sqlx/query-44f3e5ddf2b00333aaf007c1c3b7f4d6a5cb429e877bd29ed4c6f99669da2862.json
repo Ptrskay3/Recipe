@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT confirmation_id, user_email\n        FROM confirmation_delivery_queue\n        FOR UPDATE\n        SKIP LOCKED\n        LIMIT 1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "confirmation_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_email",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "44f3e5ddf2b00333aaf007c1c3b7f4d6a5cb429e877bd29ed4c6f99669da2862"
+}

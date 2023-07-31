@@ -41,7 +41,7 @@ where
             "SELECT name, is_admin FROM users WHERE user_id = $1",
             user_id
         )
-        .fetch_optional(&mut db)
+        .fetch_optional(&mut *db)
         .await?
         .ok_or(ApiError::Unauthorized)?;
 
