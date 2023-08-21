@@ -335,7 +335,7 @@ dependencies = [
  "serde_json",
  "sqlx",
  "thiserror",
- "time 0.3.25",
+ "time 0.3.26",
  "tokio",
  "tokio-util",
  "tower",
@@ -622,7 +622,7 @@ dependencies = [
  "rand",
  "sha2 0.10.2",
  "subtle",
- "time 0.3.25",
+ "time 0.3.26",
  "version_check",
 ]
 
@@ -1657,7 +1657,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "time 0.3.25",
+ "time 0.3.26",
  "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -2730,7 +2730,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "time 0.3.25",
+ "time 0.3.26",
  "url",
  "uuid",
 ]
@@ -3287,9 +3287,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.25"
+version = "0.3.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0fdd63d58b18d663fbdf70e049f00a22c8e42be082203be7f26589213cd75ea"
+checksum = "a79d09ac6b08c1ab3906a2f7cc2e81a0e27c7ae89c63812df75e52bef0751e07"
 dependencies = [
  "deranged",
  "itoa",
@@ -3306,9 +3306,9 @@ checksum = "7300fbefb4dadc1af235a9cef3737cea692a9d97e1b9cbcd4ebdae6f8868e6fb"
 
 [[package]]
 name = "time-macros"
-version = "0.2.11"
+version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb71511c991639bb078fd5bf97757e03914361c48100d52878b8e52b46fb92cd"
+checksum = "75c65469ed6b3a4809d987a41eb1dc918e9bc1d92211cbad7ae82931846f7451"
 dependencies = [
  "time-core",
 ]
