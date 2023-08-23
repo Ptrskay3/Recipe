@@ -326,7 +326,7 @@ dependencies = [
  "axum-extra",
  "axum-macros",
  "axum-prometheus",
- "base64 0.13.1",
+ "base64 0.21.2",
  "blake3 1.4.1",
  "chrono",
  "config",
