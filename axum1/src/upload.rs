@@ -52,7 +52,9 @@ pub async fn accept_form(
         .await
         .context("Failed to get next field")?
     {
-        let Some(file_name) = field.file_name().map(ToOwned::to_owned) else { continue };
+        let Some(file_name) = field.file_name().map(ToOwned::to_owned) else {
+            continue;
+        };
 
         stream_to_file(&file_name, uploader.id, field, &mut *tx).await?;
     }
