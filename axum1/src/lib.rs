@@ -19,10 +19,10 @@ pub mod upload;
 pub mod utils;
 
 static RE_USERNAME: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r#"^[a-zA-Z0-9 íáéúőóüöűÍÁÉÚŐÓÜÖŰ](\.?[a-zA-Z0-9 íáéúőóüöűÍÁÉÚŐÓÜÖŰ])*$"#).unwrap()
+    Regex::new(r"^[a-zA-Z0-9 íáéúőóüöűÍÁÉÚŐÓÜÖŰ](\.?[a-zA-Z0-9 íáéúőóüöűÍÁÉÚŐÓÜÖŰ])*$").unwrap()
 });
 
 static RE_RECIPE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r#"^[a-zA-Z0-9-íáéúőóüöűÍÁÉÚŐÓÜÖŰ](\-?[a-zA-Z0-9 íáéúőóüöűÍÁÉÚŐÓÜÖŰ - \s])*$"#)
+    Regex::new(r"^[a-zA-Z0-9-íáéúőóüöűÍÁÉÚŐÓÜÖŰ](\-?[a-zA-Z0-9 íáéúőóüöűÍÁÉÚŐÓÜÖŰ - \s])*$")
         .unwrap()
 });
