@@ -18,7 +18,7 @@ uuid = { version = "1", features = ["v4", "serde"] }
 axum-extra = { version = "0.7.7", features = ["cookie", "cookie-signed", "form"] }
 tower-http = { version = "0.4.4", features = ["add-extension", "trace", "cors", "fs", "limit"] }
 # for handling dates
-chrono = { version = "0.4.26", features = ["serde"] }
+chrono = { version = "0.4.30", features = ["serde"] }
 time = { version = "0.3.28", features = ["formatting", "serde", "serde-well-known"] }
 # for configuration and auxiliary things
 config = "0.13.3"
