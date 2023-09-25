@@ -19,7 +19,7 @@ axum-extra = { version = "0.8.0", features = ["cookie", "cookie-signed", "form"]
 tower-http = { version = "0.4.4", features = ["add-extension", "trace", "cors", "fs", "limit"] }
 # for handling dates
 chrono = { version = "0.4.31", features = ["serde"] }
-time = { version = "0.3.28", features = ["formatting", "serde", "serde-well-known"] }
+time = { version = "0.3.29", features = ["formatting", "serde", "serde-well-known"] }
 # for configuration and auxiliary things
 config = "0.13.3"
 dotenv = "0.15.0"
