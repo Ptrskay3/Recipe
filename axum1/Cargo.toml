@@ -9,7 +9,7 @@ description = "A backend for recipe app"
 [dependencies]
 # for idiomatic error handling
 anyhow = "1.0.75"
-thiserror = "1.0.49"
+thiserror = "1.0.50"
 # our choice as a web framework, and other related utilities
 axum = { version = "0.6.20", features = ["json", "headers", "multipart"] }
 tokio = { version = "1.33.0", features = ["full"] }
