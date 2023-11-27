@@ -35,7 +35,7 @@ tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 log = "0.4.20"
 # monitoring
-axum-prometheus = "0.4.0"
+axum-prometheus = "0.5.0"
 # password hashing
 argon2 = { version = "0.5", features = ["std"] }
 # for avoiding exposing sensitive information
