@@ -1,7 +1,8 @@
 use anyhow::Context;
 use axum::{
+    body::Body,
     body::Bytes,
-    extract::{BodyStream, DefaultBodyLimit, Multipart, Path},
+    extract::{DefaultBodyLimit, Multipart, Path},
     middleware::from_extractor_with_state,
     routing::post,
     BoxError, Router,
@@ -35,9 +36,9 @@ pub async fn save_request_body(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path(file_name): Path<String>,
     uploader: Uploader,
-    body: BodyStream,
+    body: Body,
 ) -> Result<(), ApiError> {
-    stream_to_file(&file_name, uploader.id, body, &mut *conn).await
+    stream_to_file(&file_name, uploader.id, body.into_data_stream(), &mut *conn).await
 }
 
 // Handler that accepts a multipart form upload and streams each field to a file.

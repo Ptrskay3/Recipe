@@ -17,6 +17,7 @@ use axum::{
 use axum_prometheus::PrometheusMetricLayerBuilder;
 use sqlx::postgres::PgPoolOptions;
 use std::{net::SocketAddr, sync::Arc};
+use tokio::net::TcpListener;
 use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
 
 pub async fn application() -> Result<(), anyhow::Error> {
@@ -100,8 +101,8 @@ pub async fn application() -> Result<(), anyhow::Error> {
         )
         .with_state(app_state);
 
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
+    let listener = TcpListener::bind(&addr).await.unwrap();
+    axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await
         .context("Failed to start server")

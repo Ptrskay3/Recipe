@@ -159,20 +159,21 @@ impl<Store: SessionStore> SessionLayer<Store> {
     }
 
     fn build_cookie(&self, secure: bool, cookie_value: String) -> Cookie<'static> {
-        let mut cookie = Cookie::build(self.cookie_name.clone(), cookie_value)
+        let mut cookie = Cookie::build((self.cookie_name.clone(), cookie_value))
             .http_only(true)
             .same_site(self.same_site_policy)
             .secure(secure)
-            .path(self.cookie_path.clone())
-            .finish();
+            .path(self.cookie_path.clone());
 
         if let Some(ttl) = self.session_ttl {
-            cookie.set_expires(Some((std::time::SystemTime::now() + ttl).into()));
+            cookie = cookie.expires(Some((std::time::SystemTime::now() + ttl).into()));
         }
 
         if let Some(cookie_domain) = self.cookie_domain.clone() {
-            cookie.set_domain(cookie_domain)
+            cookie = cookie.domain(cookie_domain);
         }
+
+        let mut cookie = cookie.build();
 
         self.sign_cookie(&mut cookie);
 
@@ -180,11 +181,11 @@ impl<Store: SessionStore> SessionLayer<Store> {
     }
 
     fn build_removal_cookie(&self, secure: bool) -> Cookie<'static> {
-        let mut cookie = Cookie::build(self.cookie_name.clone(), "")
+        let mut cookie = Cookie::build((self.cookie_name.clone(), ""))
             .http_only(true)
             .same_site(self.same_site_policy)
             .secure(secure)
-            .finish();
+            .build();
 
         cookie.make_removal();
 
