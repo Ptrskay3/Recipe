@@ -1,14 +1,13 @@
 use std::{convert::Infallible, ops::Deref};
 
 use crate::{config::ApplicationSettings, error::ApiError, state::AppState};
-use async_redis_session::RedisSessionStore;
 use axum::{
     async_trait,
     extract::{FromRef, FromRequestParts},
     http::request::Parts,
-    Extension,
 };
 use sqlx::{pool, Postgres};
+use tower_sessions::Session;
 
 pub struct DatabaseConnection(pub pool::PoolConnection<Postgres>);
 
@@ -24,23 +23,6 @@ where
         let AppState { db_pool, .. } = AppState::from_ref(state);
         let conn = db_pool.acquire().await?;
         Ok(Self(conn))
-    }
-}
-
-pub struct RedisConnection(pub RedisSessionStore);
-
-#[async_trait]
-impl<S> FromRequestParts<S> for RedisConnection
-where
-    S: Send + Sync,
-    AppState: FromRef<S>,
-{
-    type Rejection = Infallible;
-
-    async fn from_request_parts(_parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let AppState { redis_store, .. } = AppState::from_ref(state);
-
-        Ok(Self(redis_store))
     }
 }
 
@@ -69,13 +51,13 @@ where
     type Rejection = ApiError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let Extension(session) =
-            Extension::<crate::session_ext::Session>::from_request_parts(parts, state)
-                .await
-                .expect("`SessionLayer` should be added");
+        let session = Session::from_request_parts(parts, state)
+            .await
+            .expect("`SessionLayer` should be added");
 
         session
             .get::<uuid::Uuid>("user_id")
+            .await?
             .map(Self::new)
             .ok_or(ApiError::Unauthorized)
     }
@@ -97,16 +79,15 @@ where
     type Rejection = Infallible;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let Extension(session) =
-            Extension::<crate::session_ext::Session>::from_request_parts(parts, state)
-                .await
-                .expect("`SessionLayer` should be added");
+        let session = Session::from_request_parts(parts, state)
+            .await
+            .expect("`SessionLayer` should be added");
 
-        let user_id = session.get::<uuid::Uuid>("user_id");
+        let user_id = session.get::<uuid::Uuid>("user_id").await;
 
         match user_id {
-            Some(id) => Ok(Self(Some(AuthUser::new(id)))),
-            None => Ok(Self(None)),
+            Ok(Some(id)) => Ok(Self(Some(AuthUser::new(id)))),
+            Ok(None) | Err(_) => Ok(Self(None)),
         }
     }
 }
@@ -126,10 +107,9 @@ where
     type Rejection = ApiError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let Extension(session) =
-            Extension::<crate::session_ext::Session>::from_request_parts(parts, state)
-                .await
-                .expect("`SessionLayer` should be added");
+        let session = Session::from_request_parts(parts, state)
+            .await
+            .expect("`SessionLayer` should be added");
 
         let AppState {
             db_pool,
@@ -145,6 +125,7 @@ where
 
         let user_id = session
             .get::<uuid::Uuid>("user_id")
+            .await?
             .ok_or(ApiError::Unauthorized)?;
 
         let bytes_limit = sqlx::query!(

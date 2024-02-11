@@ -79,6 +79,9 @@ pub enum ApiError {
 
     #[error("an internal server error occurred")]
     Reqwest(#[from] reqwest::Error),
+
+    #[error("an internal server error occurred")]
+    Session(#[from] tower_sessions::session::Error),
 }
 
 impl ApiError {
@@ -130,7 +133,9 @@ impl ApiError {
             Self::NotFound => StatusCode::NOT_FOUND,
             Self::Conflict => StatusCode::CONFLICT,
             Self::UnprocessableEntity { .. } => StatusCode::UNPROCESSABLE_ENTITY,
-            Self::Sqlx(_) | Self::Anyhow(_) | Self::Reqwest(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::Sqlx(_) | Self::Anyhow(_) | Self::Reqwest(_) | Self::Session(_) => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
         }
     }
 }
@@ -173,6 +178,9 @@ impl IntoResponse for ApiError {
             }
             Self::Reqwest(ref e) => {
                 tracing::error!("Reqwest error: {:?}", e);
+            }
+            Self::Session(ref e) => {
+                tracing::error!("Session error: {:?}", e);
             }
 
             // Other errors get mapped normally.

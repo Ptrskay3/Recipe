@@ -1,14 +1,12 @@
 use crate::{
     email::EmailClient,
     routes::{admin, auth, ingredient, recipe},
-    session::SessionLayer,
     sse::{sse_handler, Notification},
     state::AppState,
     upload,
     utils::{oauth_client_discord, oauth_client_google, shutdown_signal},
 };
 use anyhow::Context;
-use async_redis_session::RedisSessionStore;
 use axum::{
     http::HeaderValue,
     routing::{get, get_service},
@@ -17,8 +15,11 @@ use axum::{
 use axum_prometheus::PrometheusMetricLayerBuilder;
 use sqlx::postgres::PgPoolOptions;
 use std::{net::SocketAddr, sync::Arc};
+use time::Duration;
 use tokio::net::TcpListener;
 use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
+use tower_sessions::{Expiry, SessionManagerLayer};
+use tower_sessions_redis_store::{fred::prelude::*, RedisStore};
 
 pub async fn application() -> Result<(), anyhow::Error> {
     dotenv::dotenv().ok();
@@ -44,10 +45,27 @@ pub async fn application() -> Result<(), anyhow::Error> {
 
     sqlx::migrate!().run(&db_pool).await?;
 
-    let redis_conn_str = config.redis.connection_string();
+    let redis_url = config.redis.connection_string();
 
-    let redis_store =
-        RedisSessionStore::new(redis_conn_str.as_ref()).context("failed to connect redis")?;
+    let pool = RedisPool::new(
+        RedisConfig::from_url_centralized(&redis_url).unwrap(),
+        None,
+        None,
+        None,
+        6,
+    )?;
+
+    let _redis_connection = pool.connect();
+    pool.wait_for_connect().await?;
+    tracing::debug!("redis connected.");
+
+    let session_store = RedisStore::new(pool.clone());
+    let session_layer = SessionManagerLayer::new(session_store)
+        .with_secure(
+            std::env::var("APP_ENVIRONMENT").unwrap_or_else(|_| String::from("local"))
+                == "production",
+        )
+        .with_expiry(Expiry::OnInactivity(Duration::minutes(10)));
 
     let email_client = EmailClient::from_config(config.email_client);
 
@@ -66,7 +84,6 @@ pub async fn application() -> Result<(), anyhow::Error> {
         email_client,
         tx,
         rx,
-        redis_store: redis_store.clone(),
     };
 
     let app = Router::<AppState>::new()
@@ -85,23 +102,17 @@ pub async fn application() -> Result<(), anyhow::Error> {
                 .layer(Extension(discord_oauth_client))
                 .layer(Extension(google_oauth_client))
                 .layer(
-                    SessionLayer::new(redis_store, config.redis.secret_key.as_bytes())
-                        .with_secure(
-                            std::env::var("APP_ENVIRONMENT")
-                                .unwrap_or_else(|_| String::from("local"))
-                                == "production",
-                        )
-                        .with_persistence(crate::session::Persistence::Always),
-                )
-                .layer(
                     CorsLayer::very_permissive()
                         .allow_origin(config.frontend_url.parse::<HeaderValue>().unwrap())
                         .allow_credentials(true),
-                ),
+                )
+                .layer(session_layer),
         )
         .with_state(app_state);
 
     let listener = TcpListener::bind(&addr).await.unwrap();
+
+    tracing::debug!(%addr, "listening");
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await

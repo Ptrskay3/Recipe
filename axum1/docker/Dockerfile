@@ -1,4 +1,4 @@
-FROM lukemathwalker/cargo-chef:latest-rust-1.67.0 AS chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.75.0 AS chef
 WORKDIR /app
 
 FROM chef as planner
@@ -12,7 +12,7 @@ RUN cargo chef cook --release --recipe-path chef-recipe.json
 COPY . .
 RUN cargo build --release
 
-FROM debian:bullseye-slim as runtime
+FROM debian:bookworm-slim as runtime
 ARG APP_ENV
 WORKDIR /app
 RUN apt-get update -y \

@@ -2,10 +2,11 @@ use anyhow::Context;
 use axum::{
     extract::{Query, State},
     routing::{get, post, put},
-    Extension, Form, Json, Router,
+    Form, Json, Router,
 };
 use secrecy::{ExposeSecret, Secret};
 use sqlx::Acquire;
+use tower_sessions::Session;
 use validator::Validate;
 
 use crate::{
@@ -72,25 +73,23 @@ pub struct Credentials {
 }
 
 async fn authorize(
-    Extension(mut session): Extension<crate::session_ext::Session>,
+    session: Session,
     conn: DatabaseConnection,
     Form(credentials): Form<Credentials>,
 ) -> Result<(), ApiError> {
     let user_id = validate_credentials(credentials, conn).await?;
     // Rotate the session cookie on privilege level change.
     // This is to prevent session-fixation attacks.
-    session.regenerate();
+    session.cycle_id().await?;
     session
         .insert("user_id", user_id)
+        .await
         .expect("user_id is serializable");
     Ok(())
 }
 
-async fn logout(
-    _user: AuthUser,
-    Extension(mut session): Extension<crate::session_ext::Session>,
-) -> Result<(), ApiError> {
-    session.destroy();
+async fn logout(_user: AuthUser, session: Session) -> Result<(), ApiError> {
+    session.delete().await?;
     Ok(())
 }
 

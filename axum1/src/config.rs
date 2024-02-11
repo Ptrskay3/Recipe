@@ -164,6 +164,11 @@ pub fn get_config() -> Result<Settings, config::ConfigError> {
         .add_source(config::File::from(
             configuration_directory.join(environment_filename),
         ))
+        .add_source(
+            config::Environment::default()
+                .try_parsing(true)
+                .separator("__"),
+        )
         .build()
         .unwrap();
     settings.try_deserialize()

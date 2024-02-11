@@ -1,9 +1,9 @@
-use async_session::async_trait;
 use axum::{
+    async_trait,
     extract::{FromRef, FromRequestParts, Path},
     http::request::Parts,
-    Extension,
 };
+use tower_sessions::Session;
 
 use crate::{error::ApiError, extractors::DatabaseConnection, state::AppState};
 
@@ -19,10 +19,9 @@ where
     type Rejection = ApiError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let Extension(session) =
-            Extension::<crate::session_ext::Session>::from_request_parts(parts, state)
-                .await
-                .expect("`SessionLayer` should be added");
+        let session = Session::from_request_parts(parts, state)
+            .await
+            .expect("`SessionLayer` should be added");
 
         let Path(recipe_name) = Path::<String>::from_request_parts(parts, state)
             .await
@@ -30,6 +29,7 @@ where
 
         let user_id = session
             .get::<uuid::Uuid>("user_id")
+            .await?
             .ok_or(ApiError::Forbidden)?;
 
         let DatabaseConnection(mut conn) = DatabaseConnection::from_request_parts(parts, state)

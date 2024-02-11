@@ -7,13 +7,13 @@ use oauth2::{
 use secrecy::{ExposeSecret, Secret};
 use sqlx::Acquire;
 
+use super::{confirm::generate_confirmation_token, password::compute_password_hash};
 use crate::{
     error::{ApiError, ResultExt},
     extractors::DatabaseConnection,
     utils::{DiscordOAuthClient, GoogleOAuthClient},
 };
-
-use super::{confirm::generate_confirmation_token, password::compute_password_hash};
+use tower_sessions::Session;
 
 #[derive(Debug, serde::Deserialize)]
 pub(super) struct AuthRequest {
@@ -50,12 +50,12 @@ macro_rules! oauth_handlers_for_provider {
             #[tracing::instrument(skip_all)]
             pub(super) async fn [<$provider _auth>](
                 Extension($client(client)): Extension<$client>,
-                Extension(mut session): Extension<crate::session_ext::Session>,
+               session: Session,
             ) -> Result<Json<RedirectUri>, ApiError> {
                 let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
                 session
-                    .insert("pkce_verifier", pkce_verifier)
+                    .insert("pkce_verifier", pkce_verifier).await
                     .expect("pkce_verifier is serializable");
 
                 let scopes = $scopes.iter().map(|scope| Scope::new(scope.to_string()));
@@ -67,7 +67,7 @@ macro_rules! oauth_handlers_for_provider {
                     .url();
 
                 session
-                    .insert("oauth_csrf_token", csrf_token)
+                    .insert("oauth_csrf_token", csrf_token).await
                     .expect("csrf_token is serializable");
 
                 Ok(Json(RedirectUri {
@@ -78,16 +78,16 @@ macro_rules! oauth_handlers_for_provider {
             #[tracing::instrument(skip_all)]
             pub(super) async fn [<$provider _authorize>](
                 Query(query): Query<AuthRequest>,
-                Extension(mut session): Extension<crate::session_ext::Session>,
+               session: Session,
                 Extension($client(oauth_client)): Extension<$client>,
                 DatabaseConnection(mut conn): DatabaseConnection,
             ) -> Result<(), ApiError> {
                 let verifier = session
-                    .get::<PkceCodeVerifier>("pkce_verifier")
+                    .get::<PkceCodeVerifier>("pkce_verifier").await?
                     .ok_or(ApiError::BadRequest)?;
 
                 let csrf_token = session
-                    .get::<CsrfToken>("oauth_csrf_token")
+                    .get::<CsrfToken>("oauth_csrf_token").await?
                     .ok_or(ApiError::BadRequest)?;
 
                 // Protect Cross-site Request Forgery Attacks
@@ -96,8 +96,8 @@ macro_rules! oauth_handlers_for_provider {
                 }
 
                 // Cleanup session, we don't need to store these anymore.
-                session.remove("oauth_csrf_token");
-                session.remove("pkce_verifier");
+                session.remove::<CsrfToken>("oauth_csrf_token").await?;
+                session.remove::<PkceCodeVerifier>("pkce_verifier").await?;
 
                 // Get an auth token
                 let token = oauth_client
@@ -177,9 +177,9 @@ macro_rules! oauth_handlers_for_provider {
                     .await
                     .ok();
 
-                session.regenerate();
+                session.cycle_id().await?;
                 session
-                    .insert("user_id", user_id)
+                    .insert("user_id", user_id).await
                     .expect("user_id is serializable");
 
                 Ok(())

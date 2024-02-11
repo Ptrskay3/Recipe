@@ -1,12 +1,12 @@
-use async_session::async_trait;
 use axum::{
+    async_trait,
     extract::{FromRef, FromRequestParts},
     http::request::Parts,
-    Extension,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::{error::ApiError, state::AppState};
+use tower_sessions::Session;
 
 #[derive(sqlx::FromRow, Serialize, Deserialize, Clone, Debug)]
 pub struct AdminUser {
@@ -23,10 +23,9 @@ where
     type Rejection = ApiError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let Extension(session) =
-            Extension::<crate::session_ext::Session>::from_request_parts(parts, state)
-                .await
-                .expect("`SessionLayer` should be added");
+        let session = Session::from_request_parts(parts, state)
+            .await
+            .expect("`SessionLayer` should be added");
 
         let AppState { db_pool, .. } = AppState::from_ref(state);
 
@@ -34,6 +33,7 @@ where
 
         let user_id = session
             .get::<uuid::Uuid>("user_id")
+            .await?
             .ok_or(ApiError::Unauthorized)?;
 
         let user = sqlx::query_as!(
