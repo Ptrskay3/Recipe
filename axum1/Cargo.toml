@@ -32,7 +32,7 @@ sentry = "0.32.2"
 sentry-tracing = "0.32"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
-log = "0.4.20"
+log = "0.4.21"
 # monitoring
 axum-prometheus = "0.6.1"
 # password hashing
