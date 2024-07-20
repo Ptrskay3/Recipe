@@ -1,4 +1,4 @@
-use meilisearch_sdk::Client;
+use meilisearch_sdk::client::Client;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::UnixListener;
 
@@ -71,7 +71,7 @@ pub async fn cli_manager(
 // TODO: it's really similar to other functions in `search.rs`. I'm sure there's a better way.
 // Currently this is only to work around `tokio::spawn` 'static bound.
 pub async fn run_meili_indexer_once(config: Settings) -> Result<(), anyhow::Error> {
-    let meili_client = Client::new(config.meili.url, Some(config.meili.master_key));
+    let meili_client = Client::new(config.meili.url, Some(config.meili.master_key))?;
     let pool = get_connection_pool(&config.database);
     run_meili_indexer(&pool, &meili_client).await
 }

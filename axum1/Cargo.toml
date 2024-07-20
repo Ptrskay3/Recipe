@@ -20,7 +20,7 @@ tower-http = { version = "0.5.2", features = ["add-extension", "trace", "cors", 
 chrono = { version = "0.4.35", features = ["serde"] }
 time = { version = "0.3.30", features = ["formatting", "serde", "serde-well-known"] }
 # for configuration and auxiliary things
-config = "0.13.2"
+config = "0.14.0"
 dotenv = "0.15.0"
 rand = "0.8.5"
 # (de)serialization
@@ -28,13 +28,13 @@ serde = { version = "1.0.197", features = ["derive"] }
 # database interaction
 sqlx = { version = "0.7.3", features = ["runtime-tokio-rustls", "any", "postgres", "json", "macros", "chrono", "uuid", "migrate", "bigdecimal"], default-features = false }
 # tracing and logging utilites
-sentry = "0.32.2"
-sentry-tracing = "0.32"
+sentry = "0.34.0"
+sentry-tracing = "0.34"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 log = "0.4.21"
 # monitoring
-axum-prometheus = "0.6.1"
+axum-prometheus = "0.7.0"
 # password hashing
 argon2 = { version = "0.5", features = ["std"] }
 # for avoiding exposing sensitive information
@@ -43,8 +43,8 @@ secrecy = { version = "0.8.0", features = ["serde"] }
 tower = "0.4.13"
 futures = "0.3"
 # emails
-reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
-meilisearch-sdk = "0.24.2"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+meilisearch-sdk = "0.27.0"
 serde_json = "1.0.109"
 # OAuth
 oauth2 = "4.4.2"
@@ -58,6 +58,6 @@ base64 = "0.22"
 blake3 = "*"
 paste = "1.0.14"
 async-stream = "0.3.5"
-pin-project = "1.1.5"
-tower-sessions = "0.10.2"
-tower-sessions-redis-store = "0.10.0"
+pin-project = "1.1.3"
+tower-sessions = "0.12.2"
+tower-sessions-redis-store = "0.13.0"

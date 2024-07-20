@@ -4,7 +4,7 @@ use sqlx::{Pool, Postgres};
 use crate::{config::Settings, queue::get_connection_pool, routes::ingredient::FoodCategory};
 
 pub async fn run_meili_indexer_until_stopped(config: Settings) -> Result<(), anyhow::Error> {
-    let meili_client = Client::new(config.meili.url, Some(config.meili.master_key));
+    let meili_client = Client::new(config.meili.url, Some(config.meili.master_key))?;
     let pool = get_connection_pool(&config.database);
     // TODO: These defaults are hidden here, maybe there's a better place for them?
     let retry_seconds = config.meili.retry_seconds.unwrap_or(60);
@@ -46,7 +46,7 @@ pub async fn run_meili_indexer(
     Ok(())
 }
 
-async fn meili_indexing_task<T: serde::Serialize>(
+async fn meili_indexing_task<T: serde::Serialize + Sync + Send>(
     client: &Client,
     records: &[T],
     name: &str,
