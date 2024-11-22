@@ -3,7 +3,7 @@ use argon2::{
     password_hash::SaltString, Algorithm, Argon2, Params, PasswordHash, PasswordHasher,
     PasswordVerifier, Version,
 };
-use secrecy::{ExposeSecret, Secret};
+use secrecy::{ExposeSecret, SecretString};
 
 use crate::{error::ApiError, extractors::DatabaseConnection};
 
@@ -48,7 +48,7 @@ pub async fn validate_credentials(
     Ok(user_id)
 }
 
-pub fn compute_password_hash(password: Secret<String>) -> Result<Secret<String>, anyhow::Error> {
+pub fn compute_password_hash(password: SecretString) -> Result<SecretString, anyhow::Error> {
     let salt = SaltString::generate(&mut rand::thread_rng());
     let password_hash = Argon2::new(
         Algorithm::Argon2id,
@@ -57,5 +57,5 @@ pub fn compute_password_hash(password: Secret<String>) -> Result<Secret<String>,
     )
     .hash_password(password.expose_secret().as_bytes(), &salt)?
     .to_string();
-    Ok(Secret::new(password_hash))
+    Ok(SecretString::from(password_hash))
 }

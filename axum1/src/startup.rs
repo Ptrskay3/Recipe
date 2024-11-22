@@ -1,4 +1,5 @@
 use crate::{
+    config::Settings,
     email::EmailClient,
     routes::{admin, auth, ingredient, recipe},
     sse::{sse_handler, Notification},
@@ -8,21 +9,25 @@ use crate::{
 };
 use anyhow::Context;
 use axum::{
+    extract::State,
     http::HeaderValue,
     routing::{get, get_service},
     Extension, Router,
 };
 use axum_prometheus::PrometheusMetricLayerBuilder;
 use sqlx::postgres::PgPoolOptions;
-use std::{net::SocketAddr, sync::Arc};
+use std::{
+    net::SocketAddr,
+    sync::{Arc, Mutex},
+};
 use time::Duration;
 use tokio::net::TcpListener;
 use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
 use tower_sessions::{Expiry, SessionManagerLayer};
 use tower_sessions_redis_store::{fred::prelude::*, RedisStore};
 
-pub async fn application() -> Result<(), anyhow::Error> {
-    dotenv::dotenv().ok();
+pub async fn application(dynamic_cfg: Arc<Mutex<Settings>>) -> Result<(), anyhow::Error> {
+    dotenvy::dotenv().ok();
 
     let config = crate::config::get_config().expect("Configuration file is missing");
 
@@ -80,7 +85,7 @@ pub async fn application() -> Result<(), anyhow::Error> {
 
     let app_state = AppState {
         db_pool,
-        config: config.application_settings,
+        config: dynamic_cfg,
         email_client,
         tx,
         rx,

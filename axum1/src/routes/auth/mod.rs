@@ -4,7 +4,7 @@ use axum::{
     routing::{get, post, put},
     Form, Json, Router,
 };
-use secrecy::{ExposeSecret, Secret};
+use secrecy::{ExposeSecret, SecretString};
 use sqlx::Acquire;
 use tower_sessions::Session;
 use validator::Validate;
@@ -69,7 +69,7 @@ async fn me(
 #[derive(Debug, serde::Deserialize, Clone)]
 pub struct Credentials {
     email: String,
-    password: Secret<String>,
+    password: SecretString,
 }
 
 async fn authorize(
@@ -103,14 +103,14 @@ pub struct Register {
     #[validate(
         length(min = 2, max = 40, message = "must be between 2 and 40 characters"),
         regex(
-            path = "RE_USERNAME",
+            path = *RE_USERNAME,
             message = "can only contain letters, digits and . (period); periods cannot appear at start or end position, neither consecutively."
         )
     )]
     name: String,
     #[validate(email(message = "must be a valid email"))]
     email: String,
-    password: Secret<String>,
+    password: SecretString,
 }
 
 #[tracing::instrument(name = "Registering a new user", skip(form, conn))]
@@ -169,7 +169,7 @@ async fn register(
 #[derive(serde::Deserialize)]
 pub struct UpdatePassword {
     name: String,
-    password: Secret<String>,
+    password: SecretString,
 }
 
 async fn update_password(
@@ -263,7 +263,7 @@ struct ForgetPasswordParameters {
 
 #[derive(serde::Deserialize)]
 pub struct ResetPassword {
-    password: Secret<String>,
+    password: SecretString,
 }
 
 #[derive(serde::Deserialize)]

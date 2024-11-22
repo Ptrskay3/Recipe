@@ -7,13 +7,15 @@ use crate::queue::get_connection_pool;
 use crate::search::run_meili_indexer;
 use crate::task::PausableFutureSupervisor;
 use crate::utils::report_exit;
+use std::sync::{Arc, Mutex};
 
 pub async fn cli_manager(
-    config: Settings,
+    config: Arc<Mutex<Settings>>,
     mut supervisor: PausableFutureSupervisor,
     mut _worker: PausableFutureSupervisor,
 ) -> Result<(), anyhow::Error> {
-    let socket_path = config
+    let mut cfg = config.lock().unwrap().clone();
+    let socket_path = cfg
         .application_settings
         .cli_unix_socket
         .as_ref()
@@ -45,7 +47,7 @@ pub async fn cli_manager(
         match msg.as_ref() {
             "index" => {
                 tracing::warn!("Requested MeiliSearch indexing through CLI..");
-                let result = tokio::spawn(run_meili_indexer_once(config.clone())).await;
+                let result = tokio::spawn(run_meili_indexer_once(Arc::clone(&config))).await;
                 report_exit("Meili indexing", result);
                 socket.write_all(b"ok").await?;
                 supervisor.pause();
@@ -60,6 +62,12 @@ pub async fn cli_manager(
                 supervisor.pause();
                 socket.write_all(b"ok").await?;
             }
+            "reload_config" => {
+                tracing::warn!("Reloading configuration..");
+                cfg.reload()?;
+                tracing::info!("Configuration reloaded.");
+                socket.write_all(b"ok").await?;
+            }
             cmd => {
                 tracing::warn!("Received command '{cmd}', which is not valid in this context.");
                 socket.write_all(b"error").await?;
@@ -70,8 +78,11 @@ pub async fn cli_manager(
 
 // TODO: it's really similar to other functions in `search.rs`. I'm sure there's a better way.
 // Currently this is only to work around `tokio::spawn` 'static bound.
-pub async fn run_meili_indexer_once(config: Settings) -> Result<(), anyhow::Error> {
-    let meili_client = Client::new(config.meili.url, Some(config.meili.master_key))?;
-    let pool = get_connection_pool(&config.database);
+pub async fn run_meili_indexer_once(config: Arc<Mutex<Settings>>) -> Result<(), anyhow::Error> {
+    let Settings {
+        database, meili, ..
+    } = config.lock().unwrap().clone();
+    let meili_client = Client::new(meili.url, Some(meili.master_key))?;
+    let pool = get_connection_pool(&database);
     run_meili_indexer(&pool, &meili_client).await
 }

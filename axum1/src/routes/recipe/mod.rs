@@ -68,7 +68,7 @@ struct RecipeWithIngredients {
             message = "should be at least 2 characters, but no more than 250"
         ),
         regex(
-            path = "RE_RECIPE",
+            path = *RE_RECIPE,
             message = "only letters, digits, and non-leading and non-trailing dashes are allowed"
         )
     )]
@@ -220,7 +220,7 @@ struct InsertIngredient {
 #[tracing::instrument(skip(conn))]
 async fn add_or_update_ingredient_to_recipe(
     DatabaseConnection(mut conn): DatabaseConnection,
-    creator: RecipeCreator,
+    _creator: RecipeCreator,
     Path(name): Path<String>,
     Form(ingredient): Form<InsertIngredient>,
 ) -> Result<(), ApiError> {
@@ -265,7 +265,7 @@ struct NamedIngredient {
 async fn delete_ingredient_from_recipe(
     DatabaseConnection(mut conn): DatabaseConnection,
     Path(name): Path<String>,
-    creator: RecipeCreator,
+    _creator: RecipeCreator,
     Form(ingredient): Form<NamedIngredient>,
 ) -> Result<(), ApiError> {
     let mut tx = conn.begin().await?;

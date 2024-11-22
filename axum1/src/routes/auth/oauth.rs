@@ -4,7 +4,7 @@ use oauth2::{
     reqwest::async_http_client, AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier,
     Scope, StandardRevocableToken, TokenResponse,
 };
-use secrecy::{ExposeSecret, Secret};
+use secrecy::{ExposeSecret, SecretString};
 use sqlx::Acquire;
 
 use super::{confirm::generate_confirmation_token, password::compute_password_hash};
@@ -135,7 +135,7 @@ macro_rules! oauth_handlers_for_provider {
                     u.user_id
                 } else {
                     // Assign a random strong password for the user.
-                    let random_pw = Secret::new(generate_confirmation_token());
+                    let random_pw = SecretString::from(generate_confirmation_token());
 
                     let password_hash =
                         crate::utils::spawn_blocking_with_tracing(move || compute_password_hash(random_pw))

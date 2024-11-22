@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 use axum1::{
     cli::cli_manager,
     config::get_config,
@@ -32,18 +34,17 @@ async fn main() -> anyhow::Result<()> {
 
     init_tracing_panic_hook();
 
-    let application_task = tokio::spawn(application());
-    let worker_task = run_worker_until_stopped(configuration.clone());
-    let meili_indexing_task = run_meili_indexer_until_stopped(configuration.clone());
+    let cfg = Arc::new(Mutex::new(configuration.clone()));
+
+    let application_task = tokio::spawn(application(Arc::clone(&cfg)));
+    let worker_task = run_worker_until_stopped(Arc::clone(&cfg));
+    let meili_indexing_task = run_meili_indexer_until_stopped(Arc::clone(&cfg));
 
     let (meili_task_spawned, meili_supervisor) = supervised_task(meili_indexing_task);
     let (worker_task_spawned, worker_supervisor) = supervised_task(worker_task);
+    let config = Arc::clone(&cfg);
 
-    let cli_manager_task = tokio::spawn(cli_manager(
-        configuration,
-        meili_supervisor,
-        worker_supervisor,
-    ));
+    let cli_manager_task = tokio::spawn(cli_manager(config, meili_supervisor, worker_supervisor));
 
     tokio::select! {
         f = application_task => report_exit("server", f),

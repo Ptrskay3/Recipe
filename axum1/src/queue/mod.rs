@@ -1,3 +1,4 @@
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use sqlx::{postgres::PgPoolOptions, PgPool, Postgres, Transaction};
@@ -14,9 +15,16 @@ pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
         .connect_lazy_with(configuration.with_db())
 }
 
-pub async fn run_worker_until_stopped(configuration: Settings) -> Result<(), anyhow::Error> {
-    let connection_pool = get_connection_pool(&configuration.database);
-    let email_client = configuration.email_client.client();
+pub async fn run_worker_until_stopped(
+    configuration: Arc<Mutex<Settings>>,
+) -> Result<(), anyhow::Error> {
+    let Settings {
+        database,
+        email_client,
+        ..
+    } = configuration.lock().unwrap().clone();
+    let connection_pool = get_connection_pool(&database);
+    let email_client = email_client.client();
     worker_loop(connection_pool, email_client).await
 }
 
@@ -49,8 +57,8 @@ pub async fn try_execute_task(
     }
     let (mut transaction, confirmation_id, email) = task.unwrap();
     Span::current()
-        .record("confirmation_id", &display(confirmation_id.clone()))
-        .record("user_email", &display(&email));
+        .record("confirmation_id", display(confirmation_id.clone()))
+        .record("user_email", display(&email));
     match Email::parse(email.clone()) {
         Ok(email) => {
             if let Err(e) = email_client

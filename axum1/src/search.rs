@@ -1,15 +1,22 @@
+use std::sync::{Arc, Mutex};
+
 use meilisearch_sdk::client::Client;
 use sqlx::{Pool, Postgres};
 
 use crate::{config::Settings, queue::get_connection_pool, routes::ingredient::FoodCategory};
 
-pub async fn run_meili_indexer_until_stopped(config: Settings) -> Result<(), anyhow::Error> {
-    let meili_client = Client::new(config.meili.url, Some(config.meili.master_key))?;
-    let pool = get_connection_pool(&config.database);
+pub async fn run_meili_indexer_until_stopped(
+    config: Arc<Mutex<Settings>>,
+) -> Result<(), anyhow::Error> {
+    let Settings {
+        database, meili, ..
+    } = config.lock().unwrap().clone();
+    let meili_client = Client::new(meili.url, Some(meili.master_key))?;
+    let pool = get_connection_pool(&database);
     // TODO: These defaults are hidden here, maybe there's a better place for them?
-    let retry_seconds = config.meili.retry_seconds.unwrap_or(60);
-    let max_retries = config.meili.max_retries.unwrap_or(5);
-    let indexing_interval_seconds = config.meili.indexing_interval_seconds.unwrap_or(3600);
+    let retry_seconds = meili.retry_seconds.unwrap_or(60);
+    let max_retries = meili.max_retries.unwrap_or(5);
+    let indexing_interval_seconds = meili.indexing_interval_seconds.unwrap_or(3600);
     let mut current_retries = 0;
     // I don't really know whether this is a good idea yet. Maybe the whole MeiliSearch indexing should be its own crate.
     loop {

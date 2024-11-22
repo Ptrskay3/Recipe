@@ -8,10 +8,7 @@ use axum::{
 // See: https://github.com/tokio-rs/axum/pull/1031
 use axum_extra::extract::Form;
 use serde::{Deserialize, Serialize};
-use sqlx::{
-    postgres::{PgHasArrayType, PgTypeInfo},
-    Connection,
-};
+use sqlx::Connection;
 
 use crate::{
     error::ApiError,
@@ -70,12 +67,6 @@ pub enum FoodCategory {
     Supplements,
     Beverage,
     Uncategorized,
-}
-
-impl PgHasArrayType for FoodCategory {
-    fn array_type_info() -> PgTypeInfo {
-        PgTypeInfo::with_name("_food_category")
-    }
 }
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize)]

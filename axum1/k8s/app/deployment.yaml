@@ -19,12 +19,20 @@ spec:
           ports:
             - name: http
               containerPort: 3000
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
           livenessProbe:
             httpGet:
               path: /admin/health_check
               port: 3000
             initialDelaySeconds: 10
             periodSeconds: 20
+            
 ---
 apiVersion: v1
 kind: Service

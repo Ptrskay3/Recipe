@@ -1,6 +1,6 @@
 use std::{convert::Infallible, ops::Deref};
 
-use crate::{config::ApplicationSettings, error::ApiError, state::AppState};
+use crate::{error::ApiError, state::AppState};
 use axum::{
     async_trait,
     extract::{FromRef, FromRequestParts},
@@ -112,14 +112,13 @@ where
             .expect("`SessionLayer` should be added");
 
         let AppState {
-            db_pool,
-            config:
-                ApplicationSettings {
-                    daily_upload_limit_bytes,
-                    ..
-                },
-            ..
+            db_pool, config, ..
         } = AppState::from_ref(state);
+        let daily_upload_limit_bytes = config
+            .lock()
+            .unwrap()
+            .application_settings
+            .daily_upload_limit_bytes;
 
         let mut db = db_pool.acquire().await?;
 

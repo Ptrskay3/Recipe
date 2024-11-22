@@ -1,5 +1,5 @@
 use reqwest::Client;
-use secrecy::{ExposeSecret, Secret};
+use secrecy::{ExposeSecret, SecretString};
 
 use crate::{config::EmailClientSettings, error::ApiError};
 
@@ -8,17 +8,11 @@ pub struct Email(String);
 
 impl Email {
     pub fn parse(s: String) -> Result<Email, ApiError> {
-        if validator::validate_email(&s) {
+        if validator::ValidateEmail::validate_email(&s) {
             Ok(Self(s))
         } else {
             Err(ApiError::unprocessable_entity([("email", "invalid email")]))
         }
-    }
-
-    /// # Safety
-    /// ...
-    pub unsafe fn new_unchecked(s: String) -> Self {
-        Self(s)
     }
 }
 
@@ -45,14 +39,14 @@ pub struct EmailClient {
     http_client: Client,
     base_url: String,
     sender: String,
-    authorization_token: Secret<String>,
+    authorization_token: SecretString,
 }
 
 impl EmailClient {
     pub fn new(
         base_url: String,
         sender: String,
-        authorization_token: Secret<String>,
+        authorization_token: SecretString,
         timeout: std::time::Duration,
     ) -> Self {
         let http_client = Client::builder().timeout(timeout).build().unwrap();

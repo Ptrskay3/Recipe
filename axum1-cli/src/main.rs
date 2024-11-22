@@ -26,6 +26,8 @@ enum Commands {
     Resume,
     /// Pause the indexing
     Pause,
+    /// Reload config
+    ReloadConfig,
 }
 
 #[tokio::main]
@@ -45,6 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(Commands::Index) => "index",
         Some(Commands::Resume) => "resume",
         Some(Commands::Pause) => "pause",
+        Some(Commands::ReloadConfig) => "reload_config",
         _ => "todo",
     };
 

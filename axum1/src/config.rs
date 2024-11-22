@@ -1,4 +1,4 @@
-use secrecy::{ExposeSecret, Secret};
+use secrecy::{ExposeSecret, SecretString};
 use serde::Deserialize;
 use sqlx::{
     postgres::{PgConnectOptions, PgSslMode},
@@ -22,6 +22,14 @@ pub struct Settings {
     pub oauth: OAuth,
 }
 
+impl Settings {
+    // TODO: Not everything can be changed at runtime.
+    pub fn reload(&mut self) -> anyhow::Result<()> {
+        get_config().map(|new_config| *self = new_config)?;
+        Ok(())
+    }
+}
+
 #[derive(Deserialize, Clone)]
 pub struct ApplicationSettings {
     pub port: u16,
@@ -43,7 +51,7 @@ pub struct MeiliConfig {
 pub struct EmailClientSettings {
     pub base_url: String,
     pub sender_email: String,
-    pub authorization_token: Secret<String>,
+    pub authorization_token: SecretString,
     pub timeout_milliseconds: u64,
 }
 
@@ -87,7 +95,7 @@ impl EmailClientSettings {
 #[derive(Deserialize, Clone)]
 pub struct DatabaseSettings {
     pub username: String,
-    pub password: Secret<String>,
+    pub password: SecretString,
     pub port: u16,
     pub host: String,
     pub database_name: String,
@@ -100,7 +108,7 @@ pub struct RedisSettings {
     pub port: u16,
     pub secret_key: String,
     pub username: Option<String>,
-    pub password: Option<Secret<String>>,
+    pub password: Option<SecretString>,
 }
 
 impl DatabaseSettings {
@@ -194,10 +202,10 @@ impl TryFrom<String> for Environment {
     type Error = String;
 
     fn try_from(s: String) -> Result<Self, Self::Error> {
-        match s.to_lowercase().as_str() {
-            "local" => Ok(Self::Local),
-            "production" => Ok(Self::Production),
-            "ci" => Ok(Self::CI),
+        match s {
+            s if s.eq_ignore_ascii_case("local") => Ok(Self::Local),
+            s if s.eq_ignore_ascii_case("production") => Ok(Self::Production),
+            s if s.eq_ignore_ascii_case("ci") => Ok(Self::CI),
             other => Err(format!(
                 "{} is not a supported environment. Use either `local`, `ci` or `production`.",
                 other
