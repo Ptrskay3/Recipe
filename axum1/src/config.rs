@@ -23,10 +23,8 @@ pub struct Settings {
 }
 
 impl Settings {
-    // TODO: Not everything can be changed at runtime.
-    pub fn reload(&mut self) -> anyhow::Result<()> {
-        get_config().map(|new_config| *self = new_config)?;
-        Ok(())
+    pub fn reload() -> anyhow::Result<Self> {
+        get_config().map_err(Into::into)
     }
 }
 

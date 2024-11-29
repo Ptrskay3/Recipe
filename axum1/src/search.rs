@@ -1,16 +1,14 @@
-use std::sync::{Arc, Mutex};
-
 use meilisearch_sdk::client::Client;
 use sqlx::{Pool, Postgres};
 
 use crate::{config::Settings, queue::get_connection_pool, routes::ingredient::FoodCategory};
 
 pub async fn run_meili_indexer_until_stopped(
-    config: Arc<Mutex<Settings>>,
+    mut config: tokio::sync::watch::Receiver<Settings>,
 ) -> Result<(), anyhow::Error> {
     let Settings {
         database, meili, ..
-    } = config.lock().unwrap().clone();
+    } = config.borrow_and_update().clone();
     let meili_client = Client::new(meili.url, Some(meili.master_key))?;
     let pool = get_connection_pool(&database);
     // TODO: These defaults are hidden here, maybe there's a better place for them?

@@ -7,14 +7,13 @@ use crate::queue::get_connection_pool;
 use crate::search::run_meili_indexer;
 use crate::task::PausableFutureSupervisor;
 use crate::utils::report_exit;
-use std::sync::{Arc, Mutex};
 
 pub async fn cli_manager(
-    config: Arc<Mutex<Settings>>,
+    config: tokio::sync::watch::Sender<Settings>,
     mut supervisor: PausableFutureSupervisor,
     mut _worker: PausableFutureSupervisor,
 ) -> Result<(), anyhow::Error> {
-    let mut cfg = config.lock().unwrap().clone();
+    let cfg = config.borrow().clone();
     let socket_path = cfg
         .application_settings
         .cli_unix_socket
@@ -47,7 +46,7 @@ pub async fn cli_manager(
         match msg.as_ref() {
             "index" => {
                 tracing::warn!("Requested MeiliSearch indexing through CLI..");
-                let result = tokio::spawn(run_meili_indexer_once(Arc::clone(&config))).await;
+                let result = tokio::spawn(run_meili_indexer_once(config.subscribe())).await;
                 report_exit("Meili indexing", result);
                 socket.write_all(b"ok").await?;
                 supervisor.pause();
@@ -64,7 +63,7 @@ pub async fn cli_manager(
             }
             "reload_config" => {
                 tracing::warn!("Reloading configuration..");
-                cfg.reload()?;
+                config.send(Settings::reload()?)?;
                 tracing::info!("Configuration reloaded.");
                 socket.write_all(b"ok").await?;
             }
@@ -78,10 +77,12 @@ pub async fn cli_manager(
 
 // TODO: it's really similar to other functions in `search.rs`. I'm sure there's a better way.
 // Currently this is only to work around `tokio::spawn` 'static bound.
-pub async fn run_meili_indexer_once(config: Arc<Mutex<Settings>>) -> Result<(), anyhow::Error> {
+pub async fn run_meili_indexer_once(
+    mut config: tokio::sync::watch::Receiver<Settings>,
+) -> Result<(), anyhow::Error> {
     let Settings {
         database, meili, ..
-    } = config.lock().unwrap().clone();
+    } = config.borrow_and_update().clone();
     let meili_client = Client::new(meili.url, Some(meili.master_key))?;
     let pool = get_connection_pool(&database);
     run_meili_indexer(&pool, &meili_client).await

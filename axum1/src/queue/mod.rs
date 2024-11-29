@@ -1,4 +1,3 @@
-use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use sqlx::{postgres::PgPoolOptions, PgPool, Postgres, Transaction};
@@ -16,13 +15,13 @@ pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
 }
 
 pub async fn run_worker_until_stopped(
-    configuration: Arc<Mutex<Settings>>,
+    mut configuration: tokio::sync::watch::Receiver<Settings>,
 ) -> Result<(), anyhow::Error> {
     let Settings {
         database,
         email_client,
         ..
-    } = configuration.lock().unwrap().clone();
+    } = configuration.borrow_and_update().clone();
     let connection_pool = get_connection_pool(&database);
     let email_client = email_client.client();
     worker_loop(connection_pool, email_client).await

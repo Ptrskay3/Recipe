@@ -28,10 +28,10 @@ serde = { version = "1.0.215", features = ["derive"] }
 # database interaction
 sqlx = { version = "0.8.1", features = ["runtime-tokio-rustls", "any", "postgres", "json", "macros", "chrono", "uuid", "migrate", "bigdecimal"], default-features = false }
 # tracing and logging utilites
-sentry = "0.34.0"
-sentry-tracing = "0.34"
-tracing = "0.1.40"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+sentry = "0.35.0"
+sentry-tracing = "0.35"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 log = "0.4.21"
 # monitoring
 axum-prometheus = "0.7.0"

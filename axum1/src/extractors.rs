@@ -112,11 +112,10 @@ where
             .expect("`SessionLayer` should be added");
 
         let AppState {
-            db_pool, config, ..
+            db_pool, mut config, ..
         } = AppState::from_ref(state);
         let daily_upload_limit_bytes = config
-            .lock()
-            .unwrap()
+            .borrow_and_update()
             .application_settings
             .daily_upload_limit_bytes;
 
